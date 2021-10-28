@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Synthese_Webservices_2021</title>
+    <link href="reset.css" type="text/css" rel ="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8"/>
+</head>
+
+<body>
+<div class="intro">
+    <!--This is an introducktion-->
+    <h1>Synthese_Webservices_2021</h1>
+    <p>This is the webside for the systhese project for Webservices & Applications 2021.</p>
+    <p>Members: Jonas, Liam, Rik, Stijn, Tijn, Tim and lecturer Wim Dams.</p>
+</div>
+<div>
+    <form method = "get">
+        <input type = "text" name = "msg">
+        <button type = "submit" name = "send" class = "button">Submit</button>
+    </form>
+</div>
+<div>
+    <!--List fo photo's-->
+</div>
+<script>
+    function sendmsg(){
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+* {
+    margin: 0px;
+    padding: 0px
+}
+
+body {
+    font-size: 120%;
+    background: #f05b5b;
+}
+
+h1{
+    margin: 1%;
+    font-size: larger;
+    font-weight: bold;
+}
+
+.intro{
+    text-align: center;
+}
