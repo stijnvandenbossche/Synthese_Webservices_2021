@@ -58,7 +58,6 @@ dkms.conf
 .settings
 
 # Misc
-*.map
 *.m
 
 # debug directory
