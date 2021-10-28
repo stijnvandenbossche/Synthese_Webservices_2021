@@ -50,3 +50,42 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+
+#--------------------------------------
+#STM32 SOFTWARE IGNORE
+.metadata
+.settings
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Misc
+*.map
+*.m
+
+# debug directory
+*/Debug*/
