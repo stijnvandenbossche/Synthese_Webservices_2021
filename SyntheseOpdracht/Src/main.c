@@ -45,6 +45,10 @@
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 272
 
+// hard coded image sizes
+#define PICTURE_X_PIXEL 100
+#define PICTURE_Y_PIXEL 100
+
 // define the length of the buffer of the string thats going to be displayed
 #define TEXT_BUFFER_LENGTH 300
 // define the maximum amount of characters on one line on the LCD
@@ -91,6 +95,9 @@ int _write( int xFile, char *pxPtr, int xLen );
 void initLCD(void);
 /* prints text to the LCD */
 int textToLCD(char *textArray, int len);
+
+/* func	: prints picture to the LCD */
+void pictureToLCD(uint16_t* picture);
 
 /* USER CODE END PFP */
 
@@ -141,7 +148,7 @@ void initLCD(void)
 	  BSP_LCD_Clear(LCD_COLOR_WHITE);
 
 	  BSP_LCD_SelectLayer( 1 );
-	  BSP_LCD_Clear(LCD_COLOR_WHITE);
+	  BSP_LCD_Clear(LCD_COLOR_TRANSPARENT);
 
 	  // set text and text background color
 	  BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
@@ -171,6 +178,8 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 			return 1;
 		}
 	}
+	//make sure we are on the foreground layer
+	BSP_LCD_SelectLayer( 1 );
 	// set variables to correct starting value
 	char BufString[CHARS_ON_LINE+1];
 	// y position of text
@@ -236,6 +245,16 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 
 }
 
+/*
+ * func	: prints picture to the LCD
+ * para	: picture pointer to the picture that has to be printed
+ * ret	: no return value
+ */
+void pictureToLCD(uint16_t* picture)
+{
+	BSP_LCD_SelectLayer( 0 );
+	WDA_LCD_DrawBitmap(picture, ( ( LCD_WIDTH - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ), PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
+}
 /* USER CODE END 0 */
 
 /**
