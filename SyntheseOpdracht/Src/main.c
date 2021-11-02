@@ -30,7 +30,6 @@
 
 //added "${workspace_loc:/${ProjName}/Drivers/BSP/inc}" to project properties
 #include "stm32746g_discovery_lcd.h"
-#include "stm32746g_discovery_ts.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -97,7 +96,7 @@ void initLCD(void);
 int textToLCD(char *textArray, int len);
 /* prints picture to the LCD */
 void pictureToLCD(uint16_t* picture);
-/* clears previous text of the LCD*/
+/* clears previous text of the LCD */
 void clearLCD();
 
 
@@ -146,17 +145,21 @@ void initLCD(void)
 
 	  BSP_LCD_DisplayOn();
 
+	  // background layer is now white
+	  // pictures will be displayed on this layer
 	  BSP_LCD_SelectLayer(0);
 	  BSP_LCD_Clear(LCD_COLOR_WHITE);
 
+	  // text will be displayed on foreground layer
 	  BSP_LCD_SelectLayer( 1 );
+	  // layer is made transparent so background is visible
 	  BSP_LCD_Clear(LCD_COLOR_TRANSPARENT);
 
 	  // set text and text background color
 	  BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	  BSP_LCD_SetBackColor(LCD_COLOR_TRANSPARENT);
+	  // select proper font
 	  BSP_LCD_SetFont(&Font24);
-	  BSP_TS_Init(LCD_WIDTH, LCD_HEIGHT);
 }
 
 /*
@@ -257,6 +260,7 @@ void pictureToLCD(uint16_t* picture)
 {
 	// make sure we draw on the right layer
 	BSP_LCD_SelectLayer( 0 );
+	// drawpicture based on given pointer
 	WDA_LCD_DrawBitmap(picture, ( ( LCD_WIDTH - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ), PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
 }
 /*
@@ -268,8 +272,11 @@ void clearLCD()
 {
 	// clear layer 1 so all previous text is gone
 	BSP_LCD_SelectLayer( 1 );
+	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
+	// fille full screen with plane
 	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH, LCD_HEIGHT );
+	// switch back to black so next text is properly displayed
 	BSP_LCD_SetTextColor( LCD_COLOR_BLACK );
 }
 /* USER CODE END 0 */
