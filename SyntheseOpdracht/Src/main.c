@@ -24,6 +24,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+/*cubeMX includes*/
+//added "${workspace_loc:/${ProjName}/Drivers/BSP/inc}" to project properties
+#include "stm32746g_discovery_lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,11 +66,11 @@ static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
 /* USER CODE BEGIN PFP */
 
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
@@ -104,6 +107,8 @@ int main(void)
   MX_FMC_Init();
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
+
+
 
   /* USER CODE END 2 */
 
