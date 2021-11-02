@@ -24,8 +24,13 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include <string.h>
+#include <errno.h>
+#include <sys/unistd.h>
+
 //added "${workspace_loc:/${ProjName}/Drivers/BSP/inc}" to project properties
 #include "stm32746g_discovery_lcd.h"
+#include "stm32746g_discovery_ts.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -36,8 +41,14 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+// define lcd dimensions
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 272
+
+// define the length of the buffer of the string thats going to be displayed
+#define TEXT_BUFFER_LENGTH 300
+// define the maximum amount of characters on one line on the LCD
+#define CHARS_ON_LINE 25
 
 /* USER CODE END PD */
 
@@ -58,6 +69,10 @@ SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
 
+// error message that will be displayed when there is something wrong with the text
+char errorMessage[TEXT_BUFFER_LENGTH] = "something went wrong while printing the string (see Serial terminal for more info)";
+// fill this message with your own text to see if it is displayed correct on the lcd
+char testMessage[TEXT_BUFFER_LENGTH] = "This message is just for testing purposes (type your own string here)";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -69,13 +84,44 @@ static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
 /* USER CODE BEGIN PFP */
 
+// printf
+int _write( int xFile, char *pxPtr, int xLen );
+
 /* LCD Initialization for normal operation */
 void initLCD(void);
+/* prints text to the LCD */
+int textToLCD(char *textArray, int len);
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+// printf
+int _write( int xFile, char *pcPtr, int xLen )
+{
+    HAL_StatusTypeDef xStatus;
+    switch ( xFile ) {
+    case STDOUT_FILENO: /*stdout*/
+		xStatus = HAL_UART_Transmit( &huart1, (uint8_t*)pcPtr, xLen, HAL_MAX_DELAY );
+		if ( xStatus != HAL_OK ) {
+			errno = EIO;
+			return -1;
+		}
+        break;
+    case STDERR_FILENO: /* stderr */
+		xStatus = HAL_UART_Transmit( &huart1, (uint8_t*)pcPtr, xLen, HAL_MAX_DELAY );
+		if ( xStatus != HAL_OK ) {
+			errno = EIO;
+			return -1;
+		}
+        break;
+    default:
+        errno = EBADF;
+        return -1;
+    }
+    return xLen;
+}
 
 
 /*
@@ -103,6 +149,93 @@ void initLCD(void)
 	  BSP_LCD_SetFont(&Font24);
 	  BSP_TS_Init(LCD_WIDTH, LCD_HEIGHT);
 }
+
+/*
+ * func	: prints text to the LCD
+ * para	: textArray[TEXT_BUFFER_LENGTH] array containing the string that has to be printed
+ * para	: len the amount of characters that has to be printed
+ * ret	: 0 if all went well, 1 if something went wrong
+ */
+int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
+{
+	// make sure there is a '\0' at the end
+	textArray[len] = '\0';
+	// check if there are any weird charakters in the string
+	for(int i = 0 ; i < len; i++)
+	{
+		if(textArray[i] < 0x20)
+		{
+			textToLCD(errorMessage, strlen(errorMessage));
+			printf("%s\r\n", errorMessage);
+			printf("the string that was going to be displayed contains weird characters\r\n");
+			return 1;
+		}
+	}
+	// set variables to correct starting value
+	char BufString[CHARS_ON_LINE+1];
+	// y position of text
+	uint16_t LineCnt = 0;
+	// itterators to loop in text arrays
+	uint16_t Count = 0;
+	uint16_t CountTotal = 0;
+	// counter to check if there is a word longer than the line
+	uint16_t CountPrevious = CountTotal;
+	// stay in the loop as long as the '\0' is not found
+	while( textArray[CountTotal] != '\0')
+	{
+		// save chars in the temporary buffer
+		BufString[ Count ] = textArray[CountTotal];
+		// only add one char a time some the while above can detect the '\0'
+		Count ++;
+		CountTotal ++;
+		// if 25 chars were found -> print them
+		if( Count == CHARS_ON_LINE )
+		{
+			// going back untill we find a space
+			while( BufString[ ( Count - 1 ) ] != ' ' )
+			{
+				//printf("%s\r\n",BufString);
+				// fill the buffer with '\0' and reduce where we were reading in the string
+				BufString[ ( Count - 1 ) ] = '\0';
+				Count --;
+				CountTotal --;
+
+			}
+			// check if there is a word that is longer than the line (the word can not fit on one line)
+			if(CountPrevious == CountTotal)
+			{
+				textToLCD(errorMessage, strlen(errorMessage));
+				printf("%s\r\n", errorMessage);
+				printf("the string that was going to be displayed contains a word that is longer then the line\r\n");
+
+				return 1;
+			}
+			CountPrevious = CountTotal;
+			// also fill up the space char with a '\0'
+			BufString[ ( ( uint8_t ) strlen( BufString ) - 1 ) ] = '\0';
+			// print on the lcd
+			BSP_LCD_DisplayStringAt( 0, LineCnt, ( uint8_t * ) BufString, CENTER_MODE );
+			// go down one line
+			LineCnt += 24;
+			// reset char counter
+			Count = 0;
+		}
+	}
+	// print the last chars
+	if( textArray[CountTotal] == '\0')
+	{
+		// the bufstring is still filled with data from above
+		// just add '\0' to the end
+		BufString[ Count ] = '\0';
+		//afdrukken
+		BSP_LCD_DisplayStringAt( 0, LineCnt, ( uint8_t * ) BufString, CENTER_MODE );
+
+	}
+	return 0;
+
+
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -142,6 +275,9 @@ int main(void)
 
   // LCD Initialization
   initLCD();
+
+  // print small text message on the lcd
+  textToLCD(testMessage, strlen(testMessage));
 
 
   /* USER CODE END 2 */
