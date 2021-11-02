@@ -24,7 +24,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-/*cubeMX includes*/
 //added "${workspace_loc:/${ProjName}/Drivers/BSP/inc}" to project properties
 #include "stm32746g_discovery_lcd.h"
 /* USER CODE END Includes */
@@ -36,6 +35,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+#define LCD_WIDTH 480
+#define LCD_HEIGHT 272
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -66,11 +69,40 @@ static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
 /* USER CODE BEGIN PFP */
 
+/* LCD Initialization for normal operation */
+void initLCD(void);
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+
+/*
+ * func	: LCD Initialization for normal operation
+ * para	: no parameters
+ * ret	: no return value
+ */
+void initLCD(void)
+{
+	  BSP_LCD_Init();
+	  BSP_LCD_LayerDefaultInit(1, LCD_FB_START_ADDRESS );
+	  BSP_LCD_LayerDefaultInit(0, (LCD_FB_START_ADDRESS+(LCD_WIDTH*LCD_HEIGHT*4 )));
+
+	  BSP_LCD_DisplayOn();
+
+	  BSP_LCD_SelectLayer(0);
+	  BSP_LCD_Clear(LCD_COLOR_WHITE);
+
+	  BSP_LCD_SelectLayer( 1 );
+	  BSP_LCD_Clear(LCD_COLOR_WHITE);
+
+	  // set text and text background color
+	  BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	  BSP_LCD_SetBackColor(LCD_COLOR_TRANSPARENT);
+	  BSP_LCD_SetFont(&Font24);
+	  BSP_TS_Init(LCD_WIDTH, LCD_HEIGHT);
+}
 /* USER CODE END 0 */
 
 /**
@@ -108,6 +140,8 @@ int main(void)
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
 
+  // LCD Initialization
+  initLCD();
 
 
   /* USER CODE END 2 */
