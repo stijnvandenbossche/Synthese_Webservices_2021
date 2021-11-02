@@ -95,9 +95,11 @@ int _write( int xFile, char *pxPtr, int xLen );
 void initLCD(void);
 /* prints text to the LCD */
 int textToLCD(char *textArray, int len);
-
-/* func	: prints picture to the LCD */
+/* prints picture to the LCD */
 void pictureToLCD(uint16_t* picture);
+/* clears previous text of the LCD*/
+void clearLCD();
+
 
 /* USER CODE END PFP */
 
@@ -178,6 +180,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 			return 1;
 		}
 	}
+	clearLCD();
 	//make sure we are on the foreground layer
 	BSP_LCD_SelectLayer( 1 );
 	// set variables to correct starting value
@@ -252,8 +255,22 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
  */
 void pictureToLCD(uint16_t* picture)
 {
+	// make sure we draw on the right layer
 	BSP_LCD_SelectLayer( 0 );
 	WDA_LCD_DrawBitmap(picture, ( ( LCD_WIDTH - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ), PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
+}
+/*
+ * func	: clears previous text of the LCD
+ * para	: no parameters
+ * ret	: no return value
+ */
+void clearLCD()
+{
+	// clear layer 1 so all previous text is gone
+	BSP_LCD_SelectLayer( 1 );
+	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
+	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH, LCD_HEIGHT );
+	BSP_LCD_SetTextColor( LCD_COLOR_BLACK );
 }
 /* USER CODE END 0 */
 
@@ -294,9 +311,9 @@ int main(void)
 
   // LCD Initialization
   initLCD();
-
   // print small text message on the lcd
   textToLCD(testMessage, strlen(testMessage));
+
 
 
   /* USER CODE END 2 */
