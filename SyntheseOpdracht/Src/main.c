@@ -130,14 +130,15 @@ int main(void)
   MX_FMC_Init();
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
-  char imageList[20][100];
-  uint8_t amount = getImageList(imageList);
-  printf("Amount: %d\n\r", amount);
-  for(uint8_t i = 0; i < amount; i++)
+  initFileSystemAPI();
+  char imageList[getImageAmount()][100];
+  getImageList(imageList, raw);
+  printf("Amount: %d\n\r", getImageAmount());
+  for(uint8_t i = 0; i < getImageAmount(); i++)
   {
 	  printf("Image %d: %s\n\r", i, imageList[i]);
   }
-  uint16_t * dataPointer = (uint16_t*)getImageData("/images/poop.png");
+  uint16_t * dataPointer = (uint16_t*)getRawImageData("/images/poop.png");
 
   printf("DataPointer: %x,", dataPointer);
   for(uint8_t i = 0; i < 255; i++)
@@ -147,6 +148,12 @@ int main(void)
 	  {
 		  printf("\r\n");
 	  }
+  }
+  char name[getLargestNameLength()];
+  for(uint8_t i = 0; i < getImageAmount(); i++)
+  {
+	  extractNameOutOfPath(imageList[i], name, no_ext);
+	  printf("Name: %s\n\r", name);
   }
   /* USER CODE END 2 */
 
