@@ -24,6 +24,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "fileSystemAPI.h"
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/times.h>
+#include <sys/unistd.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -67,7 +71,29 @@ static void MX_FMC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int _write(int file, char *ptr, int len) {
+    HAL_StatusTypeDef xStatus;
+    switch (file) {
+    case STDOUT_FILENO: /*stdout*/
+		xStatus = HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+		if (xStatus != HAL_OK) {
+			errno = EIO;
+			return -1;
+		}
+        break;
+    case STDERR_FILENO: /* stderr */
+		xStatus = HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+		if (xStatus != HAL_OK) {
+			errno = EIO;
+			return -1;
+		}
+        break;
+    default:
+        errno = EBADF;
+        return -1;
+    }
+    return len;
+}
 /* USER CODE END 0 */
 
 /**
@@ -104,7 +130,24 @@ int main(void)
   MX_FMC_Init();
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
+  char imageList[20][100];
+  uint8_t amount = getImageList(imageList);
+  printf("Amount: %d\n\r", amount);
+  for(uint8_t i = 0; i < amount; i++)
+  {
+	  printf("Image %d: %s\n\r", i, imageList[i]);
+  }
+  uint16_t * dataPointer = (uint16_t*)getImageData("/images/poop.png");
 
+  printf("DataPointer: %x,", dataPointer);
+  for(uint8_t i = 0; i < 255; i++)
+  {
+	  printf("%x, ", *(dataPointer+i));
+	  if(i % 10 == 0 && i != 0)
+	  {
+		  printf("\r\n");
+	  }
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
