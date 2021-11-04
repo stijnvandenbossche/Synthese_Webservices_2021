@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "fileSystemAPI.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
