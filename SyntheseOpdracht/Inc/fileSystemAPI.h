@@ -10,10 +10,10 @@
 #include "main.h"
 #include "lwip/apps/fs.h"
 #include "fsdata_custom.h"
-
+#define MAX_PATH_LENGTH 255
 typedef enum {png, raw} imageExtension;
 typedef enum {ext, no_ext} extensionState;
-uint8_t getImageList(char imageList[][100], imageExtension extType);
+uint8_t getImageList(char imageList[][MAX_PATH_LENGTH], imageExtension extType);
 char* getRawImageData(char* imagePath);
 void initFileSystemAPI(void);
 uint8_t getImageAmount(void);

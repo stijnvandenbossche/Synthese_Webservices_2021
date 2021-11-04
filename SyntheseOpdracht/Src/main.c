@@ -131,7 +131,7 @@ int main(void)
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
   initFileSystemAPI();
-  char imageList[getImageAmount()][100];
+  char imageList[getImageAmount()][MAX_PATH_LENGTH];
   getImageList(imageList, raw);
   printf("Amount: %d\n\r", getImageAmount());
   for(uint8_t i = 0; i < getImageAmount(); i++)
