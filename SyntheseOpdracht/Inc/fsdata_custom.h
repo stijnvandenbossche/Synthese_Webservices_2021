@@ -8,10 +8,10 @@
 #ifndef FSDATA_CUSTOM_H_
 #define FSDATA_CUSTOM_H_
 
-extern const struct fsdata_file file__images_Derp_png[];
+extern const struct fsdata_file file__images_Derp_PNG[];
 extern const struct fsdata_file file__images_Derp_raw[];
 extern const struct fsdata_file file__images_Vogel_png[];
-extern const struct fsdata_file file__images_Vogel_raw[];
+extern const struct fsdata_file file__images_Vogel_RAW[];
 extern const struct fsdata_file file__images_chicken_goed_png[];
 extern const struct fsdata_file file__images_chicken_goed_raw[];
 extern const struct fsdata_file file__images_lion_png[];
