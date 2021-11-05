@@ -6,9 +6,9 @@
  */
 #include "fileSystemAPI.h"
 
-static uint8_t validateImage(char* imagePath);
-static uint8_t getPathLengthNoExt(char* pstr);
-static void convExtToLowerCase(char* pOrgPath, char* pModPath, uint8_t modPathSize);
+static uint8_t validateImage(char* imagePath, uint16_t pathLength);
+static uint8_t getPathLengthNoExt(char* pPath, uint16_t pathLength);
+static void convExtToLowerCase(char* pOrgPath, uint16_t orgPathLength, char* pModPath, uint16_t modPathSize);
 static uint8_t imageAmount = 0;
 static uint8_t largestNameLength = 0;
 
@@ -19,26 +19,40 @@ static uint8_t largestNameLength = 0;
  *  void
  *
  * -Returns:
- *  void
+ *  1 when the function has succeeded.
+ *  0 when the function has failed.
  */
-void initFileSystemAPI(void)
+uint8_t initFileSystemAPI(void)
 {
 	char* pLastSlash;
 	char pathBuffer[MAX_PATH_LENGTH];
+	uint8_t returnVal = 1;
+
 	for(struct fsdata_file* f = FS_FIRST_FILE; f != NULL; f = f->next)
 	{
-		if(validateImage((char*)f->name) != 0x00)
+		// Check if the length of the full file path is smaller than MAX_PATH_LENGTH. When >= -> ERROR.
+		returnVal = (strlen((const char*)f->name) >= MAX_PATH_LENGTH)? 0 : returnVal;
+		// This if statement is used to check if the file f is a valid image.
+		if(validateImage((char*)f->name, strlen((const char*)f->name)) != 0x00)
 		{
+			// The last '/' is searched in order to get the name + extension out of the path.
 			pLastSlash = strrchr((const char*)f->name, '/');
+			// When no '/' has been found -> pLastSlash = start address of the file path.
 			pLastSlash = (pLastSlash == NULL)? (char*)f->name : pLastSlash + 1;
+
+			// The length of the name is compared with largestNameLength so that largestNameLength can be updated when necessary.
 			largestNameLength = ((strlen(pLastSlash) + 1 ) > largestNameLength)? (strlen(pLastSlash) + 1) : largestNameLength;
-			convExtToLowerCase((char*)f->name, pathBuffer, sizeof(pathBuffer));
+
+			// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .RAW or .raw .
+			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
+			// This if statement is used to check whether the file f is an image or not.
 			if(strstr(pathBuffer, ".png") != NULL)
 			{
 				imageAmount++;
 			}
 		}
 	}
+	return returnVal;
 }
 
 /*
@@ -75,18 +89,27 @@ uint8_t getLargestNameLength(void)
  *
  * -Parameters:
  *  pPath -> a pointer to the file path whose filename has to be extracted.
+ *  pathLength -> the length of the path. (Length of the string without \0)
  *  pName -> a pointer to the location where the extracted name will be stored.
  *  nameType -> specifies if the extension has to be removed from the name or not
  *
  * -Returns:
  *  void
+ *
+ *  Note: the size of the name array which is referenced by pName HAS to be largestNameLength (which can be acquired through getLargestNameLength()).
  */
-void extractNameOutOfPath(char* pPath, char* pName, extensionState nameType)
+void extractNameOutOfPath(char* pPath, uint16_t pathLength, char* pName, extensionState nameType)
 {
-	char* pLastSlash = strrchr(pPath, '/');
+	// This function searches for the first '/' and last '.' character. With these results can the name be cut out of the path.
+
+	// memrchr and memchr are used because it is uncertain that the path string contains a \0.
+	char* pLastSlash = (char*)memrchr(pPath, '/', pathLength);
+	char* pDot = (char*)memchr(pPath, '.', pathLength);
+
+	// If there is no '/' found -> pLastSlash = start address of the path string.
 	pLastSlash = (pLastSlash == NULL)? pPath : pLastSlash + 1;
-	char* pDot = strchr(pPath, '.');
-	pDot = (pDot == NULL)? pPath + strlen(pPath) : pDot;
+	// If there is no '.' found -> pDot = start address of the path string + pathLength as offset.
+	pDot = (pDot == NULL)? pPath + pathLength : pDot;
 	memset(pName, '\0', largestNameLength);
 	if(nameType == ext)
 	{
@@ -107,19 +130,22 @@ void extractNameOutOfPath(char* pPath, char* pName, extensionState nameType)
  *
  * -Returns:
  *  The amount of images present in the generated list.
- *  This will be 0 if there was an error or no valid images were found.
+ *  This will be 0 if an error has occurred or no valid images were found.
  *
- *  -Note: the column size of imageList has to be MAX_PATH_LENGTH.
+ *  -Note: the column size of imageList HAS to be MAX_PATH_LENGTH. The row size has to be equal to imageAmount (which can be acquired through getImageAmount).
  */
 uint8_t getImageList(char imageList[][MAX_PATH_LENGTH], imageExtension extType)
 {
 	uint8_t imageCnt = 0;
 	char pathBuffer[MAX_PATH_LENGTH];
+
 	for(struct fsdata_file* f = FS_FIRST_FILE; f != NULL; f = f->next)
 	{
-		if(validateImage((char*)f->name) != 0x00)
+		// validateImage is called to check if the file f is valid.
+		if(validateImage((char*)f->name, strlen((const char*)f->name)) != 0x00)
 		{
-			convExtToLowerCase((char*)f->name, pathBuffer, sizeof(pathBuffer));
+			// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .RAW or .raw .
+			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
 			if((extType == png && strstr(pathBuffer, ".png") != NULL) || (extType == raw && strstr(pathBuffer, ".raw") != NULL))
 			{
 				strcpy(*(imageList + imageCnt), (const char*)f->name);
@@ -135,30 +161,42 @@ uint8_t getImageList(char imageList[][MAX_PATH_LENGTH], imageExtension extType)
  *
  * -Parameters:
  *  imagePath -> specifies from which image the data has to be retrieved.
+ *  pathLength -> the length of the image path. (Length of the string without \0)
  *
  * -Returns:
- *  NULL when there has been an error.
- *  Otherwise, it will return a pointer that points to the start of the raw data of the specified image.
+ *  NULL when there has occurred an error/image not found.
+ *  A pointer that points to the start of the raw data from the specified image. Depending on the image format this pointer will need to be casted. (E.g. ARGB1555 -> cast to (uint16_t*))
  *
  *  -Note: regardless of the extension (or no extension) of imagePath, the returned pointer will point to the start of the data from the .raw file.
  */
-char* getRawImageData(char* imagePath)
+char* getRawImageData(char* imagePath, uint16_t pathLength)
 {
+	// In this function is the extension of the specified image removed (when present).
+	// Next, the image path without extension is copied into a buffer and .raw is added. This string is can then be used to find the correct file.
+
 	char* dataPointer = NULL;
-	if(validateImage(imagePath) != 0x00)
+	uint16_t noExtLength;
+	// validateImage is called to check if the specified image is valid.
+	if(validateImage(imagePath, pathLength) != 0x00)
 	{
-		uint8_t pathLength = getPathLengthNoExt(imagePath);
-		char rawName[pathLength + 5];
+		noExtLength = getPathLengthNoExt(imagePath, pathLength);
+		// 5 is added because the length of .raw is equal to 4 + one \0.
+		char rawName[noExtLength + 5];
 		char pathBuffer[MAX_PATH_LENGTH];
-		memset(rawName, '\0', pathLength + 5);
-		strncpy(rawName, imagePath, pathLength);
+		// Generate image.raw string.
+		memset(rawName, '\0', noExtLength + 5);
+		strncpy(rawName, imagePath, noExtLength);
 		strcat(rawName, ".raw");
 
+		// This loop is used to check every file in the fs.
 		for(struct fsdata_file* f = FS_FIRST_FILE; f != NULL; f = f->next)
 		{
-			convExtToLowerCase((char*)f->name, pathBuffer, sizeof(pathBuffer));
+			// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .RAW or .raw .
+			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
 			if(strcmp(pathBuffer, rawName) == 0)
 			{
+				// Every file in the fs has a HTTP header, but this is unnecessary for .raw files.
+				// Thus the start of the real data is searched (header ends with \r\n\r\n) and this pointer is stored in dataPointer.
 				dataPointer = strstr((const char*)f->data, "\r\n\r\n") + 4;
 			}
 		}
@@ -171,6 +209,7 @@ char* getRawImageData(char* imagePath)
  *
  * -Parameters:
  *  imagePath -> specifies the image that has to be validated. This can be the .raw or .png file or the file path without any extensions.
+ *  pathLength -> the length of the image path. (Length of the string without \0)
  *
  * -Returns:
  *  0x01 when both the .png and .raw files are found.
@@ -178,24 +217,32 @@ char* getRawImageData(char* imagePath)
  *
  *  -Note: both the .raw and .png file NEED to be located in the same folder.
  */
-static uint8_t validateImage(char* imagePath)
+static uint8_t validateImage(char* imagePath, uint16_t pathLength)
 {
-	uint8_t pathLength = getPathLengthNoExt(imagePath);
+	// In this function is the image path minus the extension (if present) copied into 2 buffers.
+	// An extension is then added to each buffer which is used compared with the filenames of the fs (I.e check whether both image.png and mage.raw are present)
+
+	uint16_t noExtLength = getPathLengthNoExt(imagePath, pathLength);
 	uint8_t pngFound = 0;
 	uint8_t rawFound = 0;
-	char rawName[pathLength + 5];
-	char pngName[pathLength + 5];
+	// 5 is added because the length of .raw and .png is equal to 4 + one \0.
+	char rawName[noExtLength + 5];
+	char pngName[noExtLength + 5];
 	char pathBuffer[MAX_PATH_LENGTH];
-	memset(rawName, '\0', pathLength + 5);
-	strncpy(rawName, imagePath, pathLength);
+
+	// Generate image.png and image.raw strings.
+	memset(rawName, '\0', noExtLength + 5);
+	strncpy(rawName, imagePath, noExtLength);
 	strcat(rawName, ".raw");
-	memset(pngName, '\0', pathLength + 5);
-	strncpy(pngName, imagePath, pathLength);
+	memset(pngName, '\0', noExtLength + 5);
+	strncpy(pngName, imagePath, noExtLength);
 	strcat(pngName, ".png");
 
+	// This loop is used to check every file in the fs.
 	for(struct fsdata_file* f = FS_FIRST_FILE; f != NULL; f = f->next)
 	{
-		convExtToLowerCase((char*)f->name, pathBuffer, sizeof(pathBuffer));
+		// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .PNG or .png .
+		convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
 		pngFound = (strcmp(pathBuffer, pngName) == 0)? 1 : pngFound;
 		rawFound = (strcmp(pathBuffer, rawName) == 0)? 1 : rawFound;
 	}
@@ -208,53 +255,59 @@ static uint8_t validateImage(char* imagePath)
  *
  * -Parameters:
  *  pPath -> a pointer to the path whose (length - extension) has to be calculated.
+ *  pathLength -> the length of the path. (Length of the string without \0)
  *
  * -Returns:
  *  The length of the (path - extension)
  *
- *  -Note: the returned length does not include the \0 (if present)
+ *  -Note: the returned length does NOT include the \0 (if present)
  *   Example: /img/file -> 9 characters
  */
-static uint8_t getPathLengthNoExt(char* pPath)
+static uint8_t getPathLengthNoExt(char* pPath, uint16_t pathLength)
 {
-	uint8_t pathLength;
+	uint16_t noExtLength = pathLength;
 	char* pToDot;
-	if((pToDot = strchr(pPath, '.')) != NULL)
+	// This if statement is used to get a pointer to the first '.' character and to check if there is a '.' present in the path.
+	// memchr is used because it is uncertain that the path string contains a \0.
+	if((pToDot = (char*)memchr(pPath, '.', pathLength)) != NULL)
 	{
-		pathLength = pToDot - pPath;
+		// The length of the path - extension is calculated by subtracting the pToDot address with the start address of the path.
+		noExtLength = pToDot - pPath;
 	}
-	else
-	{
-		pathLength = strlen(pPath);
-	}
-	return pathLength;
+	return noExtLength;
 }
 
 
 /*
- * -Function: This function converts the extension of the filename to lowercase.
+ * -Function: This function converts the extension of the filename to lowercase letters.
  * 			  E.g: /Folder/file.PNG -> /Folder/file.png
  *
  * -Parameters:
  *  pOrgPath -> a pointer to the original path.
+ *  orgPathLength -> the length of the original path. (Length of the string without \0)
  *  pModPath -> a pointer to the array where the modified path will be stored.
- *  modPathSize -> the length of the array where pModPath points to.
+ *  modPathSize -> the size of the array where pModPath points to.
  *
  * -Returns:
  *  void
  *
- *  -Note: it is recommended that the size of the array referenced by pModPath (modPathSize) is equal to MAX_PATH_LENGTH). This guarantees that the modified path will always fit into the array.
+ *  -Note: it is recommended that the size of the array referenced by pModPath (modPathSize) is equal to MAX_PATH_LENGTH. This guarantees that the modified path will always fit into the array.
+ *  	   The array referenced by pModPath will ALWAYS be cleared at the start of this function.
  */
-static void convExtToLowerCase(char* pOrgPath, char* pModPath, uint8_t modPathSize)
+static void convExtToLowerCase(char* pOrgPath, uint16_t orgPathLength, char* pModPath, uint16_t modPathSize)
 {
 	char* pDot;
-	if(strlen(pOrgPath) < modPathSize)
+	memset(pModPath, '\0', modPathSize);
+	// This if statement is used to check if the original path can fit in the array referenced by pModPath.
+	// A modified path will only be created when the statement is true.
+	if(orgPathLength < modPathSize)
 	{
-		memset(pModPath, '\0', modPathSize);
-		strncpy(pModPath, pOrgPath, strlen(pOrgPath));
+		strncpy(pModPath, pOrgPath, orgPathLength);
+		// This if statement is used to get a pointer to the first '.' character and to check if there is a '.' present in the path.
 		if((pDot = strchr(pModPath, '.')) != NULL)
 		{
 			pDot++;
+			// Change every uppercase letter to lowercase until the end of the path is reached.
 			while(*pDot != '\0')
 			{
 				*pDot = (*pDot >= 'A' && *pDot <= 'Z')? *pDot + 0x20 : *pDot;

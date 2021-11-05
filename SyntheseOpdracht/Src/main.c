@@ -130,31 +130,43 @@ int main(void)
   MX_FMC_Init();
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
-  initFileSystemAPI();
-  char imageList[getImageAmount()][MAX_PATH_LENGTH];
-  getImageList(imageList, raw);
-  printf("Amount: %d\n\r", getImageAmount());
-  for(uint8_t i = 0; i < getImageAmount(); i++)
-  {
-	  printf("Image %d: %s\n\r", i, imageList[i]);
-  }
-  uint16_t * dataPointer = (uint16_t*)getRawImageData("/images/poop.png");
 
-  printf("DataPointer: %x,", dataPointer);
-  for(uint8_t i = 0; i < 255; i++)
+  // EXAMPLE CODE
+  if(initFileSystemAPI() == 1)
   {
+	// Get list of all the valid images from the fs.
+    char imageList[getImageAmount()][MAX_PATH_LENGTH];
+    char name[getLargestNameLength()];
+	getImageList(imageList, png);
+	printf("Images present in the fs: %u\n\r", getImageAmount());
+	for(uint8_t i = 0; i < getImageAmount(); i++)
+	{
+	  // Extract the name out of the selected image path.
+	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext);
+	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
+	}
+	printf("\n\r");
+	// Display image 2 from the list on the lcd.
+	// Normally this should be something like displayPicture((uint16_t*)getRawImageData(imageList[2], strlen(imageList[2]))); but the lcd API is currently not present in this code.
+	// To check if function of the getRawImageData is correct a piece of the raw data is printed to UART.
+	// A good function to check this is lion.raw because it has a background.
+	uint16_t * dataPointer = (uint16_t*)getRawImageData("/images/lion", strlen("/images/poop"));
+
+	// Print the first 255 pixels.
+	for(uint8_t i = 0; i < 255; i++)
+	{
 	  printf("%x, ", *(dataPointer+i));
-	  if(i % 10 == 0 && i != 0)
+	  if((i == 9) || (i > 10 && i % 10 == 9))
 	  {
-		  printf("\r\n");
+		  printf("\n\r");
 	  }
+	}
   }
-  char name[getLargestNameLength()];
-  for(uint8_t i = 0; i < getImageAmount(); i++)
+  else
   {
-	  extractNameOutOfPath(imageList[i], name, no_ext);
-	  printf("Name: %s\n\r", name);
+	printf("initFileSystemAPI has failed\n\r");
   }
+  printf("\n\r");
   /* USER CODE END 2 */
 
   /* Infinite loop */
