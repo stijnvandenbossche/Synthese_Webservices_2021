@@ -20,7 +20,7 @@ static uint8_t largestNameLength = 0;
  *
  * -Returns:
  *  1 when the function has succeeded.
- *  0 when the function has failed.
+ *  0 when the function has failed. (The path of a file is longer than MAX_PATH_LENGTH)
  */
 uint8_t initFileSystemAPI(void)
 {
