@@ -11,14 +11,18 @@
  *  declaration of used variables
  */
 
-// error message that will be displayed when there is something wrong with the text
+// error message that will be displayed on the LCD when there is something wrong with the text
 static char errorMessage[TEXT_BUFFER_LENGTH] = "something went wrong while printing the string (see Serial terminal for more info)";
 
-
 /*
- * func	: LCD Initialization for normal operation
- * para	: no parameters
- * ret	: no return value
+ * -Function: LCD Initialization for normal operation.
+ *
+ * -Parameters:
+ *  void
+ *
+ * -Returns:
+ *  void
+ *
  */
 void initLCD(void)
 {
@@ -46,13 +50,25 @@ void initLCD(void)
 }
 
 /*
- * func	: prints text to the LCD
- * para	: textArray[TEXT_BUFFER_LENGTH] array containing the string that has to be printed
- * para	: len the amount of characters that has to be printed
- * ret	: 1 if all went well, 0 if something went wrong
+ * -Function: prints text to the LCD.
+ *
+ * -Parameters:
+ *  textArray -> array containing the string that has to be printed.
+ *  len -> the amount of characters that has to be printed
+ *
+ * -Returns:
+ *  1 when the function has succeeded.
+ *  0 when the function has failed.
+ *
  */
 int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 {
+	if(len > TEXT_BUFFER_LENGTH)
+	{
+		textToLCD(errorMessage, strlen(errorMessage));
+		printf("the string that was going to be displayed is to long in total\r\n");
+		return 0;
+	}
 	// make sure there is a '\0' at the end
 	textArray[len] = '\0';
 	// check if there are any weird charakters in the string
@@ -133,9 +149,14 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 }
 
 /*
- * func	: prints picture to the LCD
- * para	: picture pointer to the picture that has to be printed
- * ret	: no return value
+ * -Function: prints picture to the LCD.
+ *
+ * -Parameters:
+ *  picture -> pointer to the picture that has to be printed
+ *
+ * -Returns:
+ *  void
+ *
  */
 void pictureToLCD(uint16_t* picture)
 {
@@ -144,10 +165,16 @@ void pictureToLCD(uint16_t* picture)
 	// drawpicture based on given pointer
 	WDA_LCD_DrawBitmap(picture, ( ( LCD_WIDTH - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ), PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
 }
+
 /*
- * func	: clears previous text of the LCD
- * para	: no parameters
- * ret	: no return value
+ * -Function: clears previous text of the LCD.
+ *
+ * -Parameters:
+ *  void
+ *
+ * -Returns:
+ *  void
+ *
  */
 void clearLCD()
 {
