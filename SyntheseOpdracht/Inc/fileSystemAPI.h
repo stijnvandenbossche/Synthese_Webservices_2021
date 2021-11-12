@@ -15,8 +15,8 @@
 typedef enum {png, raw} imageExtension;
 typedef enum {ext, no_ext} extensionState;
 
-uint8_t getImageList(char imageList[][MAX_PATH_LENGTH], imageExtension extType);
-char* getRawImageData(char* imagePath, uint16_t pathLength);
+uint8_t getImageList(char* imageList[], imageExtension extType);
+void* getRawImageData(char* imagePath, uint16_t pathLength);
 uint8_t initFileSystemAPI(void);
 uint8_t getImageAmount(void);
 uint8_t getLargestNameLength(void);

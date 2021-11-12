@@ -122,19 +122,19 @@ void extractNameOutOfPath(char* pPath, uint16_t pathLength, char* pName, extensi
 }
 
 /*
- * -Function: This function generates a list with the file paths from all the valid images that are found in the file system.
+ * -Function: This function generates a list of char pointers to the file paths from all the valid images that are found in the file system.
  *
  * -Parameters:
- *  imageList -> a pointer to the location where the list will be stored (array of strings).
+ *  imageList -> an array where the list will be stored (array of char pointers. Each char pointer points to a file path string).
  *  imageExtension -> specifies the desired file type (png or raw).
  *
  * -Returns:
  *  The amount of images present in the generated list.
  *  This will be 0 if an error has occurred or no valid images were found.
  *
- *  -Note: the column size of imageList HAS to be MAX_PATH_LENGTH. The row size has to be equal to imageAmount (which can be acquired through getImageAmount).
+ *  -Note: the array size has to be equal to imageAmount (which can be acquired through getImageAmount).
  */
-uint8_t getImageList(char imageList[][MAX_PATH_LENGTH], imageExtension extType)
+uint8_t getImageList(char* imageList[], imageExtension extType)
 {
 	uint8_t imageCnt = 0;
 	char pathBuffer[MAX_PATH_LENGTH];
@@ -148,7 +148,7 @@ uint8_t getImageList(char imageList[][MAX_PATH_LENGTH], imageExtension extType)
 			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
 			if((extType == png && strstr(pathBuffer, ".png") != NULL) || (extType == raw && strstr(pathBuffer, ".raw") != NULL))
 			{
-				strcpy(*(imageList + imageCnt), (const char*)f->name);
+				imageList[imageCnt] = (char*)f->name;
 				imageCnt++;
 			}
 		}
@@ -169,7 +169,7 @@ uint8_t getImageList(char imageList[][MAX_PATH_LENGTH], imageExtension extType)
  *
  *  -Note: regardless of the extension (or no extension) of imagePath, the returned pointer will point to the start of the data from the .raw file.
  */
-char* getRawImageData(char* imagePath, uint16_t pathLength)
+void* getRawImageData(char* imagePath, uint16_t pathLength)
 {
 	// In this function is the extension of the specified image removed (when present).
 	// Next, the image path without extension is copied into a buffer and .raw is added. This string is can then be used to find the correct file.

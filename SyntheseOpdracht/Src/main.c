@@ -135,7 +135,7 @@ int main(void)
   if(initFileSystemAPI() == 1)
   {
 	// Get list of all the valid images from the fs.
-    char imageList[getImageAmount()][MAX_PATH_LENGTH];
+    char* imageList[getImageAmount()];
     char name[getLargestNameLength()];
 	getImageList(imageList, png);
 	printf("Images present in the fs: %u\n\r", getImageAmount());
