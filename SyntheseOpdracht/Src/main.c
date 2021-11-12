@@ -25,9 +25,9 @@
 /* USER CODE BEGIN Includes */
 
 #include <errno.h>
+#include <LCD_functions.h>
 #include <sys/unistd.h>
 
-#include "BSP_functions.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,7 +38,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-
+#define TESTCODE_LCD 1
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,8 +57,9 @@ UART_HandleTypeDef huart1;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
-char blablaMessage[TEXT_BUFFER_LENGTH] = "blablabla test test";
-
+#if TESTCODE_LCD == 1
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "blablabla test test";
+#endif
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -142,18 +143,19 @@ int main(void)
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
 
-  // LCD Initialization
-  initLCD();
-  // EXAMPLE: print small text message on the lcd
-  if(textToLCD(blablaMessage, strlen(blablaMessage)) == 1)
-  {
-	  printf("text is displayed correct\r\n");
-  }
-  else
-  {
-	  printf("text is not displayed correct\r\n");
-  }
-
+	#if TESTCODE_LCD == 1
+	  // LCD Initialization
+	  initLCD();
+	  // EXAMPLE: print small text message on the lcd
+	  if(textToLCD(blablaMessage, strlen(blablaMessage)) == 1)
+	  {
+		  printf("text is displayed correct\r\n");
+	  }
+	  else
+	  {
+		  printf("text is not displayed correct\r\n");
+	  }
+	#endif
 
   /* USER CODE END 2 */
 

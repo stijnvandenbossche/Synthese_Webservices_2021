@@ -29,7 +29,7 @@ void initLCD(void);
 /* prints text to the LCD */
 int textToLCD(char *textArray, int len);
 /* prints picture to the LCD */
-void pictureToLCD(uint16_t* picture);
+void pictureToLCD(void* picture);
 /* clears previous text of the LCD */
 void clearLCD();
 

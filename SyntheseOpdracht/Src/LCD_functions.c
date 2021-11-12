@@ -4,7 +4,7 @@
  *  Created on: 8 nov. 2021
  *      Author: Jonas Aertgeerts
  */
-#include "BSP_functions.h"
+#include <LCD_functions.h>
 
 
 /*
@@ -43,8 +43,8 @@ void initLCD(void)
 	  BSP_LCD_Clear(LCD_COLOR_TRANSPARENT);
 
 	  // set text and text background color
-	  BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	  BSP_LCD_SetBackColor(LCD_COLOR_TRANSPARENT);
+	  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+	  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
 	  // select proper font
 	  BSP_LCD_SetFont(&Font24);
 }
@@ -158,12 +158,12 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
  *  void
  *
  */
-void pictureToLCD(uint16_t* picture)
+void pictureToLCD(void* picture)
 {
 	// make sure we draw on the right layer
 	BSP_LCD_SelectLayer( 0 );
 	// drawpicture based on given pointer
-	WDA_LCD_DrawBitmap(picture, ( ( LCD_WIDTH - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ), PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
+	WDA_LCD_DrawBitmap((uint16_t*)picture, ( ( LCD_WIDTH - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ), PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
 }
 
 /*
@@ -185,5 +185,5 @@ void clearLCD()
 	// fille full screen with plane
 	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH, LCD_HEIGHT );
 	// switch back to black so next text is properly displayed
-	BSP_LCD_SetTextColor( LCD_COLOR_BLACK );
+	BSP_LCD_SetTextColor( LCD_COLOR_WHITE );
 }

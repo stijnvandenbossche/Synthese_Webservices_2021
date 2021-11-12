@@ -69,6 +69,9 @@ void MX_LWIP_Init(void)
   GATEWAY_ADDRESS[2] = 0;
   GATEWAY_ADDRESS[3] = 0;
 
+/* USER CODE BEGIN IP_ADDRESSES */
+/* USER CODE END IP_ADDRESSES */
+
   /* Initilialize the LwIP stack without RTOS */
   lwip_init();
 
