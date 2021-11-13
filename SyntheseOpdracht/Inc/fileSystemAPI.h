@@ -12,9 +12,9 @@
 
 /*!
  * \def MAX_PATH_LENGTH
- * MAX_PATH_LENGTH defines the maximum file path length.
+ * MAX_PATH_LENGTH defines the maximum file path length. It's value is set equal to the max path length from makefsdata, which is 256.
  */
-#define MAX_PATH_LENGTH 255
+#define MAX_PATH_LENGTH 256
 typedef enum {png, raw} imageExtension;
 typedef enum {ext, no_ext} extensionState;
 

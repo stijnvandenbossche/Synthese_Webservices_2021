@@ -1,13 +1,14 @@
 /*!
  *  \file fileSystemAPI.c
  *	\details This file contains all the function implementations from the filesystem API. Static functions are used in the API, but are not accessible for the user (and not needed).
+ *  \remark Every file path length variable, parameter and return value is of type uint16_t. This is currently not really needed but it is used so that the max path length can be easily enlarged in the future.
  *  \date 4 nov. 2021
  *  \author Tijn De Wever
  */
 #include "fileSystemAPI.h"
 
 static uint8_t validateImage(char* imagePath, uint16_t pathLength);
-static uint8_t getPathLengthNoExt(char* pPath, uint16_t pathLength);
+static uint16_t getPathLengthNoExt(char* pPath, uint16_t pathLength);
 static void convExtToLowerCase(char* pOrgPath, uint16_t orgPathLength, char* pModPath, uint16_t modPathSize);
 static uint8_t imageAmount = 0;
 static uint8_t largestNameLength = 0;
@@ -29,7 +30,7 @@ uint8_t initFileSystemAPI(void)
 	for(struct fsdata_file* f = FS_FIRST_FILE; f != NULL; f = f->next)
 	{
 		// Check if the length of the full file path is smaller than MAX_PATH_LENGTH. When >= -> ERROR.
-		returnVal = (strlen((const char*)f->name) >= MAX_PATH_LENGTH)? 0 : returnVal;
+		returnVal = (strlen((const char*)f->name) + 1 >= MAX_PATH_LENGTH)? 0 : returnVal;
 		// This if statement is used to check if the file f is a valid image.
 		if(validateImage((char*)f->name, strlen((const char*)f->name)) != 0x00)
 		{
@@ -247,7 +248,7 @@ static uint8_t validateImage(char* imagePath, uint16_t pathLength)
  *  \remark The returned length does NOT include the \0 (if present)
  *  		Example: /img/file -> 9 characters
  */
-static uint8_t getPathLengthNoExt(char* pPath, uint16_t pathLength)
+static uint16_t getPathLengthNoExt(char* pPath, uint16_t pathLength)
 {
 	uint16_t noExtLength = pathLength;
 	char* pToDot;
