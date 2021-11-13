@@ -1,8 +1,8 @@
-/*
- * fileSystemAPI.c
- *
- *  Created on: 4 nov. 2021
- *      Author: tijnd
+/*!
+ *  \file fileSystemAPI.c
+ *	\details This file contains all the function implementations from the filesystem API. Static functions are used in the API, but are not accessible for the user (and not needed).
+ *  \date 4 nov. 2021
+ *  \author Tijn De Wever
  */
 #include "fileSystemAPI.h"
 
@@ -12,15 +12,13 @@ static void convExtToLowerCase(char* pOrgPath, uint16_t orgPathLength, char* pMo
 static uint8_t imageAmount = 0;
 static uint8_t largestNameLength = 0;
 
-/*
- * -Function: This function initializes the file system API. It has to be called before any API functions are used.
+/*!
+ *  \brief This function initializes the file system API. It has to be called before any API functions are used.
  *
- * -Parameters:
- *  void
+ *  \param void
  *
- * -Returns:
- *  1 when the function has succeeded.
- *  0 when the function has failed. (The path of a file is longer than MAX_PATH_LENGTH)
+ *  \retval 1 when the function has succeeded.
+ *  \retval 0 when the function has failed. (The path of a file is longer than MAX_PATH_LENGTH)
  */
 uint8_t initFileSystemAPI(void)
 {
@@ -55,48 +53,42 @@ uint8_t initFileSystemAPI(void)
 	return returnVal;
 }
 
-/*
- * -Function: This function returns the amount of valid images that are present in the file system.
+/*!
+ *  \brief This function returns the amount of valid images that are present in the file system.
  *
- * -Parameters:
- *  void
+ *  \param void
  *
- * -Returns:
- *  amount of valid images that are present in the file system.
+ *  \return Amount of valid images that are present in the file system.
  */
 uint8_t getImageAmount(void)
 {
 	return imageAmount;
 }
 
-/*
- * -Function: This function returns the length of the largest filename from the file system.
+/*!
+ *  \brief This function returns the length of the largest filename from the file system.
  *
- * -Parameters:
- *  void
+ *  \param void
  *
- * -Returns:
- *  length of the largest filename from the file system.
+ *  \return Length of the largest filename from the file system.
  */
 uint8_t getLargestNameLength(void)
 {
 	return largestNameLength;
 }
 
-/*
- * -Function: This function extracts the name of a file (with or without the extension) from the specified path.
- * 			  E.g: /Folder/file.png -> function returns file.png or file
+/*!
+ *  \brief This function extracts the name of a file (with or without the extension) from the specified path.
+ *  	   E.g: /Folder/file.png -> function returns file.png or file
  *
- * -Parameters:
- *  pPath -> a pointer to the file path whose filename has to be extracted.
- *  pathLength -> the length of the path. (Length of the string without \0)
- *  pName -> a pointer to the location where the extracted name will be stored.
- *  nameType -> specifies if the extension has to be removed from the name or not
+ *  \param pPath -> a pointer to the file path whose filename has to be extracted.
+ *  \param pathLength -> the length of the path. (Length of the string without \0)
+ *  \param pName -> a pointer to the location where the extracted name will be stored.
+ *  \param nameType -> specifies if the extension has to be removed from the name or not
  *
- * -Returns:
- *  void
+ *  \return void
  *
- *  Note: the size of the name array which is referenced by pName HAS to be largestNameLength (which can be acquired through getLargestNameLength()).
+ *  \warning The size of the name array which is referenced by pName HAS to be largestNameLength (which can be acquired through getLargestNameLength()).
  */
 void extractNameOutOfPath(char* pPath, uint16_t pathLength, char* pName, extensionState nameType)
 {
@@ -121,18 +113,16 @@ void extractNameOutOfPath(char* pPath, uint16_t pathLength, char* pName, extensi
 	}
 }
 
-/*
- * -Function: This function generates a list of char pointers to the file paths from all the valid images that are found in the file system.
+/*!
+ *  \brief This function generates a list of char pointers to the file paths from all the valid images that are found in the file system.
  *
- * -Parameters:
- *  imageList -> an array where the list will be stored (array of char pointers. Each char pointer points to a file path string).
- *  imageExtension -> specifies the desired file type (png or raw).
+ *  \param imageList -> an array where the list will be stored (array of char pointers. Each char pointer points to the start of a file path string).
+ *  \param imageExtension -> specifies the desired file type (png or raw).
  *
- * -Returns:
- *  The amount of images present in the generated list.
- *  This will be 0 if an error has occurred or no valid images were found.
+ *  \return The amount of images present in the generated list.
+ *  \return This amount will be 0 if an error has occurred or no valid images were found.
  *
- *  -Note: the array size has to be equal to imageAmount (which can be acquired through getImageAmount).
+ *  \warning The array size HAS to be equal to imageAmount (which can be acquired through getImageAmount).
  */
 uint8_t getImageList(char* imageList[], imageExtension extType)
 {
@@ -156,18 +146,16 @@ uint8_t getImageList(char* imageList[], imageExtension extType)
 	return imageCnt;
 }
 
-/*
- * -Function: This function calculates a pointer to the start of the raw data of the specified image.
+/*!
+ *  \brief This function calculates a pointer to the start of the raw data of the specified image.
  *
- * -Parameters:
- *  imagePath -> specifies from which image the data has to be retrieved.
- *  pathLength -> the length of the image path. (Length of the string without \0)
+ *  \param imagePath -> specifies from which image the data has to be retrieved.
+ *  \param pathLength -> the length of the image path. (Length of the string without \0)
  *
- * -Returns:
- *  NULL when there has occurred an error/image not found.
- *  A pointer that points to the start of the raw data from the specified image. Depending on the image format this pointer will need to be casted. (E.g. ARGB1555 -> cast to (uint16_t*))
+ *  \return A void pointer that points to the start of the raw data from the specified image. Depending on the image format this pointer will need to be casted. (E.g. ARGB1555 -> cast to (uint16_t*))
+ *	\return NULL when an error has occurred or the image hasn't been found.
  *
- *  -Note: regardless of the extension (or no extension) of imagePath, the returned pointer will point to the start of the data from the .raw file.
+ *  \remark Regardless of the extension type (or no extension) of imagePath, the returned pointer will point to the start of the data from the .raw file.
  */
 void* getRawImageData(char* imagePath, uint16_t pathLength)
 {
@@ -204,18 +192,16 @@ void* getRawImageData(char* imagePath, uint16_t pathLength)
 	return dataPointer;
 }
 
-/*
- * -Function: This function checks if there is both a .png and .raw file of the specified file present in the file system.
+/*!
+ *  \brief This function checks if there is both a .png and .raw file of the specified file present in the file system.
  *
- * -Parameters:
- *  imagePath -> specifies the image that has to be validated. This can be the .raw or .png file or the file path without any extensions.
- *  pathLength -> the length of the image path. (Length of the string without \0)
+ *  \param imagePath -> specifies the image that has to be validated. This can be the .raw or .png file or the file path without any extensions.
+ *  \param pathLength -> the length of the image path. (Length of the string without \0)
  *
- * -Returns:
- *  0x01 when both the .png and .raw files are found.
- *  0x00 when both the .png and .raw files aren't found.
+ *  \retval 0x01 when both the .png and .raw files are found.
+ *  \retval 0x00 when both the .png and .raw files aren't found.
  *
- *  -Note: both the .raw and .png file NEED to be located in the same folder.
+ *  \warning Both the .raw and .png file NEED to be located in the same folder.
  */
 static uint8_t validateImage(char* imagePath, uint16_t pathLength)
 {
@@ -249,19 +235,17 @@ static uint8_t validateImage(char* imagePath, uint16_t pathLength)
 	return (pngFound == 1 && rawFound == 1)? 1 : 0;
 }
 
-/*
- * -Function: This function generates the length of the file path minus the extensions.
- * 			  E.g: /Folder/file.png -> function returns length of /Folder/file
+/*!
+ *  \brief This function generates the length of the file path minus the extensions.
+ * 		   E.g: /Folder/file.png -> function returns length of /Folder/file
  *
- * -Parameters:
- *  pPath -> a pointer to the path whose (length - extension) has to be calculated.
- *  pathLength -> the length of the path. (Length of the string without \0)
+ *  \param pPath -> a pointer to the path whose (length - extension) has to be calculated.
+ *  \param pathLength -> the length of the path. (Length of the string without \0)
  *
- * -Returns:
- *  The length of the (path - extension)
+ *  \return The length of the (path - extension)
  *
- *  -Note: the returned length does NOT include the \0 (if present)
- *   Example: /img/file -> 9 characters
+ *  \remark The returned length does NOT include the \0 (if present)
+ *  		Example: /img/file -> 9 characters
  */
 static uint8_t getPathLengthNoExt(char* pPath, uint16_t pathLength)
 {
@@ -278,21 +262,19 @@ static uint8_t getPathLengthNoExt(char* pPath, uint16_t pathLength)
 }
 
 
-/*
- * -Function: This function converts the extension of the filename to lowercase letters.
- * 			  E.g: /Folder/file.PNG -> /Folder/file.png
+/*!
+ *  \brief This function converts the extension of the filename to lowercase letters.
+ * 			E.g: /Folder/file.PNG -> /Folder/file.png
  *
- * -Parameters:
- *  pOrgPath -> a pointer to the original path.
- *  orgPathLength -> the length of the original path. (Length of the string without \0)
- *  pModPath -> a pointer to the array where the modified path will be stored.
- *  modPathSize -> the size of the array where pModPath points to.
+ *  \param pOrgPath -> a pointer to the original path.
+ *  \param orgPathLength -> the length of the original path. (Length of the string without \0)
+ *  \param pModPath -> a pointer to the array where the modified path will be stored.
+ *  \param modPathSize -> the size of the array where pModPath points to.
  *
- * -Returns:
- *  void
+ *  \return void
  *
- *  -Note: it is recommended that the size of the array referenced by pModPath (modPathSize) is equal to MAX_PATH_LENGTH. This guarantees that the modified path will always fit into the array.
- *  	   The array referenced by pModPath will ALWAYS be cleared at the start of this function.
+ *  \remark It is recommended that the size of the array referenced by pModPath (modPathSize) is equal to MAX_PATH_LENGTH. This guarantees that the modified path will always fit into the array.
+ *  \remark The array referenced by pModPath will ALWAYS be cleared at the start of this function.
  */
 static void convExtToLowerCase(char* pOrgPath, uint16_t orgPathLength, char* pModPath, uint16_t modPathSize)
 {

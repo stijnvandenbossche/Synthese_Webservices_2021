@@ -1,16 +1,19 @@
-/*
- * fileSystemAPI.h
- *
- *  Created on: 4 nov. 2021
- *      Author: tijnd
+/*!
+ *  \file fileSystemAPI.h
+ *	\details This file contains all the function prototypes from the filesystem API.
+ *  \date 4 nov. 2021
+ *  \author Tijn De Wever
  */
-
 #ifndef FILESYSTEMAPI_H_
 #define FILESYSTEMAPI_H_
 #include "main.h"
 #include "lwip/apps/fs.h"
 #include "fsdata_custom.h"
 
+/*!
+ * \def MAX_PATH_LENGTH
+ * MAX_PATH_LENGTH defines the maximum file path length.
+ */
 #define MAX_PATH_LENGTH 255
 typedef enum {png, raw} imageExtension;
 typedef enum {ext, no_ext} extensionState;
