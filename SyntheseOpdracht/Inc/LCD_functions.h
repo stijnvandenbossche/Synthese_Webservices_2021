@@ -1,8 +1,8 @@
-/*
- * BSP_functions.h
+/*!
+ *	\BSP_functions.h
  *
- *  Created on: 8 nov. 2021
- *      Author: Jonas Aertgeerts
+ *  \Created on: 8 nov. 2021
+ *  \Author: Jonas Aertgeerts
  */
 #ifndef BSP_FUNCTIONS_H_
 #define BSP_FUNCTIONS_H_

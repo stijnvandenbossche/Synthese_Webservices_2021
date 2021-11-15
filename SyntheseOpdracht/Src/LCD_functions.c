@@ -1,8 +1,8 @@
-/*
- * BSP_functions.c
+/*!
+ *	\file BSP_functions.c
  *
- *  Created on: 8 nov. 2021
- *      Author: Jonas Aertgeerts
+ *  \remarkCreated on: 8 nov. 2021
+ *  \author: Jonas Aertgeerts
  */
 #include <LCD_functions.h>
 
@@ -14,15 +14,17 @@
 // error message that will be displayed on the LCD when there is something wrong with the text
 static char errorMessage[TEXT_BUFFER_LENGTH] = "something went wrong while printing the string (see Serial terminal for more info)";
 
-/*
+/*!
  * -Function: LCD Initialization for normal operation.
  *
- * -Parameters:
+ * \param
  *  void
  *
- * -Returns:
+ * \retval
  *  void
  *
+ * \remark
+ *  please make sure there are no words longer then 25 characters in the string.
  */
 void initLCD(void)
 {
@@ -49,14 +51,14 @@ void initLCD(void)
 	  BSP_LCD_SetFont(&Font24);
 }
 
-/*
+/*!
  * -Function: prints text to the LCD.
  *
- * -Parameters:
+ * \param
  *  textArray -> array containing the string that has to be printed.
  *  len -> the amount of characters that has to be printed
  *
- * -Returns:
+ * \retval
  *  1 when the function has succeeded.
  *  0 when the function has failed.
  *
@@ -148,13 +150,13 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 
 }
 
-/*
+/*!
  * -Function: prints picture to the LCD.
  *
- * -Parameters:
+ * \param
  *  picture -> pointer to the picture that has to be printed
  *
- * -Returns:
+ * \retval
  *  void
  *
  */
@@ -166,17 +168,17 @@ void pictureToLCD(void* picture)
 	WDA_LCD_DrawBitmap((uint16_t*)picture, ( ( LCD_WIDTH - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ), PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
 }
 
-/*
+/*!
  * -Function: clears previous text of the LCD.
  *
- * -Parameters:
+ * \param
  *  void
  *
- * -Returns:
+ * \retval
  *  void
  *
  */
-void clearLCD()
+void clearLCD(void)
 {
 	// clear layer 1 so all previous text is gone
 	BSP_LCD_SelectLayer( 1 );
