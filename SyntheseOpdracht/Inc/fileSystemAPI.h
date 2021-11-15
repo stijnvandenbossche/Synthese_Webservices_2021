@@ -15,13 +15,15 @@
  */
 #define MAX_PATH_LENGTH 256
 typedef enum {png, raw} imageExtension;
-typedef enum {ext, no_ext} extensionState;
+typedef enum {ext, no_ext} extensionType;
+typedef enum {lower, upper, initial} caseType;
+typedef enum {a_z, z_a, no_sort} sortType;
 
-uint8_t getImageList(char* imageList[], imageExtension extType);
+uint8_t getImageList(char* imageList[], imageExtension extType, sortType sortState);
 void* getRawImageData(char* imagePath, uint16_t pathLength);
 uint8_t initFileSystemAPI(void);
 uint8_t getImageAmount(void);
 uint8_t getLargestNameLength(void);
-void extractNameOutOfPath(char* pPath, uint16_t pathLength, char* pName, extensionState nameType);
+void extractNameOutOfPath(char* pPath, uint16_t pathLength, char* pName, extensionType nameState, caseType caseState);
 
 #endif /* FILESYSTEMAPI_H_ */

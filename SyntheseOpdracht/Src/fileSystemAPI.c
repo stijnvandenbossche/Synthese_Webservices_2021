@@ -10,9 +10,12 @@
 static uint8_t validateImage(char* imagePath, uint16_t pathLength);
 static uint16_t getPathLengthNoExt(char* pPath, uint16_t pathLength);
 static void convExtToLowerCase(char* pOrgPath, uint16_t orgPathLength, char* pModPath, uint16_t modPathSize);
+static void insertImagePath(char* imageList[], uint8_t imageAmount, char* newImage, sortType sortState);
 static uint8_t imageAmount = 0;
 static uint8_t largestNameLength = 0;
 extern const struct fsdata_file* const pFirstFile;
+
+
 /*!
  *  \brief This function initializes the file system API. It has to be called before any API functions are used.
  *
@@ -54,6 +57,7 @@ uint8_t initFileSystemAPI(void)
 	return returnVal;
 }
 
+
 /*!
  *  \brief This function returns the amount of valid images that are present in the file system.
  *
@@ -65,6 +69,7 @@ uint8_t getImageAmount(void)
 {
 	return imageAmount;
 }
+
 
 /*!
  *  \brief This function returns the length of the largest filename from the file system.
@@ -78,6 +83,7 @@ uint8_t getLargestNameLength(void)
 	return largestNameLength;
 }
 
+
 /*!
  *  \brief This function extracts the name of a file (with or without the extension) from the specified path.
  *  	   E.g: /Folder/file.png -> function returns file.png or file
@@ -85,47 +91,63 @@ uint8_t getLargestNameLength(void)
  *  \param pPath -> a pointer to the file path whose filename has to be extracted.
  *  \param pathLength -> the length of the path. (Length of the string without \0)
  *  \param pName -> a pointer to the location where the extracted name will be stored.
- *  \param nameType -> specifies if the extension has to be removed from the name or not
+ *  \param nameState -> specifies if the extension has to be removed from the name or not
+ *	\param caseState -> specifies the desired character case (upper, lower, initial)
  *
  *  \return void
  *
  *  \warning The size of the name array which is referenced by pName HAS to be largestNameLength (which can be acquired through getLargestNameLength()).
  */
-void extractNameOutOfPath(char* pPath, uint16_t pathLength, char* pName, extensionState nameType)
+void extractNameOutOfPath(char* pPath, uint16_t pathLength, char* pName, extensionType nameState, caseType caseState)
 {
 	// This function searches for the first '/' and last '.' character. With these results can the name be cut out of the path.
 
 	// memrchr and memchr are used because it is uncertain that the path string contains a \0.
 	char* pLastSlash = (char*)memrchr(pPath, '/', pathLength);
 	char* pDot = (char*)memchr(pPath, '.', pathLength);
+	uint8_t charCnt = 0;
 
 	// If there is no '/' found -> pLastSlash = start address of the path string.
 	pLastSlash = (pLastSlash == NULL)? pPath : pLastSlash + 1;
 	// If there is no '.' found -> pDot = start address of the path string + pathLength as offset.
 	pDot = (pDot == NULL)? pPath + pathLength : pDot;
 	memset(pName, '\0', largestNameLength);
-	if(nameType == ext)
+	if(nameState == ext)
 	{
 		strcpy(pName, pLastSlash);
 	}
-	else if(nameType == no_ext)
+	else if(nameState == no_ext)
 	{
 		strncpy(pName, pLastSlash, pDot - pLastSlash);
 	}
+	while(*(pName + charCnt) != '\0' && caseState != initial)
+	{
+		if(caseState == lower && *(pName + charCnt) >= 'A' && *(pName + charCnt) <= 'Z')
+		{
+			*(pName + charCnt) += 0x20;
+		}
+		else if(caseState == upper && *(pName + charCnt) >= 'a' && *(pName + charCnt) <= 'z')
+		{
+			*(pName + charCnt) -= 0x20;
+		}
+		charCnt++;
+	}
 }
+
 
 /*!
  *  \brief This function generates a list of char pointers to the file paths from all the valid images that are found in the file system.
  *
  *  \param imageList -> an array where the list will be stored (array of char pointers. Each char pointer points to the start of a file path string).
  *  \param imageExtension -> specifies the desired file type (png or raw).
+ *	\param sortState -> specifies the desired output order (a_z, z_a, no_sort)
  *
  *  \return The amount of images present in the generated list.
  *  \return This amount will be 0 if an error has occurred or no valid images were found.
  *
  *  \warning The array size HAS to be equal to imageAmount (which can be acquired through getImageAmount).
  */
-uint8_t getImageList(char* imageList[], imageExtension extType)
+uint8_t getImageList(char* imageList[], imageExtension extType, sortType sortState)
 {
 	uint8_t imageCnt = 0;
 	char pathBuffer[MAX_PATH_LENGTH];
@@ -139,13 +161,77 @@ uint8_t getImageList(char* imageList[], imageExtension extType)
 			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
 			if((extType == png && strstr(pathBuffer, ".png") != NULL) || (extType == raw && strstr(pathBuffer, ".raw") != NULL))
 			{
-				imageList[imageCnt] = (char*)f->name;
+				insertImagePath(imageList, imageCnt, (char*)f->name, sortState);
+				/*if(sortState != a_z && sortState != z_a)
+				{
+					*(imageList + imageCnt) = (char*)f->name;
+				}
+				else
+				{
+
+				}*/
 				imageCnt++;
 			}
 		}
 	}
 	return imageCnt;
 }
+
+
+/*!
+ *  \brief This function inserts a new image path in imageList at the correct location (place), which can be specified by sortState.
+ *
+ *  \param imageList -> a pointer to the array that contains the sorted images and were the new image has to be inserted in
+ *  \param imagesInList -> specifies the amount of sorted images present in imageList
+ *	\param newImage -> a pointer to the path of the image that has to be inserted in imageList
+ *	\param sortState ->specifies the desired sort order (a_z, z_a, no_sort)
+ *
+ *  \return void
+ */
+static void insertImagePath(char* imageList[], uint8_t imagesInList, char* newImagePath, sortType sortState)
+{
+	uint8_t index;
+	uint8_t sortedFlag = 0;
+	char nameBuf[largestNameLength];
+	char newNameBuf[largestNameLength];
+	int8_t compareRes;
+
+	extractNameOutOfPath(newImagePath, strlen(newImagePath), newNameBuf, ext, lower);
+	// This if statement is used to check if the list has to be sorted + check whether the list is empty and thus cannot be sorted.
+	if(imagesInList == 0 || (sortState != a_z && sortState != z_a))
+	{
+		*(imageList + imagesInList) = newImagePath;
+	}
+	else
+	{
+		index = 0;
+		while(index < imagesInList && sortedFlag == 0)
+		{
+			extractNameOutOfPath(*(imageList + index), strlen(*(imageList + index)), nameBuf, ext, lower);
+			compareRes = strcmp(newNameBuf, nameBuf);
+
+			if((sortState == a_z && compareRes <= 0) || (sortState == z_a && compareRes >= 0))
+			{
+				// This for loop is used to shift every image path from [index] -> [end of the list] one index to the right.
+				for(uint8_t copyIndex = imagesInList; copyIndex > index; copyIndex--)
+				{
+					*(imageList + copyIndex) = *(imageList + copyIndex - 1);
+				}
+				*(imageList + index) = newImagePath;
+				sortedFlag = 1;
+			}
+			// This if statement is used to check if the end of the list - 1 has been reached. If so -> insert new image path at the back.
+			else if(((sortState == a_z && compareRes > 0) || (sortState == z_a && compareRes < 0)) && index == imagesInList - 1)
+			{
+				*(imageList + imagesInList) = newImagePath;
+				sortedFlag = 1;
+			}
+			index++;
+		}
+	}
+
+}
+
 
 /*!
  *  \brief This function calculates a pointer to the start of the raw data of the specified image.
@@ -193,6 +279,7 @@ void* getRawImageData(char* imagePath, uint16_t pathLength)
 	return dataPointer;
 }
 
+
 /*!
  *  \brief This function checks if there is both a .png and .raw file of the specified file present in the file system.
  *
@@ -235,6 +322,7 @@ static uint8_t validateImage(char* imagePath, uint16_t pathLength)
 	}
 	return (pngFound == 1 && rawFound == 1)? 1 : 0;
 }
+
 
 /*!
  *  \brief This function generates the length of the file path minus the extensions.

@@ -137,12 +137,12 @@ int main(void)
 	// Get list of all the valid images from the fs.
     char* imageList[getImageAmount()];
     char name[getLargestNameLength()];
-	getImageList(imageList, png);
+	getImageList(imageList, png, a_z);
 	printf("Images present in the fs: %u\n\r", getImageAmount());
 	for(uint8_t i = 0; i < getImageAmount(); i++)
 	{
 	  // Extract the name out of the selected image path.
-	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext);
+	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
 	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
 	}
 	printf("\n\r");
