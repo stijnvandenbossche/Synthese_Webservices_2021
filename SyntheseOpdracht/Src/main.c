@@ -58,7 +58,7 @@ SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
 #if TESTCODE_LCD == 1
-	char blablaMessage[TEXT_BUFFER_LENGTH] = "blablabla test test";
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "blablabla test ok";
 #endif
 /* USER CODE END PV */
 
@@ -141,8 +141,8 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
-  /* USER CODE BEGIN 2 */
 
+  /* USER CODE BEGIN 2 */
 	#if TESTCODE_LCD == 1
 	  // LCD Initialization
 	  initLCD();
