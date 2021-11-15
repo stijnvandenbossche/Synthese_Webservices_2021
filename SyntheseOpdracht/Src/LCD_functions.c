@@ -65,6 +65,7 @@ void initLCD(void)
  */
 int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 {
+	// check if length is valid
 	if(len > TEXT_BUFFER_LENGTH)
 	{
 		textToLCD(errorMessage, strlen(errorMessage));
@@ -84,55 +85,68 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 		}
 	}
 	clearLCD();
-	//make sure we are on the foreground layer
+	// make sure we are on the foreground layer
 	BSP_LCD_SelectLayer( 1 );
-	// set variables to correct starting value
+	// small string to save the line that is going to be printed.
+	// one char longer than max length for '\0'
 	char BufString[CHARS_ON_LINE+1];
 	// y position of text
 	uint16_t LineCnt = 0;
 	// itterators to loop in text arrays
 	uint16_t Count = 0;
 	uint16_t CountTotal = 0;
-	// counter to check if there is a word longer than the line
-	uint16_t CountPrevious = CountTotal;
+	// var to register if a ' ' was found in the buffer string
+	uint8_t Spacefound = 0;
 	// stay in the loop as long as the '\0' is not found
 	while( textArray[CountTotal] != '\0')
 	{
 		// save chars in the temporary buffer
 		BufString[ Count ] = textArray[CountTotal];
+		if( BufString[ Count ] == ' ')
+		{
+			Spacefound = 1;
+		}
 		// only add one char a time some the while above can detect the '\0'
 		Count ++;
 		CountTotal ++;
 		// if 25 chars were found -> print them
 		if( Count == CHARS_ON_LINE )
 		{
-			// going back untill we find a space
-			while( BufString[ ( Count - 1 ) ] != ' ' )
+			// if there was a space in the line -> go back until we find it
+			if(Spacefound == 1)
 			{
-				//printf("%s\r\n",BufString);
-				// fill the buffer with '\0' and reduce where we were reading in the string
-				BufString[ ( Count - 1 ) ] = '\0';
-				Count --;
-				CountTotal --;
-
+				// going back untill we find a space
+				while( BufString[ ( Count - 1 ) ] != ' ')
+				{
+					//printf("%s\r\n",BufString);
+					// fill the buffer with '\0' and reduce where we were reading in the string
+					BufString[ ( Count - 1 ) ] = '\0';
+					Count --;
+					CountTotal --;
+				}
 			}
-			// check if there is a word that is longer than the line (the word can not fit on one line)
-			if(CountPrevious == CountTotal)
+			// put a - at the end of the long word to continue on the next line if there was no space in the line
+			if(Spacefound == 0)
 			{
-				textToLCD(errorMessage, strlen(errorMessage));
-				printf("the string that was going to be displayed contains a word that is longer then the line\r\n");
-
-				return 0;
+				BufString[ ( Count+1 ) ] = '\0';
+				BufString[ ( Count - 1 ) ] = '-';
+				CountTotal -= 1;
 			}
-			CountPrevious = CountTotal;
-			// also fill up the space char with a '\0'
-			BufString[ ( ( uint8_t ) strlen( BufString ) - 1 ) ] = '\0';
+			// make sure the last char is '\0'
+			BufString[ Count ] = '\0';
+			// if the last char would be a ' ', it does not have to be printed
+			if(BufString[ Count -1 ] == ' ')
+			{
+				BufString[ Count -1 ] = '\0';
+			}
 			// print on the lcd
 			BSP_LCD_DisplayStringAt( 0, LineCnt, ( uint8_t * ) BufString, CENTER_MODE );
 			// go down one line
 			LineCnt += 24;
 			// reset char counter
 			Count = 0;
+			// reset to indicate no space was yet found
+			Spacefound = 0;
 		}
 	}
 	// print the last chars

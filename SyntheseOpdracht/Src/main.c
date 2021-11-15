@@ -58,7 +58,7 @@ SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
 #if TESTCODE_LCD == 1
-	char blablaMessage[TEXT_BUFFER_LENGTH] = "abcdefgh dit is een test";
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "Tijn gaf mij het woord Pneumonoultramicroscopicsilicovolcanoconi, hij zei dat ik dit op de lcd moest plaatsen";
 #endif
 /* USER CODE END PV */
 

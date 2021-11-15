@@ -10,7 +10,6 @@
 //added "${workspace_loc:/${ProjName}/Drivers/BSP/inc}" to project properties
 #include "stm32746g_discovery_lcd.h"
 
-
 // define lcd dimensions
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 272
