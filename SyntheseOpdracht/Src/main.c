@@ -58,7 +58,7 @@ SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
 #if TESTCODE_LCD == 1
-	char blablaMessage[TEXT_BUFFER_LENGTH] = "blablabla test ok";
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "abcdefgh dit is een test";
 #endif
 /* USER CODE END PV */
 
