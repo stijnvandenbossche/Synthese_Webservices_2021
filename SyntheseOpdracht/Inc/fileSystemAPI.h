@@ -8,7 +8,6 @@
 #define FILESYSTEMAPI_H_
 #include "main.h"
 #include "lwip/apps/fs.h"
-#include "fsdata_custom.h"
 
 /*!
  * \def MAX_PATH_LENGTH

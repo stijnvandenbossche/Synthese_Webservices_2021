@@ -19376,6 +19376,7 @@ sizeof(data__jquery_3_6_0_js) - 20,
 FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 }};
 
+const struct fsdata_file* const pFirstFile = file__jquery_3_6_0_js;
 #define FS_ROOT file__jquery_3_6_0_js
 #define FS_NUMFILES 18
 

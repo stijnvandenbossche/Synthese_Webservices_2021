@@ -12,7 +12,7 @@ static uint16_t getPathLengthNoExt(char* pPath, uint16_t pathLength);
 static void convExtToLowerCase(char* pOrgPath, uint16_t orgPathLength, char* pModPath, uint16_t modPathSize);
 static uint8_t imageAmount = 0;
 static uint8_t largestNameLength = 0;
-
+extern const struct fsdata_file* const pFirstFile;
 /*!
  *  \brief This function initializes the file system API. It has to be called before any API functions are used.
  *
@@ -27,7 +27,7 @@ uint8_t initFileSystemAPI(void)
 	char pathBuffer[MAX_PATH_LENGTH];
 	uint8_t returnVal = 1;
 
-	for(struct fsdata_file* f = FS_FIRST_FILE; f != NULL; f = f->next)
+	for(struct fsdata_file* f = pFirstFile; f != NULL; f = f->next)
 	{
 		// Check if the length of the full file path is smaller than MAX_PATH_LENGTH. When >= -> ERROR.
 		returnVal = (strlen((const char*)f->name) + 1 >= MAX_PATH_LENGTH)? 0 : returnVal;
@@ -130,7 +130,7 @@ uint8_t getImageList(char* imageList[], imageExtension extType)
 	uint8_t imageCnt = 0;
 	char pathBuffer[MAX_PATH_LENGTH];
 
-	for(struct fsdata_file* f = FS_FIRST_FILE; f != NULL; f = f->next)
+	for(struct fsdata_file* f = pFirstFile; f != NULL; f = f->next)
 	{
 		// validateImage is called to check if the file f is valid.
 		if(validateImage((char*)f->name, strlen((const char*)f->name)) != 0x00)
@@ -178,7 +178,7 @@ void* getRawImageData(char* imagePath, uint16_t pathLength)
 		strcat(rawName, ".raw");
 
 		// This loop is used to check every file in the fs.
-		for(struct fsdata_file* f = FS_FIRST_FILE; f != NULL; f = f->next)
+		for(struct fsdata_file* f = pFirstFile; f != NULL; f = f->next)
 		{
 			// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .RAW or .raw .
 			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
@@ -226,7 +226,7 @@ static uint8_t validateImage(char* imagePath, uint16_t pathLength)
 	strcat(pngName, ".png");
 
 	// This loop is used to check every file in the fs.
-	for(struct fsdata_file* f = FS_FIRST_FILE; f != NULL; f = f->next)
+	for(struct fsdata_file* f = pFirstFile; f != NULL; f = f->next)
 	{
 		// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .PNG or .png .
 		convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
