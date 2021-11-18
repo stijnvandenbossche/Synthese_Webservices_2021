@@ -38,8 +38,12 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+// set to 1 to test lcd code
+// set to 0 to disable testcode
 #define TESTCODE_LCD 1
+
+// time in ms it take for the screen to go dark after no more touches were detected
+#define SCREENSAVER_DELAY 10000
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -61,6 +65,9 @@ SDRAM_HandleTypeDef hsdram1;
 #if TESTCODE_LCD == 1
 	char blablaMessage[TEXT_BUFFER_LENGTH] = "Tijn gaf mij het woord Pneumonoultramicroscopicsilicovolcanoconi, hij zei dat ik dit op de lcd moest plaatsen";
 #endif
+
+	// store time when screen should go black
+	uint32_t ScreensaverStart = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,28 +80,28 @@ static void MX_FMC_Init(void);
 /* USER CODE BEGIN PFP */
 
 // printf
-int _write( int xFile, char *pxPtr, int xLen );
-
+int _write( int File, char *Ptr, int Len );
+uint8_t readButton();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
 // printf
-int _write( int xFile, char *pcPtr, int xLen )
+int _write( int File, char *Ptr, int Len )
 {
-    HAL_StatusTypeDef xStatus;
-    switch ( xFile ) {
+    HAL_StatusTypeDef Status;
+    switch ( File ) {
     case STDOUT_FILENO: /*stdout*/
-		xStatus = HAL_UART_Transmit( &huart1, (uint8_t*)pcPtr, xLen, HAL_MAX_DELAY );
-		if ( xStatus != HAL_OK ) {
+		Status = HAL_UART_Transmit( &huart1, (uint8_t*)Ptr, Len, HAL_MAX_DELAY );
+		if ( Status != HAL_OK ) {
 			errno = EIO;
 			return -1;
 		}
         break;
     case STDERR_FILENO: /* stderr */
-		xStatus = HAL_UART_Transmit( &huart1, (uint8_t*)pcPtr, xLen, HAL_MAX_DELAY );
-		if ( xStatus != HAL_OK ) {
+		Status = HAL_UART_Transmit( &huart1, (uint8_t*)Ptr, Len, HAL_MAX_DELAY );
+		if ( Status != HAL_OK ) {
 			errno = EIO;
 			return -1;
 		}
@@ -103,7 +110,20 @@ int _write( int xFile, char *pcPtr, int xLen )
         errno = EBADF;
         return -1;
     }
-    return xLen;
+    return Len;
+}
+
+// on-board button
+uint8_t readButton()
+{
+	if(GPIOI->IDR & GPIO_PIN_11)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 
@@ -158,7 +178,7 @@ int main(void)
 
 	  pictureToLCD(TESTPOOP_DATA);
 	#endif
-
+	ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -168,7 +188,21 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  MX_LWIP_Process();
+	MX_LWIP_Process();
+
+
+	if(readButton() == 1)
+	{
+		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
+		ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+	}
+	if(ScreensaverStart < HAL_GetTick())
+	{
+		// turn off screen
+		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_RESET);
+	}
   }
   /* USER CODE END 3 */
 }
