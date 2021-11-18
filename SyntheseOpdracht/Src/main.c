@@ -27,6 +27,7 @@
 #include <errno.h>
 #include <LCD_functions.h>
 #include <sys/unistd.h>
+#include "testpoop.h"
 
 /* USER CODE END Includes */
 
@@ -141,7 +142,6 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
-
   /* USER CODE BEGIN 2 */
 	#if TESTCODE_LCD == 1
 	  // LCD Initialization
@@ -155,6 +155,8 @@ int main(void)
 	  {
 		  printf("text is not displayed correct\r\n");
 	  }
+
+	  pictureToLCD(TESTPOOP_DATA);
 	#endif
 
   /* USER CODE END 2 */

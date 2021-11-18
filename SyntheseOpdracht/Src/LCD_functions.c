@@ -39,6 +39,7 @@ void initLCD(void)
 	  BSP_LCD_SelectLayer(0);
 	  BSP_LCD_Clear(LCD_COLOR_WHITE);
 
+
 	  // text will be displayed on foreground layer
 	  BSP_LCD_SelectLayer( 1 );
 	  // layer is made transparent so background is visible
@@ -84,9 +85,8 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 			return 0;
 		}
 	}
-	clearLCD();
+	clearText();
 	// make sure we are on the foreground layer
-	BSP_LCD_SelectLayer( 1 );
 	// small string to save the line that is going to be printed.
 	// one char longer than max length for '\0'
 	char BufString[CHARS_ON_LINE+1];
@@ -177,7 +177,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 void pictureToLCD(void* picture)
 {
 	// make sure we draw on the right layer
-	BSP_LCD_SelectLayer( 0 );
+	BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
 	// drawpicture based on given pointer
 	WDA_LCD_DrawBitmap((uint16_t*)picture, ( ( LCD_WIDTH - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ), PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
 }
@@ -192,14 +192,32 @@ void pictureToLCD(void* picture)
  *  void
  *
  */
-void clearLCD(void)
+void clearText(void)
 {
-	// clear layer 1 so all previous text is gone
-	BSP_LCD_SelectLayer( 1 );
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
 	// fille full screen with plane
-	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH, LCD_HEIGHT );
+	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH, LCD_HEIGHT-PICTURE_Y_PIXEL );
+	// switch back to black so next text is properly displayed
+	BSP_LCD_SetTextColor( LCD_COLOR_WHITE );
+}
+
+/*!
+ * \brief: clears previous picture of the LCD.
+ *
+ * \param
+ *  void
+ *
+ * \retval
+ *  void
+ *
+ */
+void clearPicture(void)
+{
+	// switch to transparent to make overwrite text with 'invisible' plane
+	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
+	// fille full screen with plane
+	BSP_LCD_FillRect( 0, LCD_HEIGHT-PICTURE_Y_PIXEL , LCD_WIDTH, PICTURE_Y_PIXEL );
 	// switch back to black so next text is properly displayed
 	BSP_LCD_SetTextColor( LCD_COLOR_WHITE );
 }

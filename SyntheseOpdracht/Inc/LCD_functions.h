@@ -30,6 +30,7 @@ int textToLCD(char *textArray, int len);
 /* prints picture to the LCD */
 void pictureToLCD(void* picture);
 /* clears previous text of the LCD */
-void clearLCD();
+void clearText(void);
+void clearPicture(void);
 
 #endif /* BSP_FUNCTIONS_H_ */
