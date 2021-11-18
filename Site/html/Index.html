@@ -15,24 +15,28 @@
     <p>Members: Jonas, Liam, Rik, Stijn, Tijn, Tim and lecturer Wim Dams.</p>
 </div>
 <div>
-    <form method = "get">
-        <input type = "text" name = "msg">
-        <button type = "submit" name = "send" class = "button">Submit</button>
+    <form>
+        <input type = "text" name = "msg" id = "msg">
+        <button type = "submit" name = "send" class = "button" onclick = "sendmsg()">Submit</button>
     </form>
 </div>
-<div>
-    <!--List fo photo's-->
+<div id = "photo">
+    <!--List of photo's-->
+    <!--#foto-->
 </div>
+
 <script>
+    //
     function sendmsg(){
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
             callback(xmlHttp.responseText);
     }
-    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.open("GET", "/sendedmsg.cgi?msg=" + getElementById("msg").innerHTML, true); // true for asynchronous 
     xmlHttp.send(null);
     }
+
 </script>
 </body>
 </html>
