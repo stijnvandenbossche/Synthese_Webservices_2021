@@ -24,6 +24,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include <errno.h>
+#include <LCD_functions.h>
+#include <sys/unistd.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -33,6 +37,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+#define TESTCODE_LCD 1
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,7 +57,9 @@ UART_HandleTypeDef huart1;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
-
+#if TESTCODE_LCD == 1
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "Tijn gaf mij het woord Pneumonoultramicroscopicsilicovolcanoconi, hij zei dat ik dit op de lcd moest plaatsen";
+#endif
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,10 +71,40 @@ static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
 /* USER CODE BEGIN PFP */
 
+// printf
+int _write( int xFile, char *pxPtr, int xLen );
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+// printf
+int _write( int xFile, char *pcPtr, int xLen )
+{
+    HAL_StatusTypeDef xStatus;
+    switch ( xFile ) {
+    case STDOUT_FILENO: /*stdout*/
+		xStatus = HAL_UART_Transmit( &huart1, (uint8_t*)pcPtr, xLen, HAL_MAX_DELAY );
+		if ( xStatus != HAL_OK ) {
+			errno = EIO;
+			return -1;
+		}
+        break;
+    case STDERR_FILENO: /* stderr */
+		xStatus = HAL_UART_Transmit( &huart1, (uint8_t*)pcPtr, xLen, HAL_MAX_DELAY );
+		if ( xStatus != HAL_OK ) {
+			errno = EIO;
+			return -1;
+		}
+        break;
+    default:
+        errno = EBADF;
+        return -1;
+    }
+    return xLen;
+}
+
 
 /* USER CODE END 0 */
 
@@ -103,7 +141,21 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
+
   /* USER CODE BEGIN 2 */
+	#if TESTCODE_LCD == 1
+	  // LCD Initialization
+	  initLCD();
+	  // EXAMPLE: print small text message on the lcd
+	  if(textToLCD(blablaMessage, strlen(blablaMessage)) == 1)
+	  {
+		  printf("text is displayed correct\r\n");
+	  }
+	  else
+	  {
+		  printf("text is not displayed correct\r\n");
+	  }
+	#endif
 
   /* USER CODE END 2 */
 
