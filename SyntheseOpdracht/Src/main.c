@@ -175,7 +175,7 @@ int main(void)
 	  {
 		  printf("text is not displayed correct\r\n");
 	  }
-
+	  // print testpicture
 	  pictureToLCD(TESTPOOP_DATA);
 	#endif
 	ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
@@ -190,13 +190,16 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	MX_LWIP_Process();
 
-
+	// read the button to turn the lcd back on
 	if(readButton() == 1)
 	{
+		// turn on screen
 		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
+		// update timer
 		ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
 	}
+	// if enough time passed => turn screen off
 	if(ScreensaverStart < HAL_GetTick())
 	{
 		// turn off screen
