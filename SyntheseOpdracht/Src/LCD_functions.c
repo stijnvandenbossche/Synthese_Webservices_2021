@@ -59,7 +59,7 @@ void initLCD(void)
  *  len -> the amount of characters that has to be printed
  *
  * \retval
- *  1 when the function has succeeded.
+ *  len when the function has succeeded.
  *  0 when the function has failed.
  *
  */
@@ -77,7 +77,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 	// check if there are any weird charakters in the string
 	for(int i = 0 ; i < len; i++)
 	{
-		if(textArray[i] < 0x20)
+		if(textArray[i] < ' ')
 		{
 			textToLCD(errorMessage, strlen(errorMessage));
 			printf("the string that was going to be displayed contains weird characters\r\n");
@@ -159,7 +159,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 		BSP_LCD_DisplayStringAt( 0, LineCnt, ( uint8_t * ) BufString, CENTER_MODE );
 
 	}
-	return 1;
+	return len;
 
 
 }
