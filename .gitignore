@@ -54,8 +54,8 @@ dkms.conf
 
 #--------------------------------------
 #STM32 SOFTWARE IGNORE
-*.metadata
-*.settings
+.metadata
+.settings
 *.launch
 *.log
 
