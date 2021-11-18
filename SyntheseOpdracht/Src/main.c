@@ -37,6 +37,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define TESTCODE_FS 1
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -132,6 +133,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // EXAMPLE CODE
+#if TESTCODE_FS == 1
   if(initFileSystemAPI() == 1)
   {
 	// Get list of all the valid images from the fs.
@@ -167,6 +169,7 @@ int main(void)
 	printf("initFileSystemAPI has failed\n\r");
   }
   printf("\n\r");
+#endif
   /* USER CODE END 2 */
 
   /* Infinite loop */
