@@ -162,14 +162,6 @@ uint8_t getImageList(char* imageList[], imageExtension extType, sortType sortSta
 			if((extType == png && strstr(pathBuffer, ".png") != NULL) || (extType == raw && strstr(pathBuffer, ".raw") != NULL))
 			{
 				insertImagePath(imageList, imageCnt, (char*)f->name, sortState);
-				/*if(sortState != a_z && sortState != z_a)
-				{
-					*(imageList + imageCnt) = (char*)f->name;
-				}
-				else
-				{
-
-				}*/
 				imageCnt++;
 			}
 		}
