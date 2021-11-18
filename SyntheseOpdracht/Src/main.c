@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <sys/times.h>
 #include <sys/unistd.h>
+#include <LCD_functions.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,6 +39,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define TESTCODE_FS 1
+#define TESTCODE_LCD 1
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,7 +58,9 @@ UART_HandleTypeDef huart1;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
-
+#if TESTCODE_LCD == 1
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "Tijn gaf mij het woord Pneumonoultramicroscopicsilicovolcanoconi, hij zei dat ik dit op de lcd moest plaatsen";
+#endif
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -67,6 +71,9 @@ static void MX_USART1_UART_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
 /* USER CODE BEGIN PFP */
+
+// printf
+int _write( int xFile, char *pxPtr, int xLen );
 
 /* USER CODE END PFP */
 
@@ -130,7 +137,21 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
+
   /* USER CODE BEGIN 2 */
+	#if TESTCODE_LCD == 1
+	  // LCD Initialization
+	  initLCD();
+	  // EXAMPLE: print small text message on the lcd
+	  if(textToLCD(blablaMessage, strlen(blablaMessage)) == 1)
+	  {
+		  printf("text is displayed correct\r\n");
+	  }
+	  else
+	  {
+		  printf("text is not displayed correct\r\n");
+	  }
+	#endif
 
   // EXAMPLE CODE
 #if TESTCODE_FS == 1
