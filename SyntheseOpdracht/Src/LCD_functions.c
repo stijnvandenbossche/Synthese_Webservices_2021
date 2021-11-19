@@ -15,7 +15,7 @@
 static char errorMessage[TEXT_BUFFER_LENGTH] = "something went wrong while printing the string (see Serial terminal for more info)";
 
 /*!
- * \brief: LCD Initialization for normal operation.
+ * \brief LCD Initialization for normal operation.
  *
  * \param
  *  void
@@ -53,7 +53,7 @@ void initLCD(void)
 }
 
 /*!
- * \brief: prints text to the LCD.
+ * \brief prints text to the LCD.
  *
  * \param
  *  textArray -> array containing the string that has to be printed.
@@ -165,7 +165,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 }
 
 /*!
- * \brief: prints picture to the LCD.
+ * \brief prints picture to the LCD.
  *
  * \param
  *  picture -> pointer to the picture that has to be printed
@@ -183,7 +183,7 @@ void pictureToLCD(void* picture)
 }
 
 /*!
- * \brief: clears previous text of the LCD.
+ * \brief clears previous text of the LCD.
  *
  * \param
  *  void
@@ -203,7 +203,7 @@ void clearText(void)
 }
 
 /*!
- * \brief: clears previous picture of the LCD.
+ * \brief clears previous picture of the LCD.
  *
  * \param
  *  void

@@ -167,13 +167,13 @@ int main(void)
 	  // LCD Initialization
 	  initLCD();
 	  // EXAMPLE: print small text message on the lcd
-	  if(textToLCD(blablaMessage, strlen(blablaMessage)) == 1)
+	  if(textToLCD(blablaMessage, strlen(blablaMessage)) == 0)
 	  {
-		  printf("text is displayed correct\r\n");
+		  printf("text is not displayed correct\r\n");
 	  }
 	  else
 	  {
-		  printf("text is not displayed correct\r\n");
+		  printf("text is displayed correct\r\n");
 	  }
 	  // print testpicture
 	  pictureToLCD(TESTPOOP_DATA);
