@@ -64,8 +64,8 @@ SDRAM_HandleTypeDef hsdram1;
 	char blablaMessage[TEXT_BUFFER_LENGTH] = "text will be displayed right here";
 #endif
 
-	// store time when screen should go black
-	uint32_t ScreensaverStart = 0;
+// store time when screen should go black
+uint32_t ScreensaverStart = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -79,7 +79,6 @@ static void MX_FMC_Init(void);
 
 // printf
 int _write( int File, char *Ptr, int Len );
-uint8_t readButton();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -110,21 +109,6 @@ int _write( int File, char *Ptr, int Len )
     }
     return Len;
 }
-
-// on-board button
-uint8_t readButton()
-{
-	if(GPIOI->IDR & GPIO_PIN_11)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-
 /* USER CODE END 0 */
 
 /**

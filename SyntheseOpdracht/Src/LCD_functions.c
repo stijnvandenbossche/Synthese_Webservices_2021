@@ -220,3 +220,26 @@ void clearPicture(void)
 	// fill lower screen with plane
 	BSP_LCD_FillRect( 0, LCD_HEIGHT-PICTURE_Y_PIXEL , LCD_WIDTH, PICTURE_Y_PIXEL );
 }
+
+/*!
+ * \brief reads status of onboard blue button
+ *
+ * \param
+ *  void
+ *
+ * \retval
+ *  1 when blue button is pushed
+ *  0 when blue button is released
+ *
+ */
+uint8_t readButton()
+{
+	if(GPIOI->IDR & GPIO_PIN_11)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}

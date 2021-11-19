@@ -33,5 +33,7 @@ void pictureToLCD(void* picture);
 void clearText(void);
 /* clears previous picture of the LCD */
 void clearPicture(void);
+/* reads status of onboard blue button */
+uint8_t readButton();
 
 #endif /* BSP_FUNCTIONS_H_ */
