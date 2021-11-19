@@ -95,40 +95,11 @@ void fs_close_custom(struct fs_file *file){
 
 extern void httpd_cgi_handler(struct fs_file *file, const char* uri, int iNumParams,
                               char **pcParam, char **pcValue){
-	for(int i = 0; i < iNumParams; i++){
 
-			if(strcmp(pcParam[i], "PIN1") == 0){
+	if(strcmp(pcParam[0], "msg") == 0){
+		textToLCD(pcValue[0], strlen(pcValue[0]));
+	}
 
-				if(strcmp(pcValue[i], "0") == 0){
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-				}
-				else if(strcmp(pcValue[i], "1") == 0){
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
-				}
-			}
-
-			else if(strcmp(pcParam[i], "PIN2") == 0){
-
-				if(strcmp(pcValue[i], "0") == 0){
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
-					HAL_Delay(300);
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-					HAL_Delay(300);
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
-					HAL_Delay(300);
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-				}
-				else if(strcmp(pcValue[i], "1") == 0){
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-					HAL_Delay(300);
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
-					HAL_Delay(300);
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-					HAL_Delay(300);
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
-				}
-			}
-		}
 }
 
 char ssi_tag_name[1][10] = {
