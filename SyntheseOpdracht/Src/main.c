@@ -27,7 +27,6 @@
 #include <errno.h>
 #include <LCD_functions.h>
 #include <sys/unistd.h>
-#include "testpoop.h"
 
 /* USER CODE END Includes */
 
@@ -63,7 +62,7 @@ SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
 #if TESTCODE_LCD == 1
-	char blablaMessage[TEXT_BUFFER_LENGTH] = "Tijn gaf mij het woord Pneumonoultramicroscopicsilicovolcanoconi, hij zei dat ik dit op de lcd moest plaatsen";
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "text will be displayed right here";
 #endif
 
 	// store time when screen should go black
@@ -167,7 +166,7 @@ int main(void)
 	  // LCD Initialization
 	  initLCD();
 	  // EXAMPLE: print small text message on the lcd
-	  if(textToLCD(blablaMessage, strlen(blablaMessage)) == 0)
+	  if(textToLCD(blablaMessage, strlen(blablaMessage),LCD_COLOR_WHITE) == 0)
 	  {
 		  printf("text is not displayed correct\r\n");
 	  }
@@ -176,7 +175,6 @@ int main(void)
 		  printf("text is displayed correct\r\n");
 	  }
 	  // print testpicture
-	  pictureToLCD(TESTPOOP_DATA);
 	#endif
 	ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
   /* USER CODE END 2 */

@@ -58,18 +58,21 @@ void initLCD(void)
  * \param
  *  textArray -> array containing the string that has to be printed.
  *  len -> the amount of characters that has to be printed
+ *  color -> color the text will be printed in
  *
  * \retval
  *  len when the function has succeeded.
  *  0 when the function has failed.
  *
+ * \note please don't use black text color because the text background is black
+ * \note red text color can be used for errors
  */
-int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
+int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 {
 	// check if length is valid
 	if(len > TEXT_BUFFER_LENGTH)
 	{
-		textToLCD(errorMessage, strlen(errorMessage));
+		textToLCD(errorMessage, strlen(errorMessage),LCD_COLOR_RED);
 		printf("the string that was going to be displayed is to long in total\r\n");
 		return 0;
 	}
@@ -80,12 +83,13 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 	{
 		if(textArray[i] < ' ')
 		{
-			textToLCD(errorMessage, strlen(errorMessage));
+			textToLCD(errorMessage, strlen(errorMessage),LCD_COLOR_RED);
 			printf("the string that was going to be displayed contains weird characters\r\n");
 			return 0;
 		}
 	}
 	clearText();
+	BSP_LCD_SetTextColor(color);
 	// make sure we are on the foreground layer
 	// small string to save the line that is going to be printed.
 	// one char longer than max length for '\0'
@@ -118,7 +122,6 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 				// going back untill we find a space
 				while( BufString[ ( Count - 1 ) ] != ' ')
 				{
-					//printf("%s\r\n",BufString);
 					// fill the buffer with '\0' and reduce where we were reading in the string
 					BufString[ ( Count - 1 ) ] = '\0';
 					Count --;
@@ -155,7 +158,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len)
 		// the bufstring is still filled with data from above
 		// just add '\0' to the end
 		BufString[ Count ] = '\0';
-		//afdrukken
+		// print the last section
 		BSP_LCD_DisplayStringAt( 0, LineCnt, ( uint8_t * ) BufString, CENTER_MODE );
 
 	}
@@ -196,7 +199,7 @@ void clearText(void)
 {
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
-	// fille full screen with plane
+	// fill upper screen with plane
 	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH, LCD_HEIGHT-PICTURE_Y_PIXEL );
 	// switch back to black so next text is properly displayed
 	BSP_LCD_SetTextColor( LCD_COLOR_WHITE );
@@ -216,7 +219,7 @@ void clearPicture(void)
 {
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
-	// fille full screen with plane
+	// fill lower screen with plane
 	BSP_LCD_FillRect( 0, LCD_HEIGHT-PICTURE_Y_PIXEL , LCD_WIDTH, PICTURE_Y_PIXEL );
 	// switch back to black so next text is properly displayed
 	BSP_LCD_SetTextColor( LCD_COLOR_WHITE );
