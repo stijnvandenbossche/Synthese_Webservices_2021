@@ -17,3 +17,8 @@ h1{
 .intro{
     text-align: center;
 }
+
+.message{
+    text-align: center;
+    margin: 10px;
+}

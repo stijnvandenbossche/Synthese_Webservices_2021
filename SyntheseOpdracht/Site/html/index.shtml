@@ -15,7 +15,7 @@
     <p>Members: Jonas, Liam, Rik, Stijn, Tijn, Tim and lecturer Wim Dams.</p>
 </div>
 <div>
-    <form>
+    <form class = "message">
         <input type = "text" name = "msg" id = "msg">
         <button type = "submit" name = "send" class = "button" onclick = "sendmsg()">Submit</button>
     </form>

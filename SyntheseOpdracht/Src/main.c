@@ -27,6 +27,8 @@
 #include <errno.h>
 #include <LCD_functions.h>
 #include <sys/unistd.h>
+#include "httpd.h"
+#include "lwip/init.h"
 
 /* USER CODE END Includes */
 
@@ -78,6 +80,67 @@ int _write( int xFile, char *pxPtr, int xLen );
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//useless functions
+int fs_open_custom(struct fs_file *file, const char *name) {
+
+	return 0;
+}
+
+
+void fs_close_custom(struct fs_file *file){
+
+	return 0;
+}
+
+
+extern void httpd_cgi_handler(struct fs_file *file, const char* uri, int iNumParams,
+                              char **pcParam, char **pcValue){
+	for(int i = 0; i < iNumParams; i++){
+
+			if(strcmp(pcParam[i], "PIN1") == 0){
+
+				if(strcmp(pcValue[i], "0") == 0){
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
+				}
+				else if(strcmp(pcValue[i], "1") == 0){
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
+				}
+			}
+
+			else if(strcmp(pcParam[i], "PIN2") == 0){
+
+				if(strcmp(pcValue[i], "0") == 0){
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
+					HAL_Delay(300);
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
+					HAL_Delay(300);
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
+					HAL_Delay(300);
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
+				}
+				else if(strcmp(pcValue[i], "1") == 0){
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
+					HAL_Delay(300);
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
+					HAL_Delay(300);
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
+					HAL_Delay(300);
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
+				}
+			}
+		}
+}
+
+char ssi_tag_name[1][10] = {
+                         "foto"
+                     };
+
+u16_t mySsiHandler(const char* ssi_tag_name, char *pcInsert, int iInsertLen){
+
+	sprintf(pcInsert, "This works!!! :D");
+
+	return strlen(pcInsert);
+}
 
 // printf
 int _write( int xFile, char *pcPtr, int xLen )
@@ -143,6 +206,9 @@ int main(void)
   MX_LWIP_Init();
 
   /* USER CODE BEGIN 2 */
+  httpd_init();
+  http_set_ssi_handler(mySsiHandler, ssi_tag_name, 1);
+
 	#if TESTCODE_LCD == 1
 	  // LCD Initialization
 	  initLCD();
