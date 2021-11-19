@@ -27,7 +27,6 @@
 #include <errno.h>
 #include <LCD_functions.h>
 #include <sys/unistd.h>
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -203,6 +202,8 @@ int main(void)
 		// turn off screen
 		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_RESET);
+
+
 	}
   }
   /* USER CODE END 3 */

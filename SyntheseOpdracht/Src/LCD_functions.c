@@ -179,8 +179,8 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
  */
 void pictureToLCD(void* picture)
 {
-	// make sure we draw on the right layer
-	BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
+	//remove previous picture
+	clearPicture();
 	// drawpicture based on given pointer
 	WDA_LCD_DrawBitmap((uint16_t*)picture, ( ( LCD_WIDTH - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ), PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
 }
@@ -201,8 +201,6 @@ void clearText(void)
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
 	// fill upper screen with plane
 	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH, LCD_HEIGHT-PICTURE_Y_PIXEL );
-	// switch back to black so next text is properly displayed
-	BSP_LCD_SetTextColor( LCD_COLOR_WHITE );
 }
 
 /*!
@@ -221,6 +219,4 @@ void clearPicture(void)
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
 	// fill lower screen with plane
 	BSP_LCD_FillRect( 0, LCD_HEIGHT-PICTURE_Y_PIXEL , LCD_WIDTH, PICTURE_Y_PIXEL );
-	// switch back to black so next text is properly displayed
-	BSP_LCD_SetTextColor( LCD_COLOR_WHITE );
 }
