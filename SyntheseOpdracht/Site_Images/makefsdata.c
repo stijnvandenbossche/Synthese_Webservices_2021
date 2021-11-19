@@ -123,6 +123,7 @@ int check_path(char *path, size_t size);
 static int checkSsiByFilelist(const char* filename_listfile);
 static int ext_in_list(const char* filename, const char *ext_list);
 static int file_to_exclude(const char* filename);
+static int file_to_exclude_http_header(const char* filename);
 static int file_can_be_compressed(const char* filename);
 
 /* 5 bytes per char + 3 bytes per line */
@@ -145,7 +146,7 @@ size_t overallDataBytes = 0;
 #endif
 const char *exclude_list = NULL;
 const char *ncompress_list = NULL;
-
+const char *exclude_http_header_list = NULL;
 struct file_entry *first_file = NULL;
 struct file_entry *last_file = NULL;
 
@@ -155,7 +156,7 @@ static size_t ssi_file_num_lines;
 
 static void print_usage(void)
 {
-  printf(" Usage: htmlgen [targetdir] [-s] [-e] [-11] [-nossi] [-ssi:<filename>] [-c] [-f:<filename>] [-m] [-svr:<name>] [-x:<ext_list>] [-xc:<ext_list>" USAGE_ARG_DEFLATE NEWLINE NEWLINE);
+  printf(" Usage: htmlgen [targetdir] [-s] [-e] [-11] [-nossi] [-ssi:<filename>] [-c] [-f:<filename>] [-m] [-svr:<name>] [-x:<ext_list>] [-xc:<ext_list>]" USAGE_ARG_DEFLATE "[-xh:<ext_list>]" NEWLINE NEWLINE);
   printf("   targetdir: relative or absolute path to files to convert" NEWLINE);
   printf("   switch -s: toggle processing of subdirectories (default is on)" NEWLINE);
   printf("   switch -e: exclude HTTP header from file (header is created at runtime, default is off)" NEWLINE);
@@ -168,10 +169,12 @@ static void print_usage(void)
   printf("   switch -svr: server identifier sent in HTTP response header ('Server' field)" NEWLINE);
   printf("   switch -x: comma separated list of extensions of files to exclude (e.g., -x:json,txt)" NEWLINE);
   printf("   switch -xc: comma separated list of extensions of files to not compress (e.g., -xc:mp3,jpg)" NEWLINE);
+  
 #if MAKEFS_SUPPORT_DEFLATE
   printf("   switch -defl: deflate-compress all non-SSI files (with opt. compr.-level, default=10)" NEWLINE);
   printf("                 ATTENTION: browser has to support \"Content-Encoding: deflate\"!" NEWLINE);
 #endif
+  printf("   switch -xh: comma separated list of extensions of files to exclude the http header (e.g., -xh:raw)" NEWLINE);
   printf("   if targetdir not specified, htmlgen will attempt to" NEWLINE);
   printf("   process files in subdirectory 'fs'" NEWLINE);
 }
@@ -257,7 +260,10 @@ int main(int argc, char *argv[])
       } else if ((strstr(argv[i], "-?")) || (strstr(argv[i], "-h"))) {
         print_usage();
         exit(0);
-      }
+      } else if(strstr(argv[i], "-xh:") == argv[i]) {
+		exclude_http_header_list = &argv[i][4];
+        printf("Excluding http header for files with extensions %s" NEWLINE, exclude_http_header_list);
+	  }
     } else if ((argv[i][0] == '/') && (argv[i][1] == '?') && (argv[i][2] == 0)) {
       print_usage();
       exit(0);
@@ -897,7 +903,10 @@ static int file_to_exclude(const char *filename)
 {
     return (exclude_list != NULL) && ext_in_list(filename, exclude_list);
 }
-
+static int file_to_exclude_http_header(const char *filename)
+{
+    return (exclude_http_header_list == NULL) || !ext_in_list(filename, exclude_http_header_list);
+}
 static int file_can_be_compressed(const char *filename)
 {
     return (ncompress_list == NULL) || !ext_in_list(filename, ncompress_list);
@@ -951,9 +960,9 @@ int process_file(FILE *data_file, FILE *struct_file, const char *filename)
     flags |= FS_FILE_FLAGS_SSI;
   }
   has_content_len = !is_ssi;
-  can_be_compressed = includeHttpHeader && !is_ssi && file_can_be_compressed(filename);
+  can_be_compressed = includeHttpHeader && !is_ssi && file_can_be_compressed(filename) && file_to_exclude_http_header(filename);
   file_data = get_file_data(filename, &file_size, can_be_compressed, &is_compressed);
-  if (includeHttpHeader) {
+  if (includeHttpHeader && file_to_exclude_http_header(filename)) {
     file_write_http_header(data_file, filename, file_size, &http_hdr_len, &http_hdr_chksum, has_content_len, is_compressed);
     flags |= FS_FILE_FLAGS_HEADER_INCLUDED;
     if (has_content_len) {

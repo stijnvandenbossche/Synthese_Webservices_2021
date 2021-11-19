@@ -152,7 +152,7 @@ int main(void)
 	// Normally this should be something like displayPicture((uint16_t*)getRawImageData(imageList[2], strlen(imageList[2]))); but the lcd API is currently not present in this code.
 	// To check if function of the getRawImageData is correct, a piece of the raw data is printed to UART.
 	// A good function to check this is lion.raw because it has a background.
-	uint16_t * dataPointer = (uint16_t*)getRawImageData("/images/lion", strlen("/images/lion"));
+	uint16_t * dataPointer = getRawImageData("/images/lion", strlen("/images/lion"));
 
 	// Print the first 255 pixels.
 	for(uint8_t i = 0; i < 255; i++)

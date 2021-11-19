@@ -262,9 +262,7 @@ void* getRawImageData(char* imagePath, uint16_t pathLength)
 			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
 			if(strcmp(pathBuffer, rawName) == 0)
 			{
-				// Every file in the fs has a HTTP header, but this is unnecessary for .raw files.
-				// Thus the start of the real data is searched (header ends with \r\n\r\n) and this pointer is stored in dataPointer.
-				dataPointer = strstr((const char*)f->data, "\r\n\r\n") + 4;
+				dataPointer = (const char*)f->data;
 			}
 		}
 	}
