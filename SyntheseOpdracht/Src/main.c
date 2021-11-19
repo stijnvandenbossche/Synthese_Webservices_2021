@@ -173,8 +173,8 @@ int main(void)
 	  {
 		  printf("text is displayed correct\r\n");
 	  }
-	  // print testpicture
 	#endif
+	// start timer for screensaver
 	ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
   /* USER CODE END 2 */
 
