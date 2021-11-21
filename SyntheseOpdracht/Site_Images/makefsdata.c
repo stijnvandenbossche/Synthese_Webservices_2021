@@ -5,6 +5,7 @@
  *
  * Author: Jim Pettinato
  *         Simon Goldschmidt
+ *		   Tijn De Wever
  *
  * @todo:
  * - take TCP_MSS, LWIP_TCP_TIMESTAMPS and
@@ -125,7 +126,7 @@ static int ext_in_list(const char* filename, const char *ext_list);
 static int file_to_exclude(const char* filename);
 static int file_to_exclude_http_header(const char* filename);
 static int file_can_be_compressed(const char* filename);
-
+static void strToLower(char* str, int len);
 /* 5 bytes per char + 3 bytes per line */
 static char file_buffer_c[COPY_BUFSIZE * 5 + ((COPY_BUFSIZE / HEX_BYTES_PER_LINE) * 3)];
 
@@ -167,14 +168,14 @@ static void print_usage(void)
   printf("   switch -f: target filename (default is \"fsdata.c\")" NEWLINE);
   printf("   switch -m: include \"Last-Modified\" header based on file time" NEWLINE);
   printf("   switch -svr: server identifier sent in HTTP response header ('Server' field)" NEWLINE);
-  printf("   switch -x: comma separated list of extensions of files to exclude (e.g., -x:json,txt)" NEWLINE);
-  printf("   switch -xc: comma separated list of extensions of files to not compress (e.g., -xc:mp3,jpg)" NEWLINE);
+  printf("   switch -x: comma separated list of extensions of files to exclude (e.g., -x:json,txt) (lowercase)" NEWLINE);
+  printf("   switch -xc: comma separated list of extensions of files to not compress (e.g., -xc:mp3,jpg) (lowercase)" NEWLINE);
   
 #if MAKEFS_SUPPORT_DEFLATE
   printf("   switch -defl: deflate-compress all non-SSI files (with opt. compr.-level, default=10)" NEWLINE);
   printf("                 ATTENTION: browser has to support \"Content-Encoding: deflate\"!" NEWLINE);
 #endif
-  printf("   switch -xh: comma separated list of extensions of files to exclude the http header (e.g., -xh:raw)" NEWLINE);
+  printf("   switch -xh: comma separated list of extensions of files to exclude the http header (e.g., -xh:raw) (lowercase)" NEWLINE);
   printf("   if targetdir not specified, htmlgen will attempt to" NEWLINE);
   printf("   process files in subdirectory 'fs'" NEWLINE);
 }
@@ -863,14 +864,50 @@ static int is_ssi_file(const char *filename)
     } else {
       /* check file extension */
       size_t loop;
+	  char* file_ext_lowercase;
+	  char* ext;
+	  int ret = 0;
+	  int allocateSucces = 0;
+	  // Search for first .
+	  if((ext = strchr(filename, '.')) != NULL)
+	  {
+		// Try to allocate strlen(ext) + 1 (\0) chars
+		if((file_ext_lowercase = (char*)calloc(strlen(ext) + 1, sizeof(char))) != NULL)
+		{
+		  // Convert extension to lowercase letters
+		  strncpy(file_ext_lowercase, ext, strlen(ext));
+		  allocateSucces = 1;
+		  strToLower(file_ext_lowercase, strlen(file_ext_lowercase));
+		}
+		else
+		{
+			file_ext_lowercase = (char*)filename;
+			// Warning message to the user. Note: when no more memory can be allocated.
+			printf("Function: is_ssi_file: failed to allocate file_ext_lowercase buffer, extension case will not be normalized\n");
+		}
+	  }
       for (loop = 0; loop < NUM_SHTML_EXTENSIONS; loop++) {
-        if (strstr(filename, g_pcSSIExtensions[loop])) {
-          return 1;
+        if (strstr(file_ext_lowercase, g_pcSSIExtensions[loop])) {
+          ret = 1;
+		  break;
         }
       }
+	  if(allocateSucces == 1)
+	  {
+		free(file_ext_lowercase);
+	  }
+	  return ret;
     }
   }
   return 0;
+}
+
+static void strToLower(char* str, int len)
+{
+	for(int i = 0; i < len; i++)
+	{
+	  str[i] = (str[i] >= 'A' && str[i] <= 'Z')? str[i] + 0x20 : str[i];
+	}
 }
 
 static int ext_in_list(const char* filename, const char *ext_list)
@@ -882,17 +919,37 @@ static int ext_in_list(const char* filename, const char *ext_list)
   }
   while(*ext != '\0') {
     const char *comma = strchr(ext, ',');
+	char* file_ext_lowercase;
     size_t ext_size;
     size_t filename_size = strlen(filename);
+	int allocateSucces = 0;
     if (comma == NULL) {
       comma = strchr(ext, '\0');
     }
     ext_size = comma - ext;
+	// Try to allocate the size of the extensions (ext_size) + 1 (\0) chars
+	if((file_ext_lowercase = (char*)calloc(ext_size + 1, sizeof(char))) == NULL)
+	{
+		file_ext_lowercase = (char*)(filename + (filename_size - ext_size));
+		// Warning message to the user. Note: when no more memory can be allocated, the message will be printed multiple times (while loop), but it will certainly let the user know something is wrong.
+		printf("Function ext_in_list: failed to allocate file_ext_lowercase buffer, extension case will not be normalized\n");
+	}
+	else
+	{
+		// Convert extension to lowercase letters
+		strncpy(file_ext_lowercase, (filename + (filename_size - ext_size)), ext_size);
+		strToLower(file_ext_lowercase, ext_size);
+		allocateSucces = 1;
+	}
     if ((filename[filename_size - ext_size - 1] == '.') &&
-      !strncmp(&filename[filename_size - ext_size], ext, ext_size)) {
+      !strncmp(file_ext_lowercase, ext, ext_size)) {
         found = 1;
         break;
     }
+	if(allocateSucces == 1)
+	{
+		free(file_ext_lowercase);
+	}
     ext = comma + 1;
   }
 
@@ -1042,6 +1099,8 @@ int file_write_http_header(FILE *data_file, const char *filename, int file_size,
   size_t hdr_len = 0;
   u16_t acc;
   const char *file_ext;
+  char* file_ext_lowercase;
+  int allocateSucces = 0;
   size_t j;
   u8_t provide_last_modified = includeLastModified;
 
@@ -1100,16 +1159,32 @@ int file_write_http_header(FILE *data_file, const char *filename, int file_size,
     file_type = HTTP_HDR_DEFAULT_TYPE;
   } else {
     file_type = NULL;
+	// Try to allocate the size of the extensions (file_ext) + 1 (\0) chars
+	if((file_ext_lowercase = (char*)calloc(strlen(file_ext) + 1, sizeof(char))) == NULL)
+	{
+		file_ext_lowercase = (char*)file_ext;
+	}
+	else
+	{
+		// Convert extension to lowercase letters
+		strncpy(file_ext_lowercase, file_ext, strlen(file_ext));
+		strToLower(file_ext_lowercase, strlen(file_ext_lowercase));
+		allocateSucces = 1;
+	}
     for (j = 0; j < NUM_HTTP_HEADERS; j++) {
-      if (!strcmp(file_ext, g_psHTTPHeaders[j].extension)) {
+      if (!strcmp(file_ext_lowercase, g_psHTTPHeaders[j].extension)) {
         file_type = g_psHTTPHeaders[j].content_type;
         break;
       }
     }
     if (file_type == NULL) {
-      printf("failed to get file type for extension \"%s\", using default.\n", file_ext);
+      printf("failed to get file type for extension \"%s\", using default.\n", file_ext_lowercase);
       file_type = HTTP_HDR_DEFAULT_TYPE;
     }
+	if(allocateSucces == 1)
+	{
+		free(file_ext_lowercase);
+	}
   }
 
   /* Content-Length is used for persistent connections in HTTP/1.1 but also for
