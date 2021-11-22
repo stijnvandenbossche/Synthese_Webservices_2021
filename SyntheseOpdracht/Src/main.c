@@ -95,11 +95,11 @@ void fs_close_custom(struct fs_file *file){
 
 extern void httpd_cgi_handler(struct fs_file *file, const char* uri, int iNumParams,
                               char **pcParam, char **pcValue){
-
-	if(strcmp(pcParam[0], "msg") == 0){
-		textToLCD(pcValue[0], strlen(pcValue[0]));
+	for(int i = 0; i < iNumParams; i++){
+		if(strcmp(pcParam[0], "msg") == 0){
+			textToLCD(pcValue[0], strlen(pcValue[0]));
+		}
 	}
-
 }
 
 char ssi_tag_name[1][10] = {
