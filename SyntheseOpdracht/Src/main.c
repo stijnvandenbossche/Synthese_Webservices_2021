@@ -103,13 +103,42 @@ extern void httpd_cgi_handler(struct fs_file *file, const char* uri, int iNumPar
 }
 
 char ssi_tag_name[1][10] = {
-                         "foto"
+                         "photo"
                      };
 
 u16_t mySsiHandler(const char* ssi_tag_name, char *pcInsert, int iInsertLen){
 
-	sprintf(pcInsert, "This works!!! :D");
 
+
+	if(strcmp(ssi_tag_name, "photo") == 0){
+		//vraag lijst op funtie
+		char* photolist[8][256] = {
+					"images/alien.png"
+					"images/chicken.png"
+					"images/derp.png"
+					"images/lion.png"
+					"images/poop.png"
+					"images/skull.png"
+					"images/tl.png"
+					"images/vogel.png"
+		};
+		//end lijst op funtie
+
+		sprintf(pcInsert, "<h2>%d Photo's were detected.<h2>", (sizeof photolist / sizeof photolist[0]));
+
+		strcat(pcInsert, "<form class = 'photo'>");
+		int leng = (sizeof photolist / sizeof photolist[0]);
+		for(int i = 0; i < leng; i++){
+
+			char teststr[2560];
+			sprintf(teststr, "<p><img src = 'images/alien.png' alt = 'photo %d'></p><p>%d of %d</p>", i, i, leng);
+			strcat(pcInsert, teststr);
+
+		}
+		strcat(pcInsert, "</form>");
+	}
+
+	printf(pcInsert);
 	return strlen(pcInsert);
 }
 

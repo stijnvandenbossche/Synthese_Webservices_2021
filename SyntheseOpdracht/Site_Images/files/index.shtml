@@ -22,11 +22,10 @@
 </div>
 <div id = "photo">
     <!--List of photo's-->
-    <!--#foto-->
+    <!--#photo-->
 </div>
 
 <script>
-    //
     function sendmsg(){
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
@@ -34,6 +33,16 @@
             callback(xmlHttp.responseText);
     }
     xmlHttp.open("GET", "/sendedmsg.cgi?msg=" + getElementById("msg").innerHTML, true); // true for asynchronous 
+    xmlHttp.send(null);
+    }
+
+    function sendphoto(){
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", "/sendedphoto.cgi?msg=" + this.id, true); // true for asynchronous 
     xmlHttp.send(null);
     }
 
