@@ -23,11 +23,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
 #include "fileSystemAPI.h"
 #include <errno.h>
-#include <sys/stat.h>
-#include <sys/times.h>
+#include <LCD_functions.h>
 #include <sys/unistd.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,7 +38,15 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+// set to 1 to test lcd code
+// set to 0 to disable testcode
+#define TESTCODE_LCD 1
+
 #define TESTCODE_FS 1
+
+
+// time in ms it take for the screen to go dark after no more touches were detected
+#define SCREENSAVER_DELAY 10000
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,7 +65,11 @@ UART_HandleTypeDef huart1;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
-
+#if TESTCODE_LCD == 1
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "text will be displayed right here";
+#endif
+// store time when screen should go black
+uint32_t ScreensaverStart = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,10 +81,13 @@ static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
 /* USER CODE BEGIN PFP */
 
+
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 int _write(int file, char *ptr, int len) {
     HAL_StatusTypeDef xStatus;
     switch (file) {
@@ -95,6 +111,8 @@ int _write(int file, char *ptr, int len) {
     }
     return len;
 }
+
+
 /* USER CODE END 0 */
 
 /**
@@ -130,9 +148,29 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
-  /* USER CODE BEGIN 2 */
 
-  // EXAMPLE CODE
+  /* USER CODE BEGIN 2 */
+	#if TESTCODE_LCD == 1
+	  // LCD Initialization
+	  initLCD();
+	  // EXAMPLE: print small text message on the lcd
+	  if(textToLCD(blablaMessage, strlen(blablaMessage)) == 1)
+	  {
+		  printf("text is displayed correct\r\n");
+	  }
+	  else
+	  {
+		  printf("text is not displayed correct\r\n");
+	  }
+	#endif
+
+// start timer for screensaver
+	ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+
+
+
+
+// EXAMPLE CODE
 #if TESTCODE_FS == 1
   if(initFileSystemAPI() == 1)
   {
@@ -149,7 +187,7 @@ int main(void)
 	}
 	printf("\n\r");
 	// Display image 2 from the list on the lcd.
-	// Normally this should be something like displayPicture((uint16_t*)getRawImageData(imageList[2], strlen(imageList[2]))); but the lcd API is currently not present in this code.
+	// Normally this should be something like displayPicture(getRawImageData(imageList[2], strlen(imageList[2]))); but the lcd API is currently not present in this code.
 	// To check if function of the getRawImageData is correct, a piece of the raw data is printed to UART.
 	// A good function to check this is lion.raw because it has a background.
 	uint16_t * dataPointer = getRawImageData("/images/lion", strlen("/images/lion"));
@@ -169,8 +207,8 @@ int main(void)
 	printf("initFileSystemAPI has failed\n\r");
   }
   printf("\n\r");
-#endif
-  /* USER CODE END 2 */
+#endif  
+/* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -179,7 +217,26 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  MX_LWIP_Process();
+	MX_LWIP_Process();
+
+	// read the button to turn the lcd back on
+	if(readButton() == 1)
+	{
+		// turn on screen
+		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
+		// update timer
+		ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+	}
+	// if enough time passed => turn screen off
+	if(ScreensaverStart < HAL_GetTick())
+	{
+		// turn off screen
+		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_RESET);
+
+
+	}
   }
   /* USER CODE END 3 */
 }
