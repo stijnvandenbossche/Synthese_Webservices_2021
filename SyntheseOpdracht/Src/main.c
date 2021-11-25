@@ -38,11 +38,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-// set to 1 to test lcd code
-// set to 0 to disable testcode
-#define TESTCODE_LCD 1
-
-#define TESTCODE_FS 1
+// set to 1 to test code
+// set to 0 to disable test code
+#define TESTCODE 1
 
 
 // time in ms it take for the screen to go dark after no more touches were detected
@@ -65,7 +63,7 @@ UART_HandleTypeDef huart1;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
-#if TESTCODE_LCD == 1
+#if TESTCODE == 1
 	char blablaMessage[TEXT_BUFFER_LENGTH] = "text will be displayed right here";
 #endif
 // store time when screen should go black
@@ -150,28 +148,9 @@ int main(void)
   MX_LWIP_Init();
 
   /* USER CODE BEGIN 2 */
-	#if TESTCODE_LCD == 1
-	  // LCD Initialization
-	  initLCD();
-	  // EXAMPLE: print small text message on the lcd
-	  if(textToLCD(blablaMessage, strlen(blablaMessage)) == 1)
-	  {
-		  printf("text is displayed correct\r\n");
-	  }
-	  else
-	  {
-		  printf("text is not displayed correct\r\n");
-	  }
-	#endif
-
-// start timer for screensaver
-	ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
-
-
-
-
 // EXAMPLE CODE
-#if TESTCODE_FS == 1
+#if TESTCODE == 1
+  initLCD();
   if(initFileSystemAPI() == 1)
   {
 	// Get list of all the valid images from the fs.
@@ -186,21 +165,20 @@ int main(void)
 	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
 	}
 	printf("\n\r");
-	// Display image 2 from the list on the lcd.
-	// Normally this should be something like displayPicture(getRawImageData(imageList[2], strlen(imageList[2]))); but the lcd API is currently not present in this code.
-	// To check if function of the getRawImageData is correct, a piece of the raw data is printed to UART.
-	// A good function to check this is lion.raw because it has a background.
-	uint16_t * dataPointer = getRawImageData("/images/lion", strlen("/images/lion"));
-
-	// Print the first 255 pixels.
-	for(uint8_t i = 0; i < 255; i++)
+	if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
 	{
-	  printf("%x, ", *(dataPointer+i));
-	  if((i == 9) || (i > 10 && i % 10 == 9))
-	  {
-		  printf("\n\r");
-	  }
+		printf("text is displayed correct\r\n");
 	}
+	else
+	{
+		printf("text is not displayed correct\r\n");
+	}
+
+
+	pictureToLCD(getRawImageData("/images/trex.raw", strlen("/images/trex.raw")));
+	// Other example of getRawImageData:
+	// Display image 2 from the list on the lcd.
+	// Normally this should be something like pictureToLCD(getRawImageData(imageList[2], strlen(imageList[2])));
   }
   else
   {
@@ -208,6 +186,8 @@ int main(void)
   }
   printf("\n\r");
 #endif  
+  // start timer for screensaver
+  ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
 /* USER CODE END 2 */
 
   /* Infinite loop */
