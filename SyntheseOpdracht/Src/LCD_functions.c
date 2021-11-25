@@ -14,6 +14,11 @@
 // error message that will be displayed on the LCD when there is something wrong with the text
 static char errorMessage[TEXT_BUFFER_LENGTH] = "something went wrong while printing the string (see Serial terminal for more info)";
 
+// save time for timer interrupt
+uint16_t timerTime_ms;
+
+extern TIM_HandleTypeDef htim2;
+
 /*!
  * \brief LCD Initialization for normal operation.
  *
@@ -232,7 +237,7 @@ void clearPicture(void)
  *  0 when blue button is released
  *
  */
-uint8_t readButton()
+uint8_t readButton(void)
 {
 	if(GPIOI->IDR & GPIO_PIN_11)
 	{
@@ -242,4 +247,79 @@ uint8_t readButton()
 	{
 		return 0;
 	}
+}
+
+/*!
+ * \brief sets the time for the timer interrupt routine
+ *
+ * \param
+ *  time_ms time in ms for the interrupt routine
+ *
+ * \retval
+ *  void
+ *
+ */
+void setTimer_ms(uint16_t time_ms)
+{
+	timerTime_ms = time_ms;
+	htim2.Instance->ARR = (timerTime_ms * 2) - 1;
+}
+
+/*!
+ * \brief timer interrupt callback
+ *
+ * \param
+ *  htim timer that generated the interrupt
+ *
+ * \retval
+ *  void
+ *
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
+{
+	if(htim == &htim2)
+	{
+		static uint8_t ledstate = 0;
+		if(ledstate == 0)
+		{
+			ledstate =1;
+			GPIOI->BSRR = GPIO_PIN_1;
+		}
+		else
+		{
+			ledstate = 0;
+			GPIOI->BSRR = (uint32_t)GPIO_PIN_1 << 16;
+		}
+	}
+}
+
+/*!
+ * \brief start timer to receive timer interrupts
+ *
+ * \param
+ *  void
+ *
+ * \retval
+ *  void
+ *
+ */
+void startTimer(void)
+{
+	setTimer_ms(timerTime_ms);
+	HAL_TIM_Base_Start_IT(&htim2);
+}
+
+/*!
+ * \brief stop timer to receive no more timer interrupts
+ *
+ * \param
+ *  void
+ *
+ * \retval
+ *  void
+ *
+ */
+void stopTimer(void)
+{
+	HAL_TIM_Base_Stop_IT(&htim2);
 }

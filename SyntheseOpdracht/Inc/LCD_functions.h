@@ -33,7 +33,17 @@ void pictureToLCD(void* picture);
 void clearText(void);
 /* clears previous picture of the LCD */
 void clearPicture(void);
+
 /* reads status of onboard blue button */
-uint8_t readButton();
+uint8_t readButton(void);
+
+/* brief sets the time for the timer interrupt routine */
+void setTimer_ms(uint16_t time_ms);
+/* brief timer interrupt callback */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim);
+/* brief start timer to receive timer interrupts */
+void startTimer(void);
+/* brief stop timer to receive no more timer interrupts */
+void stopTimer(void);
 
 #endif /* BSP_FUNCTIONS_H_ */
