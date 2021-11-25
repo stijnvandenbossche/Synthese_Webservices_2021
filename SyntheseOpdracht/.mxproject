@@ -7,8 +7,8 @@ HeaderPath=..\Middlewares\Third_Party\LwIP\src\include;..\Middlewares\Third_Part
 CDefines=USE_HAL_DRIVER;STM32F746xx;USE_HAL_DRIVER;USE_HAL_DRIVER;
 
 [PreviousGenFiles]
-HeaderPath=C:/Users/Gebruiker/Documents/GitHub/Synthese_Webservices_2021/SyntheseOpdracht/Inc
+HeaderPath=C:/Users/tijnd/Documents/GitHub/Synthese_Webservices_2021/SyntheseOpdracht/Inc
 HeaderFiles=lwip.h;lwipopts.h;ethernetif.h;stm32f7xx_it.h;stm32f7xx_hal_conf.h;main.h;
-SourcePath=C:/Users/Gebruiker/Documents/GitHub/Synthese_Webservices_2021/SyntheseOpdracht/Src
+SourcePath=C:/Users/tijnd/Documents/GitHub/Synthese_Webservices_2021/SyntheseOpdracht/Src
 SourceFiles=lwip.c;ethernetif.c;stm32f7xx_it.c;stm32f7xx_hal_msp.c;main.c;
 
