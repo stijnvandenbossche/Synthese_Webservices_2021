@@ -1,8 +1,8 @@
 /*!
  *	\file BSP_functions.c
  *
- *  \remarkCreated on: 8 nov. 2021
- *  \author: Jonas Aertgeerts
+ *  \Created 8 nov. 2021
+ *  \author Jonas Aertgeerts
  */
 #include <LCD_functions.h>
 
@@ -58,6 +58,7 @@ void initLCD(void)
 	  // calculate the amount of chars that fit on one line
 	  charsOnLine = ((LCD_WIDTH-11)/2)/Font12.Width;
 
+	  // draw line in the middle of the screen to devide screen in two parts
 	  BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	  BSP_LCD_DrawLine(LCD_WIDTH/2, 0, LCD_WIDTH/2, LCD_HEIGHT);
 
@@ -177,8 +178,6 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 
 	}
 	return len;
-
-
 }
 
 /*!

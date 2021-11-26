@@ -23,15 +23,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
 #include "fileSystemAPI.h"
 #include <errno.h>
-
-
 #include <sys/unistd.h>
 #include <stdio.h>
 #include "LCD_functions.h"
-#include "testpoop.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -155,44 +151,44 @@ int main(void)
   MX_FMC_Init();
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
-// EXAMPLE CODE
-#if TESTCODE == 1
-  initLCD();
-  if(initFileSystemAPI() == 1)
-  {
-	// Get list of all the valid images from the fs.
-    char* imageList[getImageAmount()];
-    char name[getLargestNameLength()];
-	getImageList(imageList, png, a_z);
-	printf("Images present in the fs: %u\n\r", getImageAmount());
-	for(uint8_t i = 0; i < getImageAmount(); i++)
-	{
-	  // Extract the name out of the selected image path.
-	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
-	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
-	}
-	printf("\n\r");
-	if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
-	{
-		printf("text is displayed correct\r\n");
-	}
-	else
-	{
-		printf("text is not displayed correct\r\n");
-	}
+	// EXAMPLE CODE
+	#if TESTCODE == 1
+	  initLCD();
+	  if(initFileSystemAPI() == 1)
+	  {
+		// Get list of all the valid images from the fs.
+		char* imageList[getImageAmount()];
+		char name[getLargestNameLength()];
+		getImageList(imageList, png, a_z);
+		printf("Images present in the fs: %u\n\r", getImageAmount());
+		for(uint8_t i = 0; i < getImageAmount(); i++)
+		{
+		  // Extract the name out of the selected image path.
+		  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
+		  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
+		}
+		printf("\n\r");
+		if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
+		{
+			printf("text is displayed correct\r\n");
+		}
+		else
+		{
+			printf("text is not displayed correct\r\n");
+		}
 
 
-	pictureToLCD(getRawImageData("/images/trex.raw", strlen("/images/trex.raw")));
-	// Other example of getRawImageData:
-	// Display image 2 from the list on the lcd.
-	// Normally this should be something like pictureToLCD(getRawImageData(imageList[2], strlen(imageList[2])));
-  }
-  else
-  {
-	printf("initFileSystemAPI has failed\n\r");
-  }
-  printf("\n\r");
-#endif  
+		pictureToLCD(getRawImageData("/images/trex.raw", strlen("/images/trex.raw")));
+		// Other example of getRawImageData:
+		// Display image 2 from the list on the lcd.
+		// Normally this should be something like pictureToLCD(getRawImageData(imageList[2], strlen(imageList[2])));
+	  }
+	  else
+	  {
+		printf("initFileSystemAPI has failed\n\r");
+	  }
+	  printf("\n\r");
+	#endif
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
 /* USER CODE END 2 */
