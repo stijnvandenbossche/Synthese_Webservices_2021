@@ -26,10 +26,14 @@
 /* LCD Initialization for normal operation */
 void initLCD(void);
 /* prints text to the LCD */
-int textToLCD(char *textArray, int len);
+int textToLCD(char *textArray, int len, uint32_t color);
 /* prints picture to the LCD */
 void pictureToLCD(void* picture);
 /* clears previous text of the LCD */
-void clearLCD();
+void clearText(void);
+/* clears previous picture of the LCD */
+void clearPicture(void);
+/* reads status of onboard blue button */
+uint8_t readButton();
 
 #endif /* BSP_FUNCTIONS_H_ */
