@@ -150,6 +150,7 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 	// EXAMPLE CODE
 	#if TESTCODE == 1
@@ -177,8 +178,13 @@ int main(void)
 			printf("text is not displayed correct\r\n");
 		}
 
-
-		pictureToLCD(getRawImageData("/images/trex.raw", strlen("/images/trex.raw")));
+		struct imageMeta foto =
+		{
+			.data = getRawImageData("/images/.raw", strlen("/images/tl.raw")),
+			.width = 100,
+			.height = 100,
+		};
+		pictureToLCD(foto);
 		// Other example of getRawImageData:
 		// Display image 2 from the list on the lcd.
 		// Normally this should be something like pictureToLCD(getRawImageData(imageList[2], strlen(imageList[2])));

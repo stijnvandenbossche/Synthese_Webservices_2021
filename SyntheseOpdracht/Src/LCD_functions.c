@@ -12,14 +12,26 @@
  */
 
 // error message that will be displayed on the LCD when there is something wrong with the text
-static char errorMessage[TEXT_BUFFER_LENGTH] = "something went wrong while printing the string (see Serial terminal for more info)";
+static char errorMessageText[TEXT_BUFFER_LENGTH] = "something went wrong while printing the string (see Serial terminal for more info)";
+// error message that will be displayed on the LCD when there is something wrong with the picture
+static char errorMessagePicture[TEXT_BUFFER_LENGTH] = "something went wrong while printing the picture, it is to big";
 
 // save time for timer interrupt
 uint16_t timerTime_ms;
 
+// timerhandler
 extern TIM_HandleTypeDef htim2;
 
+// var to store how many chars fit on one line
 uint8_t charsOnLine;
+
+// struct to save picture data that is currently displayed
+struct imageMeta currentPicture;
+
+/* clears previous text of the LCD */
+static void clearText(void);
+/* clears previous picture of the LCD */
+static void clearPicture(void);
 
 /*!
  * \brief LCD Initialization for normal operation.
@@ -87,7 +99,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 	// check if length is valid
 	if(len > TEXT_BUFFER_LENGTH)
 	{
-		textToLCD(errorMessage, strlen(errorMessage),LCD_COLOR_RED);
+		textToLCD(errorMessageText, strlen(errorMessageText),LCD_COLOR_RED);
 		printf("the string that was going to be displayed is to long in total\r\n");
 		return 0;
 	}
@@ -98,7 +110,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 	{
 		if(textArray[i] < ' ')
 		{
-			textToLCD(errorMessage, strlen(errorMessage),LCD_COLOR_RED);
+			textToLCD(errorMessageText, strlen(errorMessageText),LCD_COLOR_RED);
 			printf("the string that was going to be displayed contains weird characters\r\n");
 			return 0;
 		}
@@ -184,18 +196,28 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
  * \brief prints picture to the LCD.
  *
  * \param
- *  picture -> pointer to the picture that has to be printed
+ *  picture -> struct with picture data
  *
  * \retval
  *  void
  *
  */
-void pictureToLCD(void* picture)
+void pictureToLCD(struct imageMeta picture)
 {
-	//remove previous picture
-	clearPicture();
-	// drawpicture based on given pointer
-	WDA_LCD_DrawBitmap((uint16_t*)picture, (LCD_WIDTH/2) +  ( ( (LCD_WIDTH/2) - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ) / 2, PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
+	currentPicture = picture;
+	if(currentPicture.width > (LCD_WIDTH/2) || currentPicture.height > LCD_HEIGHT)
+	{
+		textToLCD(errorMessagePicture, strlen(errorMessagePicture),LCD_COLOR_RED);
+		printf("something went wrong while printing the picture, it is to big\r\n");
+
+	}
+	else
+	{
+		//remove previous picture
+		clearPicture();
+		// drawpicture based on given pointer
+		WDA_LCD_DrawBitmap((uint16_t*)currentPicture.data, (LCD_WIDTH/2) +  ( ( (LCD_WIDTH/2) - currentPicture.width ) / 2 ) , ( LCD_HEIGHT - currentPicture.height ) / 2, currentPicture.width, currentPicture.height, LTDC_PIXEL_FORMAT_ARGB1555);
+	}
 }
 
 /*!
@@ -231,7 +253,7 @@ void clearPicture(void)
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
 	// fill lower screen with plane
-	BSP_LCD_FillRect( (LCD_WIDTH/2)+1, 0 , (LCD_WIDTH/2)-1, PICTURE_Y_PIXEL );
+	BSP_LCD_FillRect( (LCD_WIDTH/2)+1, 0 , (LCD_WIDTH/2)-1, LCD_HEIGHT );
 }
 
 /*!

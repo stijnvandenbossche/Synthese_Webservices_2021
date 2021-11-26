@@ -16,33 +16,37 @@
 #define LCD_HEIGHT 272
 
 // hard coded image sizes
-#define PICTURE_X_PIXEL 100
-#define PICTURE_Y_PIXEL 100
+#define PICTURE_X_PIXEL_MAX 240
+#define PICTURE_Y_PIXEL_MAX 272
 
 // define the length of the buffer of the string thats going to be displayed
 #define TEXT_BUFFER_LENGTH 300
+
+// test the struct functionallity
+struct imageMeta{
+    char* data;
+    uint16_t width;
+    uint16_t height;
+};
 
 /* LCD Initialization for normal operation */
 void initLCD(void);
 /* prints text to the LCD */
 int textToLCD(char *textArray, int len, uint32_t color);
 /* prints picture to the LCD */
-void pictureToLCD(void* picture);
-/* clears previous text of the LCD */
-void clearText(void);
-/* clears previous picture of the LCD */
-void clearPicture(void);
+void pictureToLCD(struct imageMeta picture);
+
 
 /* reads status of onboard blue button */
 uint8_t readButton(void);
 
-/* brief sets the time for the timer interrupt routine */
+/* sets the time for the timer interrupt routine */
 void setTimer_ms(uint16_t time_ms);
-/* brief timer interrupt callback */
+/* timer interrupt callback */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim);
-/* brief start timer to receive timer interrupts */
+/* start timer to receive timer interrupts */
 void startTimer(void);
-/* brief stop timer to receive no more timer interrupts */
+/* stop timer to receive no more timer interrupts */
 void stopTimer(void);
 
 #endif /* BSP_FUNCTIONS_H_ */
