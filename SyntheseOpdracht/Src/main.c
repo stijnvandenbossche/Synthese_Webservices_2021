@@ -24,9 +24,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "fileSystemAPI.h"
 #include <errno.h>
 #include <LCD_functions.h>
 #include <sys/unistd.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -36,9 +38,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-// set to 1 to test lcd code
-// set to 0 to disable testcode
-#define TESTCODE_LCD 1
+// set to 1 to test code
+// set to 0 to disable test code
+#define TESTCODE 1
+
 
 // time in ms it take for the screen to go dark after no more touches were detected
 #define SCREENSAVER_DELAY 10000
@@ -60,10 +63,9 @@ UART_HandleTypeDef huart1;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
-#if TESTCODE_LCD == 1
+#if TESTCODE == 1
 	char blablaMessage[TEXT_BUFFER_LENGTH] = "text will be displayed right here";
 #endif
-
 // store time when screen should go black
 uint32_t ScreensaverStart = 0;
 /* USER CODE END PV */
@@ -77,28 +79,26 @@ static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
 /* USER CODE BEGIN PFP */
 
-// printf
-int _write( int File, char *Ptr, int Len );
+
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-// printf
-int _write( int File, char *Ptr, int Len )
-{
-    HAL_StatusTypeDef Status;
-    switch ( File ) {
+int _write(int file, char *ptr, int len) {
+    HAL_StatusTypeDef xStatus;
+    switch (file) {
     case STDOUT_FILENO: /*stdout*/
-		Status = HAL_UART_Transmit( &huart1, (uint8_t*)Ptr, Len, HAL_MAX_DELAY );
-		if ( Status != HAL_OK ) {
+		xStatus = HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+		if (xStatus != HAL_OK) {
 			errno = EIO;
 			return -1;
 		}
         break;
     case STDERR_FILENO: /* stderr */
-		Status = HAL_UART_Transmit( &huart1, (uint8_t*)Ptr, Len, HAL_MAX_DELAY );
-		if ( Status != HAL_OK ) {
+		xStatus = HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+		if (xStatus != HAL_OK) {
 			errno = EIO;
 			return -1;
 		}
@@ -107,8 +107,10 @@ int _write( int File, char *Ptr, int Len )
         errno = EBADF;
         return -1;
     }
-    return Len;
+    return len;
 }
+
+
 /* USER CODE END 0 */
 
 /**
@@ -144,23 +146,49 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
+
   /* USER CODE BEGIN 2 */
-	#if TESTCODE_LCD == 1
-	  // LCD Initialization
-	  initLCD();
-	  // EXAMPLE: print small text message on the lcd
-	  if(textToLCD(blablaMessage, strlen(blablaMessage),LCD_COLOR_WHITE) == 0)
-	  {
-		  printf("text is not displayed correct\r\n");
-	  }
-	  else
-	  {
-		  printf("text is displayed correct\r\n");
-	  }
-	#endif
-	// start timer for screensaver
-	ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
-  /* USER CODE END 2 */
+// EXAMPLE CODE
+#if TESTCODE == 1
+  initLCD();
+  if(initFileSystemAPI() == 1)
+  {
+	// Get list of all the valid images from the fs.
+    char* imageList[getImageAmount()];
+    char name[getLargestNameLength()];
+	getImageList(imageList, png, a_z);
+	printf("Images present in the fs: %u\n\r", getImageAmount());
+	for(uint8_t i = 0; i < getImageAmount(); i++)
+	{
+	  // Extract the name out of the selected image path.
+	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
+	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
+	}
+	printf("\n\r");
+	if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
+	{
+		printf("text is displayed correct\r\n");
+	}
+	else
+	{
+		printf("text is not displayed correct\r\n");
+	}
+
+
+	pictureToLCD(getRawImageData("/images/trex.raw", strlen("/images/trex.raw")));
+	// Other example of getRawImageData:
+	// Display image 2 from the list on the lcd.
+	// Normally this should be something like pictureToLCD(getRawImageData(imageList[2], strlen(imageList[2])));
+  }
+  else
+  {
+	printf("initFileSystemAPI has failed\n\r");
+  }
+  printf("\n\r");
+#endif  
+  // start timer for screensaver
+  ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+/* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
