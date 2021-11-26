@@ -19,6 +19,8 @@ uint16_t timerTime_ms;
 
 extern TIM_HandleTypeDef htim2;
 
+uint8_t charsOnLine;
+
 /*!
  * \brief LCD Initialization for normal operation.
  *
@@ -54,7 +56,9 @@ void initLCD(void)
 	  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
 	  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
 	  // select proper font
-	  BSP_LCD_SetFont(&Font24);
+	  BSP_LCD_SetFont(&Font12);
+	  // calculate the amount of chars that fit on one line
+	  charsOnLine = ((LCD_WIDTH-10)/2)/Font12.Width;
 }
 
 /*!
@@ -98,7 +102,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 	// make sure we are on the foreground layer
 	// small string to save the line that is going to be printed.
 	// one char longer than max length for '\0'
-	char BufString[CHARS_ON_LINE+1];
+	char BufString[charsOnLine+1];
 	// y position of text
 	uint16_t LineCnt = 0;
 	// itterators to loop in text arrays
@@ -119,7 +123,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 		Count ++;
 		CountTotal ++;
 		// if 25 chars were found -> print them
-		if( Count == CHARS_ON_LINE )
+		if( Count == charsOnLine )
 		{
 			// if there was a space in the line -> go back until we find it
 			if(Spacefound == 1)
@@ -148,7 +152,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 				BufString[ Count -1 ] = '\0';
 			}
 			// print on the lcd
-			BSP_LCD_DisplayStringAt( 0, LineCnt, ( uint8_t * ) BufString, CENTER_MODE );
+			BSP_LCD_DisplayStringAt( 5, LineCnt, ( uint8_t * ) BufString, LEFT_MODE );
 			// go down one line
 			LineCnt += 24;
 			// reset char counter
@@ -164,7 +168,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 		// just add '\0' to the end
 		BufString[ Count ] = '\0';
 		// print the last section
-		BSP_LCD_DisplayStringAt( 0, LineCnt, ( uint8_t * ) BufString, CENTER_MODE );
+		BSP_LCD_DisplayStringAt( 5, LineCnt, ( uint8_t * ) BufString, LEFT_MODE );
 
 	}
 	return len;
@@ -187,7 +191,7 @@ void pictureToLCD(void* picture)
 	//remove previous picture
 	clearPicture();
 	// drawpicture based on given pointer
-	WDA_LCD_DrawBitmap((uint16_t*)picture, ( ( LCD_WIDTH - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ), PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
+	WDA_LCD_DrawBitmap((uint16_t*)picture, ( ( (LCD_WIDTH/2) - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ) / 2, PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
 }
 
 /*!
@@ -205,7 +209,7 @@ void clearText(void)
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
 	// fill upper screen with plane
-	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH, LCD_HEIGHT-PICTURE_Y_PIXEL );
+	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH/2, LCD_HEIGHT );
 }
 
 /*!
@@ -223,7 +227,7 @@ void clearPicture(void)
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
 	// fill lower screen with plane
-	BSP_LCD_FillRect( 0, LCD_HEIGHT-PICTURE_Y_PIXEL , LCD_WIDTH, PICTURE_Y_PIXEL );
+	BSP_LCD_FillRect( LCD_WIDTH/2, 0 , LCD_WIDTH/2, PICTURE_Y_PIXEL );
 }
 
 /*!

@@ -7,6 +7,7 @@
 #ifndef BSP_FUNCTIONS_H_
 #define BSP_FUNCTIONS_H_
 #include <string.h>
+#include <stdio.h>
 //added "${workspace_loc:/${ProjName}/Drivers/BSP/inc}" to project properties
 #include "stm32746g_discovery_lcd.h"
 
@@ -20,8 +21,6 @@
 
 // define the length of the buffer of the string thats going to be displayed
 #define TEXT_BUFFER_LENGTH 300
-// define the maximum amount of characters on one line on the LCD
-#define CHARS_ON_LINE 25
 
 /* LCD Initialization for normal operation */
 void initLCD(void);
