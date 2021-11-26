@@ -27,6 +27,7 @@
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_alien_png = 0;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_alien_png[] FSDATA_ALIGN_POST = {
 /* /images/alien.png (18 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x61,0x6c,0x69,0x65,0x6e,0x2e,0x70,0x6e,
@@ -742,6 +743,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_alien_png[] FSDATA_ALIG
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_alien_raw = 1;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_alien_raw[] FSDATA_ALIGN_POST = {
 /* /images/alien.raw (18 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x61,0x6c,0x69,0x65,0x6e,0x2e,0x72,0x61,
@@ -2003,6 +2005,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_alien_raw[] FSDATA_ALIG
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_chicken_png = 2;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_chicken_png[] FSDATA_ALIGN_POST = {
 /* /images/chicken.png (20 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x63,0x68,0x69,0x63,0x6b,0x65,0x6e,0x2e,
@@ -2738,6 +2741,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_chicken_png[] FSDATA_AL
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_chicken_raw = 3;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_chicken_raw[] FSDATA_ALIGN_POST = {
 /* /images/chicken.raw (20 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x63,0x68,0x69,0x63,0x6b,0x65,0x6e,0x2e,
@@ -3999,6 +4003,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_chicken_raw[] FSDATA_AL
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_derp_png = 4;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_derp_png[] FSDATA_ALIGN_POST = {
 /* /images/derp.png (17 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x64,0x65,0x72,0x70,0x2e,0x70,0x6e,0x67,
@@ -4486,6 +4491,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_derp_png[] FSDATA_ALIGN
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_derp_raw = 5;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_derp_raw[] FSDATA_ALIGN_POST = {
 /* /images/derp.raw (17 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x64,0x65,0x72,0x70,0x2e,0x72,0x61,0x77,
@@ -5747,6 +5753,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_derp_raw[] FSDATA_ALIGN
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_lion_png = 6;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_lion_png[] FSDATA_ALIGN_POST = {
 /* /images/lion.png (17 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x6c,0x69,0x6f,0x6e,0x2e,0x70,0x6e,0x67,
@@ -6655,6 +6662,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_lion_png[] FSDATA_ALIGN
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_lion_raw = 7;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_lion_raw[] FSDATA_ALIGN_POST = {
 /* /images/lion.raw (17 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x6c,0x69,0x6f,0x6e,0x2e,0x72,0x61,0x77,
@@ -7916,6 +7924,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_lion_raw[] FSDATA_ALIGN
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_poop_png = 8;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_poop_png[] FSDATA_ALIGN_POST = {
 /* /images/poop.png (17 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x70,0x6f,0x6f,0x70,0x2e,0x70,0x6e,0x67,
@@ -8859,6 +8868,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_poop_png[] FSDATA_ALIGN
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_poop_raw = 9;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_poop_raw[] FSDATA_ALIGN_POST = {
 /* /images/poop.raw (17 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x70,0x6f,0x6f,0x70,0x2e,0x72,0x61,0x77,
@@ -10120,6 +10130,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_poop_raw[] FSDATA_ALIGN
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_skull_png = 10;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_skull_png[] FSDATA_ALIGN_POST = {
 /* /images/skull.png (18 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x73,0x6b,0x75,0x6c,0x6c,0x2e,0x70,0x6e,
@@ -10240,6 +10251,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_skull_png[] FSDATA_ALIG
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_skull_raw = 11;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_skull_raw[] FSDATA_ALIGN_POST = {
 /* /images/skull.raw (18 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x73,0x6b,0x75,0x6c,0x6c,0x2e,0x72,0x61,
@@ -11501,6 +11513,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_skull_raw[] FSDATA_ALIG
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_tl_png = 12;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_tl_png[] FSDATA_ALIGN_POST = {
 /* /images/tl.png (15 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x74,0x6c,0x2e,0x70,0x6e,0x67,0x00,0x00,
@@ -11855,6 +11868,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_tl_png[] FSDATA_ALIGN_P
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_tl_raw = 13;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_tl_raw[] FSDATA_ALIGN_POST = {
 /* /images/tl.raw (15 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x74,0x6c,0x2e,0x72,0x61,0x77,0x00,0x00,
@@ -13115,6 +13129,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_tl_raw[] FSDATA_ALIGN_P
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_trex_png = 14;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_trex_png[] FSDATA_ALIGN_POST = {
 /* /images/trex.png (17 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x74,0x72,0x65,0x78,0x2e,0x70,0x6e,0x67,
@@ -13471,6 +13486,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_trex_png[] FSDATA_ALIGN
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_trex_raw = 15;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_trex_raw[] FSDATA_ALIGN_POST = {
 /* /images/trex.raw (17 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x74,0x72,0x65,0x78,0x2e,0x72,0x61,0x77,
@@ -14732,6 +14748,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_trex_raw[] FSDATA_ALIGN
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_vogel_png = 16;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_vogel_png[] FSDATA_ALIGN_POST = {
 /* /images/vogel.png (18 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x76,0x6f,0x67,0x65,0x6c,0x2e,0x70,0x6e,
@@ -15045,6 +15062,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_vogel_png[] FSDATA_ALIG
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__images_vogel_raw = 17;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__images_vogel_raw[] FSDATA_ALIGN_POST = {
 /* /images/vogel.raw (18 chars) */
 0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x76,0x6f,0x67,0x65,0x6c,0x2e,0x72,0x61,
@@ -16306,6 +16324,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_vogel_raw[] FSDATA_ALIG
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__index_html = 18;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__index_html[] FSDATA_ALIGN_POST = {
 /* /index.html (12 chars) */
 0x2f,0x69,0x6e,0x64,0x65,0x78,0x2e,0x68,0x74,0x6d,0x6c,0x00,
@@ -16346,6 +16365,7 @@ static const unsigned char FSDATA_ALIGN_PRE data__index_html[] FSDATA_ALIGN_POST
 #if FSDATA_FILE_ALIGNMENT==1
 static const unsigned int dummy_align__jquery_3_6_0_js = 19;
 #endif
+__attribute__((section(".ExtQSPIFlashSection")))
 static const unsigned char FSDATA_ALIGN_PRE data__jquery_3_6_0_js[] FSDATA_ALIGN_POST = {
 /* /jquery-3.6.0.js (17 chars) */
 0x2f,0x6a,0x71,0x75,0x65,0x72,0x79,0x2d,0x33,0x2e,0x36,0x2e,0x30,0x2e,0x6a,0x73,
@@ -21881,5 +21901,4 @@ FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 const struct fsdata_file* const pFirstFile = file__jquery_3_6_0_js;
 #define FS_ROOT file__jquery_3_6_0_js
 #define FS_NUMFILES 20
-
 

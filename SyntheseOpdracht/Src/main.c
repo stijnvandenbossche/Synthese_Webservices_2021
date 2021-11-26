@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <LCD_functions.h>
 #include <sys/unistd.h>
+#include "stm32746g_discovery_qspi.h"
 
 /* USER CODE END Includes */
 
@@ -58,6 +59,8 @@ DMA2D_HandleTypeDef hdma2d;
 
 LTDC_HandleTypeDef hltdc;
 
+QSPI_HandleTypeDef hqspi;
+
 UART_HandleTypeDef huart1;
 
 SDRAM_HandleTypeDef hsdram1;
@@ -77,6 +80,7 @@ static void MX_LTDC_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
+static void MX_QUADSPI_Init(void);
 /* USER CODE BEGIN PFP */
 
 
@@ -146,8 +150,13 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
-
+  MX_QUADSPI_Init();
   /* USER CODE BEGIN 2 */
+  //QSPI INIT
+  BSP_QSPI_Init();
+  BSP_QSPI_MemoryMappedMode();
+  WRITE_REG(QUADSPI->LPTR, 0xFFF);
+
 // EXAMPLE CODE
 #if TESTCODE == 1
   initLCD();
@@ -188,7 +197,7 @@ int main(void)
 #endif  
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
-/* USER CODE END 2 */
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -402,6 +411,41 @@ static void MX_LTDC_Init(void)
   /* USER CODE BEGIN LTDC_Init 2 */
 
   /* USER CODE END LTDC_Init 2 */
+
+}
+
+/**
+  * @brief QUADSPI Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_QUADSPI_Init(void)
+{
+
+  /* USER CODE BEGIN QUADSPI_Init 0 */
+
+  /* USER CODE END QUADSPI_Init 0 */
+
+  /* USER CODE BEGIN QUADSPI_Init 1 */
+
+  /* USER CODE END QUADSPI_Init 1 */
+  /* QUADSPI parameter configuration*/
+  hqspi.Instance = QUADSPI;
+  hqspi.Init.ClockPrescaler = 1;
+  hqspi.Init.FifoThreshold = 4;
+  hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
+  hqspi.Init.FlashSize = 16;
+  hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_6_CYCLE;
+  hqspi.Init.ClockMode = QSPI_CLOCK_MODE_0;
+  hqspi.Init.FlashID = QSPI_FLASH_ID_1;
+  hqspi.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
+  if (HAL_QSPI_Init(&hqspi) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN QUADSPI_Init 2 */
+
+  /* USER CODE END QUADSPI_Init 2 */
 
 }
 
