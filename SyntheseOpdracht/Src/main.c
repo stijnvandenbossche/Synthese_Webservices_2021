@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "lwip.h"
+#include "mqtt.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -27,6 +28,7 @@
 #include "fileSystemAPI.h"
 #include <errno.h>
 #include <LCD_functions.h>
+#include "MQTT_functions.h"
 #include <sys/unistd.h>
 
 /* USER CODE END Includes */
@@ -188,6 +190,14 @@ int main(void)
 #endif  
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+
+  mqtt_client_t *client = mqtt_client_new();	/* Dynamic storage allocation */
+  if(client != NULL) {
+    example_do_connect(client);
+  }
+
+  example_publish(client, NULL);
+  //HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_Port, LCD_BL_CTRL_Pin,1);
 /* USER CODE END 2 */
 
   /* Infinite loop */
