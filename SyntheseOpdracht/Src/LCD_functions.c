@@ -52,13 +52,18 @@ void initLCD(void)
 	  // layer is made transparent so background is visible
 	  BSP_LCD_Clear(LCD_COLOR_TRANSPARENT);
 
-	  // set text and text background color
-	  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+
 	  // select proper font
 	  BSP_LCD_SetFont(&Font12);
 	  // calculate the amount of chars that fit on one line
-	  charsOnLine = ((LCD_WIDTH-10)/2)/Font12.Width;
+	  charsOnLine = ((LCD_WIDTH-11)/2)/Font12.Width;
+
+	  BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	  BSP_LCD_DrawLine(LCD_WIDTH/2, 0, LCD_WIDTH/2, LCD_HEIGHT);
+
+	  // set text and text background color
+	  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+	  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
 }
 
 /*!
@@ -104,7 +109,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 	// one char longer than max length for '\0'
 	char BufString[charsOnLine+1];
 	// y position of text
-	uint16_t LineCnt = 0;
+	uint16_t LineCnt = 10;
 	// itterators to loop in text arrays
 	uint16_t Count = 0;
 	uint16_t CountTotal = 0;
@@ -154,7 +159,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 			// print on the lcd
 			BSP_LCD_DisplayStringAt( 5, LineCnt, ( uint8_t * ) BufString, LEFT_MODE );
 			// go down one line
-			LineCnt += 24;
+			LineCnt += 12;
 			// reset char counter
 			Count = 0;
 			// reset to indicate no space was yet found
@@ -191,7 +196,7 @@ void pictureToLCD(void* picture)
 	//remove previous picture
 	clearPicture();
 	// drawpicture based on given pointer
-	WDA_LCD_DrawBitmap((uint16_t*)picture, ( ( (LCD_WIDTH/2) - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ) / 2, PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
+	WDA_LCD_DrawBitmap((uint16_t*)picture, (LCD_WIDTH/2) +  ( ( (LCD_WIDTH/2) - PICTURE_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - PICTURE_Y_PIXEL ) / 2, PICTURE_X_PIXEL, PICTURE_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
 }
 
 /*!
@@ -209,7 +214,7 @@ void clearText(void)
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
 	// fill upper screen with plane
-	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH/2, LCD_HEIGHT );
+	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH/2-1, LCD_HEIGHT );
 }
 
 /*!
@@ -227,7 +232,7 @@ void clearPicture(void)
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
 	// fill lower screen with plane
-	BSP_LCD_FillRect( LCD_WIDTH/2, 0 , LCD_WIDTH/2, PICTURE_Y_PIXEL );
+	BSP_LCD_FillRect( (LCD_WIDTH/2)+1, 0 , (LCD_WIDTH/2)-1, PICTURE_Y_PIXEL );
 }
 
 /*!

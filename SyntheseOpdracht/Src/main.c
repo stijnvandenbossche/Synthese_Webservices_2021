@@ -25,8 +25,9 @@
 /* USER CODE BEGIN Includes */
 #include <errno.h>
 #include <sys/unistd.h>
-#include "LCD_functions.h"
 #include <stdio.h>
+#include "LCD_functions.h"
+#include "testpoop.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -156,6 +157,7 @@ int main(void)
 	  initLCD();
 	  startTimer();
 	  setTimer_ms(400);
+	  pictureToLCD(TEST_POOP_DATA);
 	  // EXAMPLE: print small text message on the lcd
 	  if(textToLCD(blablaMessage, strlen(blablaMessage),LCD_COLOR_WHITE) == 0)
 	  {
