@@ -11,6 +11,7 @@
 //added "${workspace_loc:/${ProjName}/Drivers/BSP/inc}" to project properties
 #include "stm32746g_discovery_lcd.h"
 
+
 // define lcd dimensions
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 272
@@ -24,7 +25,7 @@
 
 // test the struct functionallity
 struct imageMeta{
-    char* data;
+    void	* data;
     uint16_t width;
     uint16_t height;
 };

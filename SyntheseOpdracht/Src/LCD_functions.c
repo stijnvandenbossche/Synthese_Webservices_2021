@@ -5,7 +5,7 @@
  *  \author Jonas Aertgeerts
  */
 #include <LCD_functions.h>
-
+#include "errorPicture.h"
 
 /*
  *  declaration of used variables
@@ -13,8 +13,6 @@
 
 // error message that will be displayed on the LCD when there is something wrong with the text
 static char errorMessageText[TEXT_BUFFER_LENGTH] = "something went wrong while printing the string (see Serial terminal for more info)";
-// error message that will be displayed on the LCD when there is something wrong with the picture
-static char errorMessagePicture[TEXT_BUFFER_LENGTH] = "something went wrong while printing the picture, it is to big";
 
 // save time for timer interrupt
 uint16_t timerTime_ms;
@@ -207,9 +205,11 @@ void pictureToLCD(struct imageMeta picture)
 	currentPicture = picture;
 	if(currentPicture.width > (LCD_WIDTH/2) || currentPicture.height > LCD_HEIGHT)
 	{
-		textToLCD(errorMessagePicture, strlen(errorMessagePicture),LCD_COLOR_RED);
+		//remove previous picture
+		clearPicture();
+		// print the error picture
+		WDA_LCD_DrawBitmap((uint16_t*)ERROR_PICTURE_DATA, (LCD_WIDTH/2) +  ( ( (LCD_WIDTH/2) - ERROR_PICTURE_DATA_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - ERROR_PICTURE_DATA_Y_PIXEL ) / 2, ERROR_PICTURE_DATA_X_PIXEL, ERROR_PICTURE_DATA_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
 		printf("something went wrong while printing the picture, it is to big\r\n");
-
 	}
 	else
 	{
