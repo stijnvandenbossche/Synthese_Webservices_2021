@@ -22,3 +22,17 @@ h1{
     text-align: center;
     margin: 10px;
 }
+
+.photo {
+    text-align: center;
+    margin: 10px;
+}
+
+.count {
+    text-align: center;
+    margin: 10px;
+}
+
+.pbut {
+    background-color: rgba(0, 0, 0, 0.0);
+}

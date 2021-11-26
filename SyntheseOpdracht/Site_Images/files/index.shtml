@@ -36,13 +36,13 @@
     xmlHttp.send(null);
     }
 
-    function sendphoto(){
+    function sendphoto(path){
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
             callback(xmlHttp.responseText);
     }
-    xmlHttp.open("GET", "/sendedphoto.cgi?msg=" + this.id, true); // true for asynchronous 
+    xmlHttp.open("GET", "/sendedphoto.cgi?photo=" + path, true); // true for asynchronous 
     xmlHttp.send(null);
     }
 
