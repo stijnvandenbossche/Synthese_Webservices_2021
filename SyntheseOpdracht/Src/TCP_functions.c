@@ -10,7 +10,7 @@
 #include <LCD_functions.h>
 #endif
 
-char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\nSend 'l' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nOr send 't' to display text.";
+char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\nSend 'l' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nOr send 't' followed by a space, then your text to display that text.\r\n";
 
 int init_TCP(void){
 	lwip_init();
@@ -51,20 +51,23 @@ err_t succesful_send(void *arg, struct tcp_pcb *tpcb, u16_t len){
 err_t handle_incoming_message(void *arg, struct tcp_pcb *tpcb,struct pbuf *pbuf, err_t err){
 	//write data to pbuf and depending from what is received to different action
 	printf("incoming message\r\n");
-	char data[200];
+	char data[TEXT_BUFFER_LENGTH];
+	int pbuf_len = pbuf->tot_len;
 	if(pbuf!=NULL){
 		/*if(pbuf->tot_len>pbuf->len){
 			//message longer than expected, abort
 			return ERR_OK;
 		}else{*/
-			data[0] = ((char*)(pbuf->payload))[0];
+			for(int i=0;i<(pbuf->len);i++){
+				data[i] = ((char*)(pbuf->payload))[i];
+			}
 			data[pbuf->len]='\0';
-			if(handle_command(data)==1){
+			if(handle_command(data,pbuf_len)==1){
 				//unknown command -> give error
 			}
 			tcp_recved(tpcb,pbuf->len);
 			pbuf_free(pbuf);
-			//}
+		//}
 	}
 	else{
 		//pbuf empty -> means connection was closed, to do: close connection
@@ -72,31 +75,34 @@ err_t handle_incoming_message(void *arg, struct tcp_pcb *tpcb,struct pbuf *pbuf,
 	return ERR_OK;
 }
 
-int handle_command(char* command){
+int handle_command(char* command,int command_length){
 	printf("Handle command: %c\r\n",command[0]);
 	int image_number;
-	if(strlen(command)==1 || strlen(command)==2 || 1){
-		if(command[0]=='l' ||command[0] =='L'){
-			char text_l[30] = "Received command 'l'";
-			textToLCD(text_l,strlen(text_l),LCD_COLOR_BLUE);
+	int err_code = 0;
+	if(command[0]=='l' ||command[0] =='L'){
 
-			//list of all images -> use command to display this
-			return 0;
-		}else if(command[0]=='t' || command[0] == 'T'){
-			char text_t[30] = "Received command 't'";
-			textToLCD(text_t,strlen(text_t),LCD_COLOR_RED);
-			//display text to screen -> use command for this
-			return 0;
-		}else if(isdigit(command[0])){
-			//image_number = atoi(command);
-			textToLCD(command,1,LCD_COLOR_GREEN);
-			//display image with number image_number -> use command for this
-			return 0;
+		char text_l[30] = "Received command 'l'";
+		textToLCD(text_l,strlen(text_l),LCD_COLOR_BLUE);
+		//list of all images -> use command to display this
+	}else if(command[0]=='t' || command[0] == 'T'){
+		char text_t[TEXT_BUFFER_LENGTH];
+		strncpy(text_t,&command[2],command_length);
+		textToLCD(text_t,command_length-2,LCD_COLOR_RED);
+	}else if(isdigit(command[0])){
+		if(command_length>=2 && isdigit(command[1])){ //two-digit number
+			image_number = atoi(command[0])*10 + atoi(command[1]);
 		}else{
-			return 1; //unknown command
+			//one - digit number
+			image_number = atoi(command[0]);
 		}
+		char displaystring[2];
+		snprintf(displaystring,2,"%d",image_number);
+		textToLCD(displaystring,2,LCD_COLOR_GREEN);
+
+		//display image with number image_number -> use command for this
 	}else{
-		return 1; //unknown command
+		err_code=1; //unknown command
 	}
+	return err_code;
 }
 
