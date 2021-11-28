@@ -34,6 +34,6 @@ void check_TCP_timeouts(void);
 err_t handle_incoming_connection(void* , struct tcp_pcb *, err_t);
 err_t handle_incoming_message(void *, struct tcp_pcb *,struct pbuf *, err_t);
 err_t succesful_send(void*, struct tcp_pcb *, u16_t );
-int handle_command(char*,int);
+int handle_command(char*,int,struct tcp_pcb *);
 
 #endif /* INC_TCP_FUNCTIONS_H_ */
