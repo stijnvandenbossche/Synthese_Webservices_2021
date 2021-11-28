@@ -184,8 +184,17 @@ int main(void)
 		printf("text is displayed correct\r\n");
 	}
 
-
-	pictureToLCD(getRawImageData("/images/trex.raw", strlen("/images/trex.raw")));
+	struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
+	if(getRawImageMetaData("/images/trex.raw", strlen("/images/trex.raw"), &buf) != 0)
+	{
+		printf("%s#%d#%dx%d@%d\n\r", buf.name, buf.num, buf.width, buf.height, buf.frameTime);
+		pictureToLCD(buf.data);
+	}
+	else
+	{
+		printf("Error\n\r");
+	}
+	//pictureToLCD(getRawImageData("/images/trex.raw", strlen("/images/trex.raw")));
 	// Other example of getRawImageData:
 	// Display image 2 from the list on the lcd.
 	// Normally this should be something like pictureToLCD(getRawImageData(imageList[2], strlen(imageList[2])));

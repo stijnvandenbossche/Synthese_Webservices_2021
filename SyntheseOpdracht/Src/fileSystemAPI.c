@@ -1,7 +1,7 @@
 /*!
  *  \file fileSystemAPI.c
  *	\details This file contains all the function implementations from the filesystem API. Static functions are used in the API, but are not accessible for the user (and not needed).
- *  \details A file path can exist of the following parts: /Folder/Folder/.../name__arg__arg.ext The arguments are only required with .raw files (width and height).
+ *  \details A file path can exist of the following parts: /Folder/Folder/.../name#NUM#WIDHTxHEIGHT@TIME.ext The arguments are only required with .raw files.
  *  \remark Every file path length variable, parameter and return value is of type uint16_t. This is currently not really needed but it is used so that the max path length can be easily enlarged in the future.
  *  \date 4 nov. 2021
  *  \author Tijn De Wever
@@ -11,7 +11,7 @@ static uint8_t validateImage(char* imagePath, uint16_t pathLength);
 static void convExtToLowerCase(char* pOrgPath, uint16_t orgPathLength, char* pModPath, uint16_t modPathSize);
 static void insertImagePath(char* imageList[], uint8_t imageAmount, char* newImage, sortType sortState);
 static uint16_t getPathLength(char* pPath, uint16_t pathLength, pathStopType stopMode);
-static uint8_t extractArgsOutOfPath(char* pPath, uint16_t pathLength);
+static uint8_t extractArgsOutOfPath(char* pPath, uint16_t pathLength, struct imageMetaData* pMetaData);
 static uint8_t imageAmount = 0;
 static uint8_t largestNameLength = 0;
 extern const struct fsdata_file* const pFirstFile;
@@ -227,24 +227,24 @@ static void insertImagePath(char* imageList[], uint8_t imagesInList, char* newIm
 
 
 /*!
- *  \brief This function calculates a pointer to the start of the raw data of the specified image.
+ *  \brief This function can be used to get the meta data of the specified raw image.
  *
  *  \param imagePath -> specifies from which image the data has to be retrieved.
  *  \param pathLength -> the length of the image path. (Length of the string without \0)
+ *  \param pMetaData -> a pointer to the location where the meta data will be stored.
  *
- *  \return A void pointer that points to the start of the raw data from the specified image. Depending on the image format this pointer will need to be casted. (E.g. ARGB1555 -> cast to (uint16_t*))
- *	\return NULL when an error has occurred or the image hasn't been found.
+ *  \retval 0x01 if the meta data has successfully been retrieved.
+ *  \retval 0x00 if an error occurred.
  *
- *  \remark Regardless of the extension type (or no extension) of imagePath, the returned pointer will point to the start of the data from the .raw file.
+ *  \remark Regardless of the extension type (or no extension) of imagePath, the retrieved meta data will be from the corresponding .raw file.
  */
-void* getRawImageData(char* imagePath, uint16_t pathLength)
+uint8_t getRawImageMetaData(char* imagePath, uint16_t pathLength, struct imageMetaData* pMetaData)
 {
 	// In this function the specified image path without extension or arguments is compared to the names of the files in the file system.
-	// When both match and the file from the file system is a raw image, the correct raw file is found and a pointer to the image data is returned.
-
-	char* dataPointer = NULL;
+	// When both match and the file from the file system is a raw image, the correct raw file is found and the meta data from this image is retrieved.
 	uint16_t lengthUntilArgsOrExt;
 	char pathBuffer[MAX_PATH_LENGTH];
+	uint8_t retVal = 0;
 	// validateImage is called to check if the specified image is valid.
 	if(validateImage(imagePath, pathLength) != 0x00)
 	{
@@ -258,11 +258,16 @@ void* getRawImageData(char* imagePath, uint16_t pathLength)
 			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
 			if(strncmp(pathBuffer, imagePath, lengthUntilArgsOrExt) == 0 && strstr(pathBuffer, ".raw") != NULL)
 			{
-				dataPointer = (char*)f->data;
+				if(extractArgsOutOfPath((char*)f->name, strlen((const char*)f->name), pMetaData) != 0)
+				{
+					pMetaData->name = (char*)f->name;
+					pMetaData->data = (void*)f->data;
+					retVal = 1;
+				}
 			}
 		}
 	}
-	return dataPointer;
+	return retVal;
 }
 
 
@@ -284,6 +289,7 @@ static uint8_t validateImage(char* imagePath, uint16_t pathLength)
 	uint8_t pngFound = 0;
 	uint8_t rawFound = 0;
 	uint8_t argsValid = 0;
+	struct imageMetaData buf;
 
 	for(struct fsdata_file* f = (struct fsdata_file*)pFirstFile; f != NULL; f = (struct fsdata_file*)f->next)
 	{
@@ -293,7 +299,7 @@ static uint8_t validateImage(char* imagePath, uint16_t pathLength)
 		{
 			pngFound = (strstr(pathBuffer, ".png") != NULL)? 1 : pngFound;
 			rawFound = (strstr(pathBuffer, ".raw") != NULL)? 1 : rawFound;
-			argsValid = (rawFound == 1 && extractArgsOutOfPath((char*)f->name, strlen((const char*)f->name)) == 1)? 1 : argsValid;
+			argsValid = (rawFound == 1 && extractArgsOutOfPath((char*)f->name, strlen((const char*)f->name), &buf) == 1)? 1 : argsValid;
 		}
 	}
 	return (argsValid == 1 && pngFound == 1 && rawFound == 1)? 1 : 0;
@@ -305,30 +311,49 @@ static uint8_t validateImage(char* imagePath, uint16_t pathLength)
  *
  *  \param pPath -> a pointer to the file path whose arguments have to be extracted.
  *  \param pathLength -> the length of the file path. (Length of the string without \0)
+ *  \param pMetaData -> a pointer to the location where the meta data will be stored.
  *
  *  \retval 0x01 when arguments where found which were all valid.
  *  \retval 0x00 when invalid or no arguments were found or if an error has occurred.
  *
  */
-static uint8_t extractArgsOutOfPath(char* pPath, uint16_t pathLength)
+static uint8_t extractArgsOutOfPath(char* pPath, uint16_t pathLength, struct imageMetaData* pMetaData)
 {
 	char pathBuffer[MAX_PATH_LENGTH];
 	char* pStartArg;
-	uint16_t argValBuf;
+
+	uint16_t argNumBuf;
+	uint16_t argWidthBuf;
+	uint16_t argHeightBuf;
+	uint16_t argTimeBuf;
+
 	uint16_t lengthBeforeArgs = getPathLength(pPath, pathLength, stop_at_args);
 	uint16_t lengthBeforeExt = getPathLength(pPath, pathLength, stop_at_ext);
 	uint8_t retVal = 0;
 	convExtToLowerCase(pPath, pathLength, pathBuffer, sizeof(pathBuffer));
-	if(strstr(pathBuffer, ".raw") != NULL && (lengthBeforeExt - lengthBeforeArgs) == strlen("__xxx__xxx"))
+	// TODO: check if every argument is present.
+	if(strstr(pathBuffer, ".raw") != NULL && (lengthBeforeExt - lengthBeforeArgs) >= strlen("#-#-x-@-"))
 	{
-		if((pStartArg = strstr(pathBuffer + lengthBeforeArgs, "__")) != NULL && strstr(pathBuffer + lengthBeforeArgs + 5, "__") != NULL)
+		pStartArg = strchr(pathBuffer, '#');
+		pStartArg = strtok(pStartArg, "#x@");
+		argNumBuf = strtol(pStartArg, NULL, 10);
+
+		pStartArg = strtok(NULL, "#x@");
+		argWidthBuf = strtol(pStartArg, NULL, 10);
+
+		pStartArg = strtok(NULL, "#x@");
+		argHeightBuf = strtol(pStartArg, NULL, 10);
+
+		pStartArg = strtok(NULL, "#x@");
+		argTimeBuf = strtol(pStartArg, NULL, 10);
+
+		if(argNumBuf > 0 && argWidthBuf >= MIN_IMAGE_WIDTH && argWidthBuf <= MAX_IMAGE_WIDTH && argHeightBuf >= MIN_IMAGE_HEIGHT && argHeightBuf <= MAX_IMAGE_HEIGHT)
 		{
+			pMetaData->num = argNumBuf;
+			pMetaData->width = argWidthBuf;
+			pMetaData->height = argHeightBuf;
+			pMetaData->frameTime = argTimeBuf;
 			retVal = 1;
-			argValBuf = strtol(pStartArg + 2, NULL, 10);
-			retVal = (argValBuf < MIN_IMAGE_WIDTH || argValBuf > MAX_IMAGE_WIDTH)? 0 : retVal;
-			pStartArg += 5;
-			argValBuf = strtol(pStartArg + 2, NULL, 10);
-			retVal = (argValBuf < MIN_IMAGE_HEIGHT || argValBuf > MAX_IMAGE_HEIGHT)? 0 : retVal;
 		}
 	}
 	return retVal;
@@ -350,26 +375,22 @@ static uint16_t getPathLength(char* pPath, uint16_t pathLength, pathStopType sto
 {
 	uint16_t newLength = pathLength;
 	char* pToSymbol;
-	// This if statement is used to check if pPath ends with a \0.
-	if(*(pPath + pathLength) == '\0')
+	if(stopMode == stop_at_args || stopMode == stop_at_any)
 	{
-		if(stopMode == stop_at_args || stopMode == stop_at_any)
+		// This if statement is used to get a pointer to the first "__" string and to check if there are arguments present in the path (arguments have to start with __).
+		if((pToSymbol = (char*)memchr(pPath, '#', pathLength)) != NULL)
 		{
-			// This if statement is used to get a pointer to the first "__" string and to check if there are arguments present in the path (arguments have to start with __).
-			if((pToSymbol = (char*)strstr(pPath, "__")) != NULL)
-			{
-				// The length of the path - start of arguments is calculated by subtracting the pToSymbol address with the start address of the path.
-				newLength = pToSymbol - pPath;
-			}
+			// The length of the path - start of arguments is calculated by subtracting the pToSymbol address with the start address of the path.
+			newLength = pToSymbol - pPath;
 		}
-		if(stopMode == stop_at_ext || (stopMode == stop_at_any && newLength == pathLength))
+	}
+	if(stopMode == stop_at_ext || (stopMode == stop_at_any && newLength == pathLength))
+	{
+		// This if statement is used to get a pointer to the first '.' character and to check if there is a '.' present in the path.
+		if((pToSymbol = (char*)memchr(pPath, '.', pathLength)) != NULL)
 		{
-			// This if statement is used to get a pointer to the first '.' character and to check if there is a '.' present in the path.
-			if((pToSymbol = (char*)strchr(pPath, '.')) != NULL)
-			{
-				// The length of the path - extension is calculated by subtracting the pToSymbol address with the start address of the path.
-				newLength = pToSymbol - pPath;
-			}
+			// The length of the path - extension is calculated by subtracting the pToSymbol address with the start address of the path.
+			newLength = pToSymbol - pPath;
 		}
 	}
 	return newLength;
