@@ -174,13 +174,14 @@ int main(void)
 	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
 	}
 	printf("\n\r");
-	if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
+
+	if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 0)
 	{
-		printf("text is displayed correct\r\n");
+		printf("text is not displayed correct\r\n");
 	}
 	else
 	{
-		printf("text is not displayed correct\r\n");
+		printf("text is displayed correct\r\n");
 	}
 
 

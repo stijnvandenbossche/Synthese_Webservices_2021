@@ -741,13 +741,13 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_alien_png[] FSDATA_ALIG
 0x60,0x82,};
 
 #if FSDATA_FILE_ALIGNMENT==1
-static const unsigned int dummy_align__images_alien_raw = 1;
+static const unsigned int dummy_align__images_alien__100__100_raw = 1;
 #endif
 __attribute__((section(".ExtQSPIFlashSection")))
-static const unsigned char FSDATA_ALIGN_PRE data__images_alien_raw[] FSDATA_ALIGN_POST = {
-/* /images/alien.raw (18 chars) */
-0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x61,0x6c,0x69,0x65,0x6e,0x2e,0x72,0x61,
-0x77,0x00,0x00,0x00,
+static const unsigned char FSDATA_ALIGN_PRE data__images_alien__100__100_raw[] FSDATA_ALIGN_POST = {
+/* /images/alien__100__100.raw (28 chars) */
+0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x61,0x6c,0x69,0x65,0x6e,0x5f,0x5f,0x31,
+0x30,0x30,0x5f,0x5f,0x31,0x30,0x30,0x2e,0x72,0x61,0x77,0x00,
 
 /* raw file data (20000 bytes) */
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -2739,13 +2739,13 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_chicken_png[] FSDATA_AL
 0x45,0x4e,0x44,0xae,0x42,0x60,0x82,};
 
 #if FSDATA_FILE_ALIGNMENT==1
-static const unsigned int dummy_align__images_chicken_raw = 3;
+static const unsigned int dummy_align__images_chicken__100__100_raw = 3;
 #endif
 __attribute__((section(".ExtQSPIFlashSection")))
-static const unsigned char FSDATA_ALIGN_PRE data__images_chicken_raw[] FSDATA_ALIGN_POST = {
-/* /images/chicken.raw (20 chars) */
-0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x63,0x68,0x69,0x63,0x6b,0x65,0x6e,0x2e,
-0x72,0x61,0x77,0x00,
+static const unsigned char FSDATA_ALIGN_PRE data__images_chicken__100__100_raw[] FSDATA_ALIGN_POST = {
+/* /images/chicken__100__100.raw (30 chars) */
+0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x63,0x68,0x69,0x63,0x6b,0x65,0x6e,0x5f,
+0x5f,0x31,0x30,0x30,0x5f,0x5f,0x31,0x30,0x30,0x2e,0x72,0x61,0x77,0x00,0x00,0x00,
 
 /* raw file data (20000 bytes) */
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -4489,13 +4489,13 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_derp_png[] FSDATA_ALIGN
 0x00,0x00,0x49,0x45,0x4e,0x44,0xae,0x42,0x60,0x82,};
 
 #if FSDATA_FILE_ALIGNMENT==1
-static const unsigned int dummy_align__images_derp_raw = 5;
+static const unsigned int dummy_align__images_derp__100__100_raw = 5;
 #endif
 __attribute__((section(".ExtQSPIFlashSection")))
-static const unsigned char FSDATA_ALIGN_PRE data__images_derp_raw[] FSDATA_ALIGN_POST = {
-/* /images/derp.raw (17 chars) */
-0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x64,0x65,0x72,0x70,0x2e,0x72,0x61,0x77,
-0x00,0x00,0x00,0x00,
+static const unsigned char FSDATA_ALIGN_PRE data__images_derp__100__100_raw[] FSDATA_ALIGN_POST = {
+/* /images/derp__100__100.raw (27 chars) */
+0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x64,0x65,0x72,0x70,0x5f,0x5f,0x31,0x30,
+0x30,0x5f,0x5f,0x31,0x30,0x30,0x2e,0x72,0x61,0x77,0x00,0x00,
 
 /* raw file data (20000 bytes) */
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -6660,13 +6660,13 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_lion_png[] FSDATA_ALIGN
 0xae,0x42,0x60,0x82,};
 
 #if FSDATA_FILE_ALIGNMENT==1
-static const unsigned int dummy_align__images_lion_raw = 7;
+static const unsigned int dummy_align__images_lion__100__100_raw = 7;
 #endif
 __attribute__((section(".ExtQSPIFlashSection")))
-static const unsigned char FSDATA_ALIGN_PRE data__images_lion_raw[] FSDATA_ALIGN_POST = {
-/* /images/lion.raw (17 chars) */
-0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x6c,0x69,0x6f,0x6e,0x2e,0x72,0x61,0x77,
-0x00,0x00,0x00,0x00,
+static const unsigned char FSDATA_ALIGN_PRE data__images_lion__100__100_raw[] FSDATA_ALIGN_POST = {
+/* /images/lion__100__100.raw (27 chars) */
+0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x6c,0x69,0x6f,0x6e,0x5f,0x5f,0x31,0x30,
+0x30,0x5f,0x5f,0x31,0x30,0x30,0x2e,0x72,0x61,0x77,0x00,0x00,
 
 /* raw file data (20000 bytes) */
 0xd3,0xff,0xd3,0xff,0xd3,0xff,0xd3,0xff,0xd3,0xff,0xd3,0xff,0xd3,0xff,0xd3,0xff,
@@ -8866,13 +8866,13 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_poop_png[] FSDATA_ALIGN
 0x42,0x60,0x82,};
 
 #if FSDATA_FILE_ALIGNMENT==1
-static const unsigned int dummy_align__images_poop_raw = 9;
+static const unsigned int dummy_align__images_poop__100__100_raw = 9;
 #endif
 __attribute__((section(".ExtQSPIFlashSection")))
-static const unsigned char FSDATA_ALIGN_PRE data__images_poop_raw[] FSDATA_ALIGN_POST = {
-/* /images/poop.raw (17 chars) */
-0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x70,0x6f,0x6f,0x70,0x2e,0x72,0x61,0x77,
-0x00,0x00,0x00,0x00,
+static const unsigned char FSDATA_ALIGN_PRE data__images_poop__100__100_raw[] FSDATA_ALIGN_POST = {
+/* /images/poop__100__100.raw (27 chars) */
+0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x70,0x6f,0x6f,0x70,0x5f,0x5f,0x31,0x30,
+0x30,0x5f,0x5f,0x31,0x30,0x30,0x2e,0x72,0x61,0x77,0x00,0x00,
 
 /* raw file data (20000 bytes) */
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -10249,13 +10249,13 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_skull_png[] FSDATA_ALIG
 0x1e,0x2e,0xb5,0x4e,0x77,0x13,0xff,0x06,};
 
 #if FSDATA_FILE_ALIGNMENT==1
-static const unsigned int dummy_align__images_skull_raw = 11;
+static const unsigned int dummy_align__images_skull__100__100_raw = 11;
 #endif
 __attribute__((section(".ExtQSPIFlashSection")))
-static const unsigned char FSDATA_ALIGN_PRE data__images_skull_raw[] FSDATA_ALIGN_POST = {
-/* /images/skull.raw (18 chars) */
-0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x73,0x6b,0x75,0x6c,0x6c,0x2e,0x72,0x61,
-0x77,0x00,0x00,0x00,
+static const unsigned char FSDATA_ALIGN_PRE data__images_skull__100__100_raw[] FSDATA_ALIGN_POST = {
+/* /images/skull__100__100.raw (28 chars) */
+0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x73,0x6b,0x75,0x6c,0x6c,0x5f,0x5f,0x31,
+0x30,0x30,0x5f,0x5f,0x31,0x30,0x30,0x2e,0x72,0x61,0x77,0x00,
 
 /* raw file data (20000 bytes) */
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -11866,12 +11866,13 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_tl_png[] FSDATA_ALIGN_P
 0x9b,0xc0,0xe9,0x22,0x44,0x55,0x49,0x13,0x51,0xa6,0x60,0x1e,0xf8,0x3f,};
 
 #if FSDATA_FILE_ALIGNMENT==1
-static const unsigned int dummy_align__images_tl_raw = 13;
+static const unsigned int dummy_align__images_tl__100__100_raw = 13;
 #endif
 __attribute__((section(".ExtQSPIFlashSection")))
-static const unsigned char FSDATA_ALIGN_PRE data__images_tl_raw[] FSDATA_ALIGN_POST = {
-/* /images/tl.raw (15 chars) */
-0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x74,0x6c,0x2e,0x72,0x61,0x77,0x00,0x00,
+static const unsigned char FSDATA_ALIGN_PRE data__images_tl__100__100_raw[] FSDATA_ALIGN_POST = {
+/* /images/tl__100__100.raw (25 chars) */
+0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x74,0x6c,0x5f,0x5f,0x31,0x30,0x30,0x5f,
+0x5f,0x31,0x30,0x30,0x2e,0x72,0x61,0x77,0x00,0x00,0x00,0x00,
 
 /* raw file data (20000 bytes) */
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -13484,13 +13485,13 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_trex_png[] FSDATA_ALIGN
 0x00,0x00,0x49,0x45,0x4e,0x44,0xae,0x42,0x60,0x82,};
 
 #if FSDATA_FILE_ALIGNMENT==1
-static const unsigned int dummy_align__images_trex_raw = 15;
+static const unsigned int dummy_align__images_trex__100__100_raw = 15;
 #endif
 __attribute__((section(".ExtQSPIFlashSection")))
-static const unsigned char FSDATA_ALIGN_PRE data__images_trex_raw[] FSDATA_ALIGN_POST = {
-/* /images/trex.raw (17 chars) */
-0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x74,0x72,0x65,0x78,0x2e,0x72,0x61,0x77,
-0x00,0x00,0x00,0x00,
+static const unsigned char FSDATA_ALIGN_PRE data__images_trex__100__100_raw[] FSDATA_ALIGN_POST = {
+/* /images/trex__100__100.raw (27 chars) */
+0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x74,0x72,0x65,0x78,0x5f,0x5f,0x31,0x30,
+0x30,0x5f,0x5f,0x31,0x30,0x30,0x2e,0x72,0x61,0x77,0x00,0x00,
 
 /* raw file data (20000 bytes) */
 0xde,0xfb,0xde,0xfb,0xde,0xfb,0xde,0xfb,0xde,0xfb,0xde,0xfb,0xde,0xfb,0xde,0xfb,
@@ -15060,13 +15061,13 @@ static const unsigned char FSDATA_ALIGN_PRE data__images_vogel_png[] FSDATA_ALIG
 0xfb,0xff,0x8a,0x1d,0x00,0xa6,0x61,0xa0,0x5e,0xaf,0x6a,0x8f,0xfa,0x3f,};
 
 #if FSDATA_FILE_ALIGNMENT==1
-static const unsigned int dummy_align__images_vogel_raw = 17;
+static const unsigned int dummy_align__images_vogel__100__100_raw = 17;
 #endif
 __attribute__((section(".ExtQSPIFlashSection")))
-static const unsigned char FSDATA_ALIGN_PRE data__images_vogel_raw[] FSDATA_ALIGN_POST = {
-/* /images/vogel.raw (18 chars) */
-0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x76,0x6f,0x67,0x65,0x6c,0x2e,0x72,0x61,
-0x77,0x00,0x00,0x00,
+static const unsigned char FSDATA_ALIGN_PRE data__images_vogel__100__100_raw[] FSDATA_ALIGN_POST = {
+/* /images/vogel__100__100.raw (28 chars) */
+0x2f,0x69,0x6d,0x61,0x67,0x65,0x73,0x2f,0x76,0x6f,0x67,0x65,0x6c,0x5f,0x5f,0x31,
+0x30,0x30,0x5f,0x5f,0x31,0x30,0x30,0x2e,0x72,0x61,0x77,0x00,
 
 /* raw file data (20000 bytes) */
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -21746,144 +21747,144 @@ sizeof(data__images_alien_png) - 20,
 FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 }};
 
-const struct fsdata_file file__images_alien_raw[] = { {
+const struct fsdata_file file__images_alien__100__100_raw[] = { {
 file__images_alien_png,
-data__images_alien_raw,
-data__images_alien_raw + 20,
-sizeof(data__images_alien_raw) - 20,
+data__images_alien__100__100_raw,
+data__images_alien__100__100_raw + 28,
+sizeof(data__images_alien__100__100_raw) - 28,
 0,
 }};
 
 const struct fsdata_file file__images_chicken_png[] = { {
-file__images_alien_raw,
+file__images_alien__100__100_raw,
 data__images_chicken_png,
 data__images_chicken_png + 20,
 sizeof(data__images_chicken_png) - 20,
 FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 }};
 
-const struct fsdata_file file__images_chicken_raw[] = { {
+const struct fsdata_file file__images_chicken__100__100_raw[] = { {
 file__images_chicken_png,
-data__images_chicken_raw,
-data__images_chicken_raw + 20,
-sizeof(data__images_chicken_raw) - 20,
+data__images_chicken__100__100_raw,
+data__images_chicken__100__100_raw + 32,
+sizeof(data__images_chicken__100__100_raw) - 32,
 0,
 }};
 
 const struct fsdata_file file__images_derp_png[] = { {
-file__images_chicken_raw,
+file__images_chicken__100__100_raw,
 data__images_derp_png,
 data__images_derp_png + 20,
 sizeof(data__images_derp_png) - 20,
 FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 }};
 
-const struct fsdata_file file__images_derp_raw[] = { {
+const struct fsdata_file file__images_derp__100__100_raw[] = { {
 file__images_derp_png,
-data__images_derp_raw,
-data__images_derp_raw + 20,
-sizeof(data__images_derp_raw) - 20,
+data__images_derp__100__100_raw,
+data__images_derp__100__100_raw + 28,
+sizeof(data__images_derp__100__100_raw) - 28,
 0,
 }};
 
 const struct fsdata_file file__images_lion_png[] = { {
-file__images_derp_raw,
+file__images_derp__100__100_raw,
 data__images_lion_png,
 data__images_lion_png + 20,
 sizeof(data__images_lion_png) - 20,
 FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 }};
 
-const struct fsdata_file file__images_lion_raw[] = { {
+const struct fsdata_file file__images_lion__100__100_raw[] = { {
 file__images_lion_png,
-data__images_lion_raw,
-data__images_lion_raw + 20,
-sizeof(data__images_lion_raw) - 20,
+data__images_lion__100__100_raw,
+data__images_lion__100__100_raw + 28,
+sizeof(data__images_lion__100__100_raw) - 28,
 0,
 }};
 
 const struct fsdata_file file__images_poop_png[] = { {
-file__images_lion_raw,
+file__images_lion__100__100_raw,
 data__images_poop_png,
 data__images_poop_png + 20,
 sizeof(data__images_poop_png) - 20,
 FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 }};
 
-const struct fsdata_file file__images_poop_raw[] = { {
+const struct fsdata_file file__images_poop__100__100_raw[] = { {
 file__images_poop_png,
-data__images_poop_raw,
-data__images_poop_raw + 20,
-sizeof(data__images_poop_raw) - 20,
+data__images_poop__100__100_raw,
+data__images_poop__100__100_raw + 28,
+sizeof(data__images_poop__100__100_raw) - 28,
 0,
 }};
 
 const struct fsdata_file file__images_skull_png[] = { {
-file__images_poop_raw,
+file__images_poop__100__100_raw,
 data__images_skull_png,
 data__images_skull_png + 20,
 sizeof(data__images_skull_png) - 20,
 FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 }};
 
-const struct fsdata_file file__images_skull_raw[] = { {
+const struct fsdata_file file__images_skull__100__100_raw[] = { {
 file__images_skull_png,
-data__images_skull_raw,
-data__images_skull_raw + 20,
-sizeof(data__images_skull_raw) - 20,
+data__images_skull__100__100_raw,
+data__images_skull__100__100_raw + 28,
+sizeof(data__images_skull__100__100_raw) - 28,
 0,
 }};
 
 const struct fsdata_file file__images_tl_png[] = { {
-file__images_skull_raw,
+file__images_skull__100__100_raw,
 data__images_tl_png,
 data__images_tl_png + 16,
 sizeof(data__images_tl_png) - 16,
 FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 }};
 
-const struct fsdata_file file__images_tl_raw[] = { {
+const struct fsdata_file file__images_tl__100__100_raw[] = { {
 file__images_tl_png,
-data__images_tl_raw,
-data__images_tl_raw + 16,
-sizeof(data__images_tl_raw) - 16,
+data__images_tl__100__100_raw,
+data__images_tl__100__100_raw + 28,
+sizeof(data__images_tl__100__100_raw) - 28,
 0,
 }};
 
 const struct fsdata_file file__images_trex_png[] = { {
-file__images_tl_raw,
+file__images_tl__100__100_raw,
 data__images_trex_png,
 data__images_trex_png + 20,
 sizeof(data__images_trex_png) - 20,
 FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 }};
 
-const struct fsdata_file file__images_trex_raw[] = { {
+const struct fsdata_file file__images_trex__100__100_raw[] = { {
 file__images_trex_png,
-data__images_trex_raw,
-data__images_trex_raw + 20,
-sizeof(data__images_trex_raw) - 20,
+data__images_trex__100__100_raw,
+data__images_trex__100__100_raw + 28,
+sizeof(data__images_trex__100__100_raw) - 28,
 0,
 }};
 
 const struct fsdata_file file__images_vogel_png[] = { {
-file__images_trex_raw,
+file__images_trex__100__100_raw,
 data__images_vogel_png,
 data__images_vogel_png + 20,
 sizeof(data__images_vogel_png) - 20,
 FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT,
 }};
 
-const struct fsdata_file file__images_vogel_raw[] = { {
+const struct fsdata_file file__images_vogel__100__100_raw[] = { {
 file__images_vogel_png,
-data__images_vogel_raw,
-data__images_vogel_raw + 20,
-sizeof(data__images_vogel_raw) - 20,
+data__images_vogel__100__100_raw,
+data__images_vogel__100__100_raw + 28,
+sizeof(data__images_vogel__100__100_raw) - 28,
 0,
 }};
 
 const struct fsdata_file file__index_html[] = { {
-file__images_vogel_raw,
+file__images_vogel__100__100_raw,
 data__index_html,
 data__index_html + 12,
 sizeof(data__index_html) - 12,
