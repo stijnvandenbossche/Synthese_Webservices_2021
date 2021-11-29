@@ -254,6 +254,7 @@ uint8_t pictureToLCD(struct imageMetaData picture)
  */
 static void frameToLCD(void* data, uint16_t width, uint16_t height)
 {
+	while(!(hltdc.Instance->CDSR & 1<<2)); // wait on vsync
 	WDA_LCD_DrawBitmap((uint16_t*)data, (LCD_WIDTH/2) +  ( ( (LCD_WIDTH/2) - width ) / 2 ) , ( LCD_HEIGHT - height ) / 2, width, height, LTDC_PIXEL_FORMAT_ARGB1555);
 }
 /*!
