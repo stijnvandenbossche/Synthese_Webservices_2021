@@ -14,9 +14,6 @@
 // error message that will be displayed on the LCD when there is something wrong with the text
 static char errorMessageText[TEXT_BUFFER_LENGTH] = "something went wrong while printing the string (see Serial terminal for more info)";
 
-// save time for timer interrupt
-uint16_t timerTime_ms;
-
 // timerhandler
 extern TIM_HandleTypeDef htim2;
 
@@ -24,24 +21,37 @@ extern TIM_HandleTypeDef htim2;
 uint8_t charsOnLine;
 
 // struct to save picture data that is currently displayed
-struct imageMeta currentPicture;
+struct imageMetaData currentPicture;
+
+// list of all frames of one gif
+char* frameList[50];
+
+// store the amount of frames of the gif
+uint8_t frameAmount;
+// to itterate over all gif frames
+uint8_t frameCounter;
 
 /* clears previous text of the LCD */
 static void clearText(void);
 /* clears previous picture of the LCD */
 static void clearPicture(void);
+/* print one frame/picture to the LCD */
+static void frameToLCD(void* data, uint16_t width, uint16_t height);
+/* sets the time for the timer interrupt routine */
+static void setTimer_ms(uint16_t time_ms);
+/* start timer to receive timer interrupts */
+static void startTimer(void);
+/* stop timer to receive no more timer interrupts */
+static void stopTimer(void);
 
 /*!
  * \brief LCD Initialization for normal operation.
  *
- * \param
- *  void
+ * \param void
  *
- * \retval
- *  void
+ * \retval void
  *
- * \remark
- *  please make sure there are no words longer then 25 characters in the string.
+ *  \remark please make sure there are no words longer then 25 characters in the string.
  */
 void initLCD(void)
 {
@@ -70,7 +80,7 @@ void initLCD(void)
 
 	  // draw line in the middle of the screen to devide screen in two parts
 	  BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	  BSP_LCD_DrawLine(LCD_WIDTH/2, 0, LCD_WIDTH/2, LCD_HEIGHT);
+	  BSP_LCD_DrawLine(LCD_WIDTH/2-1, 0, LCD_WIDTH/2-1, LCD_HEIGHT);
 
 	  // set text and text background color
 	  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
@@ -80,14 +90,13 @@ void initLCD(void)
 /*!
  * \brief prints text to the LCD.
  *
- * \param
- *  textArray -> array containing the string that has to be printed.
- *  len -> the amount of characters that has to be printed
- *  color -> color the text will be printed in
+ * \param textArray -> array containing the string that has to be printed.
+ * \param len -> the amount of characters that has to be printed
+ * \param color -> color the text will be printed in
  *
- * \retval
- *  len when the function has succeeded.
- *  0 when the function has failed.
+ *
+ * \retval len when the function has succeeded.
+ * \retval 0 when the function has failed.
  *
  * \note please don't use black text color because the text background is black
  * \note red text color can be used for errors
@@ -193,41 +202,66 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 /*!
  * \brief prints picture to the LCD.
  *
- * \param
- *  picture -> struct with picture data
+ * \param picture -> struct with picture data
  *
- * \retval
- *  void
+ * \retval 1 when the function has succeeded.
+ * \retval 0 when the picture is not displayed.
  *
  */
-void pictureToLCD(struct imageMeta picture)
+uint8_t pictureToLCD(struct imageMetaData picture)
 {
 	currentPicture = picture;
 	if(currentPicture.width > (LCD_WIDTH/2) || currentPicture.height > LCD_HEIGHT)
 	{
+		stopTimer();
 		//remove previous picture
 		clearPicture();
 		// print the error picture
-		WDA_LCD_DrawBitmap((uint16_t*)ERROR_PICTURE_DATA, (LCD_WIDTH/2) +  ( ( (LCD_WIDTH/2) - ERROR_PICTURE_DATA_X_PIXEL ) / 2 ) , ( LCD_HEIGHT - ERROR_PICTURE_DATA_Y_PIXEL ) / 2, ERROR_PICTURE_DATA_X_PIXEL, ERROR_PICTURE_DATA_Y_PIXEL, LTDC_PIXEL_FORMAT_ARGB1555);
+		frameToLCD(ERROR_PICTURE_DATA, ERROR_PICTURE_DATA_X_PIXEL, ERROR_PICTURE_DATA_Y_PIXEL);
 		printf("something went wrong while printing the picture, it is to big\r\n");
+		return 0;
 	}
 	else
 	{
-		//remove previous picture
-		clearPicture();
-		// drawpicture based on given pointer
-		WDA_LCD_DrawBitmap((uint16_t*)currentPicture.data, (LCD_WIDTH/2) +  ( ( (LCD_WIDTH/2) - currentPicture.width ) / 2 ) , ( LCD_HEIGHT - currentPicture.height ) / 2, currentPicture.width, currentPicture.height, LTDC_PIXEL_FORMAT_ARGB1555);
+		if(picture.frameTime == 0)
+		{
+			stopTimer();
+			//remove previous picture
+			clearPicture();
+			// drawpicture based on given pointer
+			frameToLCD(currentPicture.data, currentPicture.width, currentPicture.height);
+		}
+		else
+		{
+			//frameAmount = getGifFrames(currentPicture.name, strlen(currentPicture.name), frameList);
+			frameCounter = 0;
+			setTimer_ms(picture.frameTime);
+			startTimer();
+		}
+		return 1;
 	}
 }
 
 /*!
+ * \brief print one frame/picture to the LCD.
+ *
+ * \param data -> pointer to data
+ * \param width -> width of the picture
+ * \param height -> height of the picture
+ *
+ * \retval void
+ *
+ */
+static void frameToLCD(void* data, uint16_t width, uint16_t height)
+{
+	WDA_LCD_DrawBitmap((uint16_t*)data, (LCD_WIDTH/2) +  ( ( (LCD_WIDTH/2) - width ) / 2 ) , ( LCD_HEIGHT - height ) / 2, width, height, LTDC_PIXEL_FORMAT_ARGB1555);
+}
+/*!
  * \brief clears previous text of the LCD.
  *
- * \param
- *  void
+ * \param void
  *
- * \retval
- *  void
+ * \retval void
  *
  */
 void clearText(void)
@@ -241,11 +275,9 @@ void clearText(void)
 /*!
  * \brief clears previous picture of the LCD.
  *
- * \param
- *  void
+ * \param void
  *
- * \retval
- *  void
+ * \retval void
  *
  */
 void clearPicture(void)
@@ -259,12 +291,10 @@ void clearPicture(void)
 /*!
  * \brief reads status of onboard blue button
  *
- * \param
- *  void
+ * \param void
  *
- * \retval
- *  1 when blue button is pushed
- *  0 when blue button is released
+ *  \retval 1 when blue button is pushed
+ *  \retval 0 when blue button is released
  *
  */
 uint8_t readButton(void)
@@ -282,17 +312,14 @@ uint8_t readButton(void)
 /*!
  * \brief sets the time for the timer interrupt routine
  *
- * \param
- *  time_ms time in ms for the interrupt routine
+ * \param time_ms time in ms for the interrupt routine
  *
- * \retval
- *  void
+ * \retval void
  *
  */
-void setTimer_ms(uint16_t time_ms)
+static void setTimer_ms(uint16_t time_ms)
 {
-	timerTime_ms = time_ms;
-	htim2.Instance->ARR = (timerTime_ms * 2) - 1;
+	htim2.Instance->ARR = (time_ms * 2) - 1;
 }
 
 /*!
@@ -301,24 +328,19 @@ void setTimer_ms(uint16_t time_ms)
  * \param
  *  htim timer that generated the interrupt
  *
- * \retval
- *  void
+ * \retval void
  *
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
 	if(htim == &htim2)
 	{
-		static uint8_t ledstate = 0;
-		if(ledstate == 0)
+		//getRawImageMetaData(frameList[frameCounter], strlen(frameList[frameCounter]), &currentPicture);
+		frameToLCD(currentPicture.data, currentPicture.width, currentPicture.height);
+		frameCounter++;
+		if(frameCounter == frameAmount)
 		{
-			ledstate =1;
-			GPIOI->BSRR = GPIO_PIN_1;
-		}
-		else
-		{
-			ledstate = 0;
-			GPIOI->BSRR = (uint32_t)GPIO_PIN_1 << 16;
+			frameCounter = 0;
 		}
 	}
 }
@@ -326,30 +348,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 /*!
  * \brief start timer to receive timer interrupts
  *
- * \param
- *  void
+ * \param void
  *
- * \retval
- *  void
+ * \retval void
  *
  */
-void startTimer(void)
+static void startTimer(void)
 {
-	setTimer_ms(timerTime_ms);
 	HAL_TIM_Base_Start_IT(&htim2);
 }
 
 /*!
  * \brief stop timer to receive no more timer interrupts
  *
- * \param
- *  void
+ * \param void
  *
- * \retval
- *  void
+ * \retval void
  *
  */
-void stopTimer(void)
+static void stopTimer(void)
 {
 	HAL_TIM_Base_Stop_IT(&htim2);
 }

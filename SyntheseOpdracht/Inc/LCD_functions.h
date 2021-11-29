@@ -11,6 +11,18 @@
 //added "${workspace_loc:/${ProjName}/Drivers/BSP/inc}" to project properties
 #include "stm32746g_discovery_lcd.h"
 
+#include "fileSystemAPI.h"
+
+// ONLY FOR TESTING!
+struct imageMetaData{
+	char* name;
+    void* data;
+    uint16_t width;
+    uint16_t height;
+    uint16_t num;
+    uint16_t frameTime;
+};
+
 
 // define lcd dimensions
 #define LCD_WIDTH 480
@@ -23,31 +35,18 @@
 // define the length of the buffer of the string thats going to be displayed
 #define TEXT_BUFFER_LENGTH 300
 
-// test the struct functionallity
-struct imageMeta{
-    void	* data;
-    uint16_t width;
-    uint16_t height;
-};
-
 /* LCD Initialization for normal operation */
 void initLCD(void);
 /* prints text to the LCD */
 int textToLCD(char *textArray, int len, uint32_t color);
 /* prints picture to the LCD */
-void pictureToLCD(struct imageMeta picture);
-
+uint8_t pictureToLCD(struct imageMetaData picture);
 
 /* reads status of onboard blue button */
 uint8_t readButton(void);
 
-/* sets the time for the timer interrupt routine */
-void setTimer_ms(uint16_t time_ms);
 /* timer interrupt callback */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim);
-/* start timer to receive timer interrupts */
-void startTimer(void);
-/* stop timer to receive no more timer interrupts */
-void stopTimer(void);
+
 
 #endif /* BSP_FUNCTIONS_H_ */

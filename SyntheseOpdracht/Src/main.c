@@ -23,11 +23,16 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
 #include "fileSystemAPI.h"
 #include <errno.h>
+#include <LCD_functions.h>
 #include <sys/unistd.h>
-#include <stdio.h>
-#include "LCD_functions.h"
+//#include "stm32746g_discovery_qspi.h"
+
+
+#include "bigpoop.h"
+#include "smallpoop.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,7 +42,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
 // set to 1 to test code
 // set to 0 to disable test code
 #define TESTCODE 1
@@ -58,6 +62,7 @@ DMA2D_HandleTypeDef hdma2d;
 
 LTDC_HandleTypeDef hltdc;
 
+
 TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart1;
@@ -66,9 +71,8 @@ SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
 #if TESTCODE == 1
-	char blablaMessage[TEXT_BUFFER_LENGTH] = "text will be displayed right here";
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "text will be displayed right here. ;-)";
 #endif
-
 // store time when screen should go black
 uint32_t ScreensaverStart = 0;
 /* USER CODE END PV */
@@ -80,11 +84,12 @@ static void MX_LTDC_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
+static void MX_QUADSPI_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
-// printf
-int _write( int File, char *Ptr, int Len );
+
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -152,52 +157,100 @@ int main(void)
   MX_LWIP_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-	// EXAMPLE CODE
-	#if TESTCODE == 1
-	  initLCD();
-	  if(initFileSystemAPI() == 1)
-	  {
-		// Get list of all the valid images from the fs.
-		char* imageList[getImageAmount()];
-		char name[getLargestNameLength()];
-		getImageList(imageList, png, a_z);
-		printf("Images present in the fs: %u\n\r", getImageAmount());
-		for(uint8_t i = 0; i < getImageAmount(); i++)
-		{
-		  // Extract the name out of the selected image path.
-		  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
-		  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
-		}
-		printf("\n\r");
-		if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 0)
-		{
-			printf("text is not displayed correct\r\n");
-		}
-		else
-		{
-			printf("text is displayed correct\r\n");
-		}
 
-		struct imageMeta foto =
-		{
-			.data = getRawImageData("/images/tl.raw", strlen("/images/tl.raw")),
-			.width = 300,
-			.height = 100,
-		};
-		pictureToLCD(foto);
-		// Other example of getRawImageData:
-		// Display image 2 from the list on the lcd.
-		// Normally this should be something like pictureToLCD(getRawImageData(imageList[2], strlen(imageList[2])));
-	  }
-	  else
-	  {
-		printf("initFileSystemAPI has failed\n\r");
-	  }
-	  printf("\n\r");
-	#endif
+// EXAMPLE CODE
+#if TESTCODE == 1
+  initLCD();
+  if(initFileSystemAPI() == 1)
+  {/*
+	// Get list of all the valid images from the fs.
+    char* imageList[getImageAmount()];
+    char* gifList[10];
+    char* frameList[50];
+    char name[getLargestNameLength()];
+	getImageList(imageList, png, a_z);
+	printf("Images present in the fs: %u\n\r", getImageAmount());
+	for(uint8_t i = 0; i < getImageAmount(); i++)
+	{
+	  // Extract the name out of the selected image path.
+	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
+	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
+	}
+	printf("\n\r");
+	struct imageMetaData buf1 = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
+	getRawImageMetaData(imageList[2], strlen(imageList[2]), &buf1);
+
+
+
+	//test de foto
+	//zet op 1==1 om te proberen
+	//zet op 1==0 om te skippen
+	if(1==0)
+	{
+	pictureToLCD(buf1);
+	}
+*/
+
+
+/*
+	//test de 1e homergif
+	if(1==0)
+	{
+	getImageList(gifList, gif, a_z);
+	//buf1 = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
+	getRawImageMetaData(gifList[0], strlen(gifList[0]), &buf1);
+	uint8_t amount = getGifFrames(buf1.name, strlen(buf1.name), frameList);
+	struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
+	getRawImageMetaData(frameList[0], strlen(frameList[0]), &buf);
+	pictureToLCD(buf);
+	}
+*/
+
+	  if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 0)
+	  	{
+	  		printf("text is not displayed correct\r\n");
+	  	}
+	  	else
+	  	{
+	  		printf("text is displayed correct\r\n");
+	  	}
+
+
+	//test grote poop
+	if(1==1)
+	{
+		struct imageMetaData bigbuf = {.data = BIGPOOP_DATA, .name = NULL, .num = 0, .frameTime = 0, .height = BIGPOOP_DATA_Y_PIXEL, .width = BIGPOOP_DATA_X_PIXEL};
+		pictureToLCD(bigbuf);
+	}
+
+	//test kleine poop
+	if(1==0)
+	{
+		struct imageMetaData smallbuf = {.data = SMALLPOOP_DATA, .name = NULL, .num = 0, .frameTime = 0, .height = SMALLPOOP_DATA_Y_PIXEL, .width = SMALLPOOP_DATA_X_PIXEL};
+		pictureToLCD(smallbuf);
+	}
+
+	//nieuwe text
+	HAL_Delay(2000);
+	if(textToLCD("test", strlen("test"), LCD_COLOR_ORANGE) == 0)
+	{
+		printf("text is not displayed correct\r\n");
+	}
+	else
+	{
+		printf("text is displayed correct\r\n");
+	}
+
+  }
+  else
+  {
+	printf("initFileSystemAPI has failed\n\r");
+  }
+  printf("\n\r");
+#endif  
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
-/* USER CODE END 2 */
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
