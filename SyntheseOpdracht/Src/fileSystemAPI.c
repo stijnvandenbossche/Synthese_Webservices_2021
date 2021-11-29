@@ -13,6 +13,7 @@ static void insertImagePath(char* imageList[], uint8_t imageAmount, char* newIma
 static uint16_t getPathLength(char* pPath, uint16_t pathLength, pathStopType stopMode);
 static uint8_t extractArgsOutOfPath(char* pPath, uint16_t pathLength, struct imageMetaData* pMetaData);
 static uint8_t imageAmount = 0;
+static uint8_t gifAmount = 0;
 static uint8_t largestNameLength = 0;
 extern const struct fsdata_file* const pFirstFile;
 
@@ -53,6 +54,11 @@ uint8_t initFileSystemAPI(void)
 			{
 				imageAmount++;
 			}
+			// This if statement is used to check whether the file f is a gif or not.
+			if(strstr(pathBuffer, ".gif") != NULL)
+			{
+				gifAmount++;
+			}
 		}
 	}
 	return returnVal;
@@ -71,6 +77,17 @@ uint8_t getImageAmount(void)
 	return imageAmount;
 }
 
+/*!
+ *  \brief This function returns the amount of valid gifs that are present in the file system.
+ *
+ *  \param void
+ *
+ *  \return Amount of gifs images that are present in the file system.
+ */
+uint8_t getGifAmount(void)
+{
+	return gifAmount;
+}
 
 /*!
  *  \brief This function returns the length of the largest filename from the file system.
@@ -139,17 +156,18 @@ void extractNameOutOfPath(char* pPath, uint16_t pathLength, char* pName, extensi
 /*!
  *  \brief This function generates a list of char pointers to the file paths from all the valid images that are found in the file system.
  *
- *  \param imageList -> an array where the list will be stored (array of char pointers. Each char pointer points to the start of a file path string).
- *  \param imageExtension -> specifies the desired file type (png or raw).
+ *  \param imageList -> an array where the list will be stored (array of char pointers). (Each char pointer points to the start of a file path string).
+ *  \param imageExtension -> specifies the desired file type (png or gif).
  *	\param sortState -> specifies the desired output order (a_z, z_a, no_sort)
  *
  *  \return The amount of images present in the generated list.
  *  \return This amount will be 0 if an error has occurred or no valid images were found.
  *
- *  \warning The array size HAS to be equal to imageAmount (which can be acquired through getImageAmount).
+ *  \warning The array size HAS to be equal to imageAmount or gifAmount (which can be acquired through getImageAmount and getGifAmount) depending on extType.
  */
-uint8_t getImageList(char* imageList[], imageExtension extType, sortType sortState)
+uint8_t getImageList(char* imageList[], fileExtension extType, sortType sortState)
 {
+	// TODO: check extType
 	uint8_t imageCnt = 0;
 	char pathBuffer[MAX_PATH_LENGTH];
 
@@ -158,9 +176,9 @@ uint8_t getImageList(char* imageList[], imageExtension extType, sortType sortSta
 		// validateImage is called to check if the file f is valid.
 		if(validateImage((char*)f->name, strlen((const char*)f->name)) != 0x00)
 		{
-			// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .RAW or .raw .
+			// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .GIF or .gif .
 			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
-			if((extType == png && strstr(pathBuffer, ".png") != NULL) || (extType == raw && strstr(pathBuffer, ".raw") != NULL))
+			if((extType == png && strstr(pathBuffer, ".png") != NULL) || (extType == gif && strstr(pathBuffer, ".gif") != NULL))
 			{
 				insertImagePath(imageList, imageCnt, (char*)f->name, sortState);
 				imageCnt++;
@@ -170,6 +188,45 @@ uint8_t getImageList(char* imageList[], imageExtension extType, sortType sortSta
 	return imageCnt;
 }
 
+
+/*!
+ *  \brief This function generates a list of char pointers to the file paths from all the valid frames that are found for the specified gif.
+ *
+ *  \param pGifPath -> a pointer to the path of the gif, whose frames ahve to be extracted.
+ *  \param pathLength -> the length of the path. (Length of the string without \0)
+ *	\param frameList -> an array where the list will be stored (array of char pointers). (Each char pointer points to the start of a file path string).
+ *
+ *  \return The amount of frames retrieved.
+ *  \return This amount will be 0 if an error has occurred or no valid gifs were found.
+ *
+ *  \remark Regardless of the extension type (or no extension) of pGifPath, the generated list will be for the corresponding .gif file.
+ *  \warning The array size HAS to be equal to MAX_GIF_FRAMES.
+ */
+uint8_t getGifFrames(char* pGifPath, uint16_t pathLength, char* frameList[])
+{
+	uint8_t frameCnt = 0;
+	uint16_t lengthUntilArgsOrExt;
+	char pathBuffer[MAX_PATH_LENGTH];
+	// validateImage is called to check if the specified image is valid.
+	if(validateImage(pGifPath, pathLength) != 0x00)
+	{
+		// getPathLength is called to get the length of the path without arguments or the extension.
+		lengthUntilArgsOrExt = getPathLength(pGifPath, pathLength, stop_at_any);
+
+		// This loop is used to check every file in the fs.
+		for(struct fsdata_file* f = (struct fsdata_file*)pFirstFile; f != NULL; f = (struct fsdata_file*)f->next)
+		{
+			// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .RAW or .raw .
+			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
+			if(strncmp(pathBuffer, pGifPath, lengthUntilArgsOrExt) == 0 && strstr(pathBuffer, ".raw") != NULL)
+			{
+				insertImagePath(frameList, frameCnt, (char*)f->name, a_z);
+				frameCnt++;
+			}
+		}
+	}
+	return frameCnt;
+}
 
 /*!
  *  \brief This function inserts a new image path in imageList at the correct location (place), which can be specified by sortState.
@@ -188,6 +245,8 @@ static void insertImagePath(char* imageList[], uint8_t imagesInList, char* newIm
 	char nameBuf[largestNameLength];
 	char newNameBuf[largestNameLength];
 	int8_t compareRes;
+	struct imageMetaData newImageMetaData = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
+	struct imageMetaData metaDataBuffer = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
 
 	extractNameOutOfPath(newImagePath, strlen(newImagePath), newNameBuf, ext, lower);
 	// This if statement is used to check if the list has to be sorted + check whether the list is empty and thus cannot be sorted.
@@ -198,11 +257,20 @@ static void insertImagePath(char* imageList[], uint8_t imagesInList, char* newIm
 	else
 	{
 		index = 0;
+		extractArgsOutOfPath(newImagePath, strlen(newImagePath), &newImageMetaData);
 		while(index < imagesInList && sortedFlag == 0)
 		{
 			extractNameOutOfPath(*(imageList + index), strlen(*(imageList + index)), nameBuf, ext, lower);
 			compareRes = strcmp(newNameBuf, nameBuf);
+			extractArgsOutOfPath(*(imageList + index), strlen(*(imageList + index)), &metaDataBuffer);
 
+			// This if statement is used to check if both names match. If so, the frame number is compared and compareRes is changed if necessary.
+			// This is done so the frames of a gif align correct and not 1, 10, 2, 3. compareRes is not changed if the files have no arguments.
+			if(compareRes == 0)
+			{
+				compareRes = (newImageMetaData.num < metaDataBuffer.num)? -1 : compareRes;
+				compareRes = (newImageMetaData.num > metaDataBuffer.num)? 1 : compareRes;
+			}
 			if((sortState == a_z && compareRes <= 0) || (sortState == z_a && compareRes >= 0))
 			{
 				// This for loop is used to shift every image path from [index] -> [end of the list] one index to the right.
@@ -245,11 +313,16 @@ uint8_t getRawImageMetaData(char* imagePath, uint16_t pathLength, struct imageMe
 	uint16_t lengthUntilArgsOrExt;
 	char pathBuffer[MAX_PATH_LENGTH];
 	uint8_t retVal = 0;
+	struct imageMetaData bufMetaData;
+	pMetaData->num = 1;
+
 	// validateImage is called to check if the specified image is valid.
 	if(validateImage(imagePath, pathLength) != 0x00)
 	{
 		// getPathLength is called to get the length of the path without arguments or the extension.
 		lengthUntilArgsOrExt = getPathLength(imagePath, pathLength, stop_at_any);
+		// extractArgsOutOfPath is called to extract the arguments of imagePath.
+		extractArgsOutOfPath(imagePath, pathLength, pMetaData);
 
 		// This loop is used to check every file in the fs.
 		for(struct fsdata_file* f = (struct fsdata_file*)pFirstFile; f != NULL; f = (struct fsdata_file*)f->next)
@@ -258,8 +331,11 @@ uint8_t getRawImageMetaData(char* imagePath, uint16_t pathLength, struct imageMe
 			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
 			if(strncmp(pathBuffer, imagePath, lengthUntilArgsOrExt) == 0 && strstr(pathBuffer, ".raw") != NULL)
 			{
-				if(extractArgsOutOfPath((char*)f->name, strlen((const char*)f->name), pMetaData) != 0)
+				// This if statement is used to compare the frame number of file f, with the frame number of imagePath.
+				// This is done so that the meta data of the correct .raw file is returned. If imagePath does not have a frame number -> .raw file with num 1 is chosen.
+				if(extractArgsOutOfPath((char*)f->name, strlen((const char*)f->name), &bufMetaData) != 0 && bufMetaData.num == pMetaData->num)
 				{
+					*pMetaData = bufMetaData;
 					pMetaData->name = (char*)f->name;
 					pMetaData->data = (void*)f->data;
 					retVal = 1;
@@ -272,21 +348,22 @@ uint8_t getRawImageMetaData(char* imagePath, uint16_t pathLength, struct imageMe
 
 
 /*!
- *  \brief This function checks if there is both a .png and .raw file of the specified file present in the file system.
+ *  \brief This function checks if there is both a .png and .raw file or a .gif and .raw files of the specified file present in the file system.
  *
- *  \param imagePath -> specifies the image that has to be validated. This can be the .raw or .png file or the file path without any extensions.
+ *  \param imagePath -> specifies the image that has to be validated. This can be the .raw or .png or .gif file or the file path without any extensions.
  *  \param pathLength -> the length of the image path. (Length of the string without \0)
  *
- *  \retval 0x01 when both the .png and .raw files are found and the arguments of the .raw file are valid.
- *  \retval 0x00 if the .png or .raw file isn't found or when the arguments of the .raw file are not valid.
+ *  \retval 0x01 when both the .png and .raw files or .gif and .raw files are found and the arguments of the .raw file(s) are valid.
+ *  \retval 0x00 if the .png or .raw file or .gif and .raw files aren't found or when the arguments of the .raw file(s) are invalid.
  *
- *  \warning Both the .raw and .png file NEED to be located in the same folder.
+ *  \warning Both the .raw and .png or .gif and .raw files NEED to be located in the same folder.
  */
 static uint8_t validateImage(char* imagePath, uint16_t pathLength)
 {
 	uint16_t lengthUntilArgsOrExt = getPathLength(imagePath, pathLength, stop_at_any);
 	char pathBuffer[MAX_PATH_LENGTH];
 	uint8_t pngFound = 0;
+	uint8_t gifFound = 0;
 	uint8_t rawFound = 0;
 	uint8_t argsValid = 0;
 	struct imageMetaData buf;
@@ -298,11 +375,12 @@ static uint8_t validateImage(char* imagePath, uint16_t pathLength)
 		if(getPathLength((char*)f->name, strlen((const char*)f->name), stop_at_any) == lengthUntilArgsOrExt && strncmp(imagePath, (const char*)f->name, lengthUntilArgsOrExt) == 0)
 		{
 			pngFound = (strstr(pathBuffer, ".png") != NULL)? 1 : pngFound;
+			gifFound = (strstr(pathBuffer, ".gif") != NULL)? 1 : gifFound;
 			rawFound = (strstr(pathBuffer, ".raw") != NULL)? 1 : rawFound;
 			argsValid = (rawFound == 1 && extractArgsOutOfPath((char*)f->name, strlen((const char*)f->name), &buf) == 1)? 1 : argsValid;
 		}
 	}
-	return (argsValid == 1 && pngFound == 1 && rawFound == 1)? 1 : 0;
+	return (argsValid == 1 && rawFound == 1 && (gifFound || pngFound == 1))? 1 : 0;
 }
 
 
@@ -322,7 +400,7 @@ static uint8_t extractArgsOutOfPath(char* pPath, uint16_t pathLength, struct ima
 	char pathBuffer[MAX_PATH_LENGTH];
 	char* pStartArg;
 
-	uint16_t argNumBuf;
+	uint8_t argNumBuf;
 	uint16_t argWidthBuf;
 	uint16_t argHeightBuf;
 	uint16_t argTimeBuf;
