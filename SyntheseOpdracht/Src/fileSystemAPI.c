@@ -1,7 +1,7 @@
 /*!
  *  \file fileSystemAPI.c
  *	\details This file contains all the function implementations from the filesystem API. Static functions are used in the API, but are not accessible for the user (and not needed).
- *  \details A file path can exist of the following parts: /Folder/Folder/.../name#NUM#WIDHTxHEIGHT@TIME.ext The arguments are only required with .raw files.
+ *  \details A file path can exist of the following parts: /Folder/Folder/.../name#NUM#WIDTHxHEIGHT@TIME.ext The arguments are only required with .raw files.
  *  \remark Every file path length variable, parameter and return value is of type uint16_t. This is currently not really needed but it is used so that the max path length can be easily enlarged in the future.
  *  \date 4 nov. 2021
  *  \author Tijn De Wever

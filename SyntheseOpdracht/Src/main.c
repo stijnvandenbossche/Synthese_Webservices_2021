@@ -162,58 +162,71 @@ int main(void)
   initLCD();
   if(initFileSystemAPI() == 1)
   {
-	// Get list of all the valid images from the fs.
-    char* imageList[getImageAmount()];
-    char* gifList[getGifAmount()];
-    char* frameList[MAX_GIF_FRAMES];
-    char name[getLargestNameLength()];
-    struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
+	  // Get list of all the valid images/gifs from the fs.
+      char* imageList[getImageAmount()];
+      char* gifList[getGifAmount()];
+      char* frameList[MAX_GIF_FRAMES];
+      char name[getLargestNameLength()];
+      struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
 
-	getImageList(imageList, png, a_z);
-	printf("Images present in the fs: %u\n\r", getImageAmount());
-	for(uint8_t i = 0; i < getImageAmount(); i++)
-	{
-	  // Extract the name out of the selected image path.
-	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
-	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
-	}
-	printf("\n\r");
+      getImageList(imageList, png, a_z);
+      printf("Images present in the fs: %u\n\r", getImageAmount());
+      for(uint8_t i = 0; i < getImageAmount(); i++)
+      {
+    	  // Extract the name out of the selected image path.
+    	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
+    	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
+      }
+      printf("\n\r");
 
-	if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 0)
-	{
-		printf("text is not displayed correct\r\n");
-	}
-	else
-	{
-		printf("text is displayed correct\r\n");
-	}
+      printf("Gifs present in the fs: %u\n\r", getGifAmount());
+      getImageList(gifList, gif, a_z);
+	  for(uint8_t i = 0; i < getGifAmount(); i++)
+	  {
+		  // Extract the name out of the selected image path.
+		  extractNameOutOfPath(gifList[i], strlen(gifList[i]), name, no_ext, lower);
+		  printf("Gif %u, name: %s, path: %s\n\r", i, name, gifList[i]);
+	  }
+	  printf("\n\r");
 
-	getRawImageMetaData(imageList[0], strlen(imageList[0]), &buf);
-	pictureToLCD(buf.data);
-	HAL_Delay(2000);
+      if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
+      {
+    	  printf("text is displayed correct\r\n");
+      }
+      else
+      {
+    	  printf("text is not displayed correct\r\n");
+      }
+      if(getImageAmount() >= 1)
+      {
+    	  getRawImageMetaData(imageList[0], strlen(imageList[0]), &buf);
+    	  pictureToLCD(buf.data);
+      }
+      // This code is temporary, because the lcd api can't process gifs at this moment.
+      // It will block everything, so only required when testing the fs API.
+      /*if(getGifAmount() >= 1)
+      {
+    	  HAL_Delay(2000);
+		  uint8_t amount = getGifFrames(gifList[0], strlen(gifList[0]), frameList);
+		  while(1)
+		  {
+			  for(uint8_t i = 0; i < amount; i++)
+			  {
+				  getRawImageMetaData(frameList[i], strlen(frameList[i]), &buf);
+				  while(!(hltdc.Instance->CDSR & 1<<2));
+				  pictureToLCD(buf.data);
+				  HAL_Delay(buf.frameTime);
+			  }
+		  }
+      }*/
 
-	getImageList(gifList, gif, a_z);
-	getRawImageMetaData(gifList[0], strlen(gifList[0]), &buf);
-
-	uint8_t amount = getGifFrames(buf.name, strlen(buf.name), frameList);
-	while(1)
-	{
-		for(uint8_t i = 0; i < amount; i++)
-		{
-			getRawImageMetaData(frameList[i], strlen(frameList[i]), &buf);
-			//printf("%s, %d, %d, %d\n\r", buf.name, buf.num, buf.frameTime, amount);
-			while(!(hltdc.Instance->CDSR & 1<<2)); //wachten op vsync
-			pictureToLCD(buf.data);
-			HAL_Delay(buf.frameTime);
-		}
-		//printf("\n\r");
-	}
   }
   else
   {
-	printf("initFileSystemAPI has failed\n\r");
+	  printf("initFileSystemAPI has failed\n\r");
   }
   printf("\n\r");
+
 #endif  
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
