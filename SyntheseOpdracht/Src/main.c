@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <LCD_functions.h>
 #include <sys/unistd.h>
+#include "stm32746g_discovery_qspi.h"
 
 /* USER CODE END Includes */
 
@@ -58,6 +59,8 @@ DMA2D_HandleTypeDef hdma2d;
 
 LTDC_HandleTypeDef hltdc;
 
+QSPI_HandleTypeDef hqspi;
+
 UART_HandleTypeDef huart1;
 
 SDRAM_HandleTypeDef hsdram1;
@@ -77,6 +80,7 @@ static void MX_LTDC_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
+static void MX_QUADSPI_Init(void);
 /* USER CODE BEGIN PFP */
 
 
@@ -146,49 +150,87 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
-
+  MX_QUADSPI_Init();
   /* USER CODE BEGIN 2 */
+  //QSPI INIT
+  BSP_QSPI_Init();
+  BSP_QSPI_MemoryMappedMode();
+  WRITE_REG(QUADSPI->LPTR, 0xFFF);
+
 // EXAMPLE CODE
 #if TESTCODE == 1
   initLCD();
   if(initFileSystemAPI() == 1)
   {
-	// Get list of all the valid images from the fs.
-    char* imageList[getImageAmount()];
-    char name[getLargestNameLength()];
-	getImageList(imageList, png, a_z);
-	printf("Images present in the fs: %u\n\r", getImageAmount());
-	for(uint8_t i = 0; i < getImageAmount(); i++)
-	{
-	  // Extract the name out of the selected image path.
-	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
-	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
-	}
-	printf("\n\r");
-	if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
-	{
-		printf("text is displayed correct\r\n");
-	}
-	else
-	{
-		printf("text is not displayed correct\r\n");
-	}
+	  // Get list of all the valid images/gifs from the fs.
+      char* imageList[getImageAmount()];
+      char* gifList[getGifAmount()];
+      char* frameList[MAX_GIF_FRAMES];
+      char name[getLargestNameLength()];
+      struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
 
+      getImageList(imageList, png, a_z);
+      printf("Images present in the fs: %u\n\r", getImageAmount());
+      for(uint8_t i = 0; i < getImageAmount(); i++)
+      {
+    	  // Extract the name out of the selected image path.
+    	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
+    	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
+      }
+      printf("\n\r");
 
-	pictureToLCD(getRawImageData("/images/trex.raw", strlen("/images/trex.raw")));
-	// Other example of getRawImageData:
-	// Display image 2 from the list on the lcd.
-	// Normally this should be something like pictureToLCD(getRawImageData(imageList[2], strlen(imageList[2])));
+      printf("Gifs present in the fs: %u\n\r", getGifAmount());
+      getImageList(gifList, gif, a_z);
+	  for(uint8_t i = 0; i < getGifAmount(); i++)
+	  {
+		  // Extract the name out of the selected image path.
+		  extractNameOutOfPath(gifList[i], strlen(gifList[i]), name, no_ext, lower);
+		  printf("Gif %u, name: %s, path: %s\n\r", i, name, gifList[i]);
+	  }
+	  printf("\n\r");
+
+      if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
+      {
+    	  printf("text is displayed correct\r\n");
+      }
+      else
+      {
+    	  printf("text is not displayed correct\r\n");
+      }
+      if(getImageAmount() >= 1)
+      {
+    	  getRawImageMetaData(imageList[0], strlen(imageList[0]), &buf);
+    	  pictureToLCD(buf.data);
+      }
+      // This code is temporary, because the lcd api can't process gifs at this moment.
+      // It will block everything, so only required when testing the fs API.
+      /*if(getGifAmount() >= 1)
+      {
+    	  HAL_Delay(2000);
+		  uint8_t amount = getGifFrames(gifList[0], strlen(gifList[0]), frameList);
+		  while(1)
+		  {
+			  for(uint8_t i = 0; i < amount; i++)
+			  {
+				  getRawImageMetaData(frameList[i], strlen(frameList[i]), &buf);
+				  while(!(hltdc.Instance->CDSR & 1<<2));
+				  pictureToLCD(buf.data);
+				  HAL_Delay(buf.frameTime);
+			  }
+		  }
+      }*/
+
   }
   else
   {
-	printf("initFileSystemAPI has failed\n\r");
+	  printf("initFileSystemAPI has failed\n\r");
   }
   printf("\n\r");
+
 #endif  
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
-/* USER CODE END 2 */
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -402,6 +444,41 @@ static void MX_LTDC_Init(void)
   /* USER CODE BEGIN LTDC_Init 2 */
 
   /* USER CODE END LTDC_Init 2 */
+
+}
+
+/**
+  * @brief QUADSPI Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_QUADSPI_Init(void)
+{
+
+  /* USER CODE BEGIN QUADSPI_Init 0 */
+
+  /* USER CODE END QUADSPI_Init 0 */
+
+  /* USER CODE BEGIN QUADSPI_Init 1 */
+
+  /* USER CODE END QUADSPI_Init 1 */
+  /* QUADSPI parameter configuration*/
+  hqspi.Instance = QUADSPI;
+  hqspi.Init.ClockPrescaler = 1;
+  hqspi.Init.FifoThreshold = 4;
+  hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
+  hqspi.Init.FlashSize = 16;
+  hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_6_CYCLE;
+  hqspi.Init.ClockMode = QSPI_CLOCK_MODE_0;
+  hqspi.Init.FlashID = QSPI_FLASH_ID_1;
+  hqspi.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
+  if (HAL_QSPI_Init(&hqspi) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN QUADSPI_Init 2 */
+
+  /* USER CODE END QUADSPI_Init 2 */
 
 }
 
