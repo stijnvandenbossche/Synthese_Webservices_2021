@@ -17,7 +17,7 @@
 <div>
     <form class = "message">
         <input type = "text" name = "msg" id = "msg">
-        <button type = "submit" name = "send" class = "button" onclick = "sendmsg()">Submit</button>
+        <button name = "send" class = "button" onclick = "sendmsg()">Submit</button>
     </form>
 </div>
 <div id = "photo">
