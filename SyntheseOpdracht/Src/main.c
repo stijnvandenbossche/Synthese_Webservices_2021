@@ -44,8 +44,7 @@
 #define TESTCODE 1
 
 
-// time in ms it take for the screen to go dark after no more touches were detected
-#define SCREENSAVER_DELAY 10000
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -252,11 +251,14 @@ int main(void)
 	// read the button to turn the lcd back on
 	if(readButton() == 1)
 	{
-		// turn on screen
-		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
-		// update timer
-		ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+		 if(textToLCD("screen lights up with new text", strlen("screen lights up with new text"), LCD_COLOR_WHITE) == 1)
+		  {
+			   printf("text is displayed correct\r\n");
+		  }
+		  else
+		  {
+			  printf("text is not displayed correct\r\n");
+		  }
 	}
 	// if enough time passed => turn screen off
 	if(ScreensaverStart < HAL_GetTick())
@@ -264,8 +266,6 @@ int main(void)
 		// turn off screen
 		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_RESET);
-
-
 	}
   }
   /* USER CODE END 3 */

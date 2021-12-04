@@ -16,7 +16,10 @@ static char errorMessageText[TEXT_BUFFER_LENGTH] = "something went wrong while p
 
 // timerhandler
 extern TIM_HandleTypeDef htim2;
+
 extern LTDC_HandleTypeDef hltdc;
+// to light up screen when new image is displayed
+extern uint32_t ScreensaverStart;
 
 // var to store how many chars fit on one line
 uint8_t charsOnLine;
@@ -123,6 +126,11 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 			return 0;
 		}
 	}
+	//light up screen
+	ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+	HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
+	//clear text
 	clearText();
 	BSP_LCD_SetTextColor(color);
 	// make sure we are on the foreground layer
@@ -211,6 +219,11 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
  */
 uint8_t pictureToLCD(struct imageMetaData picture)
 {
+	//light up screen
+	ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+	HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
+
 	currentPicture = picture;
 	if(currentPicture.width > MAX_IMAGE_WIDTH || currentPicture.height > MAX_IMAGE_HEIGHT)
 	{
@@ -224,6 +237,7 @@ uint8_t pictureToLCD(struct imageMetaData picture)
 	}
 	else
 	{
+
 		if(picture.frameTime == 0)
 		{
 			stopTimer();
@@ -288,7 +302,7 @@ static void clearPicture(void)
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
 	// fill lower screen with plane
-	BSP_LCD_FillRect( (LCD_WIDTH/2)+1, 0 , (LCD_WIDTH/2)-1, LCD_HEIGHT );
+	BSP_LCD_FillRect( (LCD_WIDTH/2), 0 , LCD_WIDTH/2, LCD_HEIGHT );
 }
 
 /*!
