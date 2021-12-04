@@ -25,7 +25,7 @@ uint8_t charsOnLine;
 struct imageMetaData currentPicture;
 
 // list of all frames of one gif
-char* frameList[50];
+char* frameList[MAX_GIF_FRAMES];
 
 // store the amount of frames of the gif
 uint8_t frameAmount;
@@ -212,7 +212,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 uint8_t pictureToLCD(struct imageMetaData picture)
 {
 	currentPicture = picture;
-	if(currentPicture.width > (LCD_WIDTH/2) || currentPicture.height > LCD_HEIGHT)
+	if(currentPicture.width > MAX_IMAGE_WIDTH || currentPicture.height > MAX_IMAGE_HEIGHT)
 	{
 		stopTimer();
 		//remove previous picture

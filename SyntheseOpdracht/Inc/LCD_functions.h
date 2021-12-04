@@ -17,10 +17,6 @@
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 272
 
-// hard coded image sizes
-#define PICTURE_X_PIXEL_MAX 240
-#define PICTURE_Y_PIXEL_MAX 272
-
 // define the length of the buffer of the string thats going to be displayed
 #define TEXT_BUFFER_LENGTH 300
 
