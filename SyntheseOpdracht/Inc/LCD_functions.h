@@ -13,17 +13,6 @@
 
 #include "fileSystemAPI.h"
 
-// ONLY FOR TESTING!
-struct imageMetaData{
-	char* name;
-    void* data;
-    uint16_t width;
-    uint16_t height;
-    uint16_t num;
-    uint16_t frameTime;
-};
-
-
 // define lcd dimensions
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 272

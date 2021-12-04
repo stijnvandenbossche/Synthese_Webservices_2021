@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <LCD_functions.h>
 #include <sys/unistd.h>
-//#include "stm32746g_discovery_qspi.h"
+#include "stm32746g_discovery_qspi.h"
 
 /* USER CODE END Includes */
 
@@ -59,13 +59,17 @@ DMA2D_HandleTypeDef hdma2d;
 
 LTDC_HandleTypeDef hltdc;
 
+QSPI_HandleTypeDef hqspi;
+
+TIM_HandleTypeDef htim2;
+
 UART_HandleTypeDef huart1;
 
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
 #if TESTCODE == 1
-	char blablaMessage[TEXT_BUFFER_LENGTH] = "text will be displayed right here. ;-)";
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "text will be displayed right here";
 #endif
 // store time when screen should go black
 uint32_t ScreensaverStart = 0;
@@ -150,14 +154,12 @@ int main(void)
   MX_FMC_Init();
   MX_LWIP_Init();
   MX_QUADSPI_Init();
-
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   //QSPI INIT
   BSP_QSPI_Init();
   BSP_QSPI_MemoryMappedMode();
   WRITE_REG(QUADSPI->LPTR, 0xFFF);
-
 
 // EXAMPLE CODE
 #if TESTCODE == 1
@@ -170,6 +172,7 @@ int main(void)
       char* frameList[MAX_GIF_FRAMES];
       char name[getLargestNameLength()];
       struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
+      uint8_t amount;
 
       getImageList(imageList, png, a_z);
       printf("Images present in the fs: %u\n\r", getImageAmount());
@@ -188,48 +191,44 @@ int main(void)
 		  // Extract the name out of the selected image path.
 		  extractNameOutOfPath(gifList[i], strlen(gifList[i]), name, no_ext, lower);
 		  printf("Gif %u, name: %s, path: %s\n\r", i, name, gifList[i]);
+
+		  //test gif
+		  //put on 1==1 to test
+		  //pu on 1==0 to test
+		  if(1==1)
+		  {
+
+			  if(textToLCD(name, strlen(name), LCD_COLOR_WHITE) == 1)
+			  {
+				   printf("text is displayed correct\r\n");
+			  }
+			  else
+			  {
+				  printf("text is not displayed correct\r\n");
+			  }
+
+			  getRawImageMetaData(gifList[i], strlen(gifList[i]), &buf);
+			  pictureToLCD(buf);
+			  //just regular delay for testing purposes
+			  HAL_Delay(5000);
+		  }
 	  }
 	  printf("\n\r");
 
-      if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
-      {
-    	  printf("text is displayed correct\r\n");
-      }
-      else
-      {
-    	  printf("text is not displayed correct\r\n");
-      }
-      if(getImageAmount() >= 1)
-      {
-    	  getRawImageMetaData(imageList[0], strlen(imageList[0]), &buf);
-    	  pictureToLCD(buf.data);
-      }
-      // This code is temporary, because the lcd api can't process gifs at this moment.
-      // It will block everything, so only required when testing the fs API.
-      /*if(getGifAmount() >= 1)
-      {
-    	  HAL_Delay(2000);
-		  uint8_t amount = getGifFrames(gifList[0], strlen(gifList[0]), frameList);
-		  while(1)
-		  {
-			  for(uint8_t i = 0; i < amount; i++)
-			  {
-				  getRawImageMetaData(frameList[i], strlen(frameList[i]), &buf);
-				  while(!(hltdc.Instance->CDSR & 1<<2));
-				  pictureToLCD(buf.data);
-				  HAL_Delay(buf.frameTime);
-			  }
-		  }
-      }*/}
+
+
+
+  }
   else
   {
-	printf("initFileSystemAPI has failed\n\r");
+	  printf("initFileSystemAPI has failed\n\r");
   }
   printf("\n\r");
+
 #endif  
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
-/* USER CODE END 2 */
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -447,6 +446,41 @@ static void MX_LTDC_Init(void)
 }
 
 /**
+  * @brief QUADSPI Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_QUADSPI_Init(void)
+{
+
+  /* USER CODE BEGIN QUADSPI_Init 0 */
+
+  /* USER CODE END QUADSPI_Init 0 */
+
+  /* USER CODE BEGIN QUADSPI_Init 1 */
+
+  /* USER CODE END QUADSPI_Init 1 */
+  /* QUADSPI parameter configuration*/
+  hqspi.Instance = QUADSPI;
+  hqspi.Init.ClockPrescaler = 1;
+  hqspi.Init.FifoThreshold = 4;
+  hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
+  hqspi.Init.FlashSize = 16;
+  hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_6_CYCLE;
+  hqspi.Init.ClockMode = QSPI_CLOCK_MODE_0;
+  hqspi.Init.FlashID = QSPI_FLASH_ID_1;
+  hqspi.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
+  if (HAL_QSPI_Init(&hqspi) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN QUADSPI_Init 2 */
+
+  /* USER CODE END QUADSPI_Init 2 */
+
+}
+
+/**
   * @brief TIM2 Initialization Function
   * @param None
   * @retval None
@@ -489,40 +523,7 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 2 */
 
-
-
-/**
-  * @brief QUADSPI Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_QUADSPI_Init(void)
-{
-
-  /* USER CODE BEGIN QUADSPI_Init 0 */
-
-  /* USER CODE END QUADSPI_Init 0 */
-
-  /* USER CODE BEGIN QUADSPI_Init 1 */
-
-  /* USER CODE END QUADSPI_Init 1 */
-  /* QUADSPI parameter configuration*/
-  hqspi.Instance = QUADSPI;
-  hqspi.Init.ClockPrescaler = 1;
-  hqspi.Init.FifoThreshold = 4;
-  hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
-  hqspi.Init.FlashSize = 16;
-  hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_6_CYCLE;
-  hqspi.Init.ClockMode = QSPI_CLOCK_MODE_0;
-  hqspi.Init.FlashID = QSPI_FLASH_ID_1;
-  hqspi.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
-  if (HAL_QSPI_Init(&hqspi) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN QUADSPI_Init 2 */
-
-  /* USER CODE END QUADSPI_Init 2 */}
+}
 
 /**
   * @brief USART1 Initialization Function

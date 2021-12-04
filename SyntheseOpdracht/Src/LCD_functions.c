@@ -16,6 +16,7 @@ static char errorMessageText[TEXT_BUFFER_LENGTH] = "something went wrong while p
 
 // timerhandler
 extern TIM_HandleTypeDef htim2;
+extern LTDC_HandleTypeDef hltdc;
 
 // var to store how many chars fit on one line
 uint8_t charsOnLine;
@@ -233,7 +234,8 @@ uint8_t pictureToLCD(struct imageMetaData picture)
 		}
 		else
 		{
-			//frameAmount = getGifFrames(currentPicture.name, strlen(currentPicture.name), frameList);
+			clearPicture();
+			frameAmount = getGifFrames(currentPicture.name, strlen(currentPicture.name), frameList);
 			frameCounter = 0;
 			setTimer_ms(picture.frameTime);
 			startTimer();
@@ -336,7 +338,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
 	if(htim == &htim2)
 	{
-		//getRawImageMetaData(frameList[frameCounter], strlen(frameList[frameCounter]), &currentPicture);
+		getRawImageMetaData(frameList[frameCounter], strlen(frameList[frameCounter]), &currentPicture);
 		frameToLCD(currentPicture.data, currentPicture.width, currentPicture.height);
 		frameCounter++;
 		if(frameCounter == frameAmount)
