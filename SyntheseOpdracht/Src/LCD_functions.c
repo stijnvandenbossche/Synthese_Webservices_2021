@@ -267,7 +267,7 @@ static void frameToLCD(void* data, uint16_t width, uint16_t height)
  * \retval void
  *
  */
-void clearText(void)
+static void clearText(void)
 {
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
@@ -283,7 +283,7 @@ void clearText(void)
  * \retval void
  *
  */
-void clearPicture(void)
+static void clearPicture(void)
 {
 	// switch to transparent to make overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
