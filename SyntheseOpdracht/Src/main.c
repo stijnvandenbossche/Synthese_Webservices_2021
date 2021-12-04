@@ -172,7 +172,6 @@ int main(void)
       char* frameList[MAX_GIF_FRAMES];
       char name[getLargestNameLength()];
       struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
-      uint8_t amount;
 
       getImageList(imageList, png, a_z);
       printf("Images present in the fs: %u\n\r", getImageAmount());
@@ -181,9 +180,20 @@ int main(void)
     	  // Extract the name out of the selected image path.
     	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
     	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
+
+
       }
       printf("\n\r");
-
+      //test large picture
+	  //put on 1==1 to test
+	  //pu on 1==0 to test
+	  if(1==1)
+	  {
+		  getRawImageMetaData("/images/maishakselaar", strlen("/images/maishakselaar"), &buf);
+		  pictureToLCD(buf);
+		  //just regular delay for testing purposes
+		  HAL_Delay(5000);
+	  }
       printf("Gifs present in the fs: %u\n\r", getGifAmount());
       getImageList(gifList, gif, a_z);
 	  for(uint8_t i = 0; i < getGifAmount(); i++)
