@@ -251,14 +251,10 @@ int main(void)
 	// read the button to turn the lcd back on
 	if(readButton() == 1)
 	{
-		 if(textToLCD("screen lights up with new text", strlen("screen lights up with new text"), LCD_COLOR_WHITE) == 1)
-		  {
-			   printf("text is displayed correct\r\n");
-		  }
-		  else
-		  {
-			  printf("text is not displayed correct\r\n");
-		  }
+		//light up screen
+		ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
 	}
 	// if enough time passed => turn screen off
 	if(ScreensaverStart < HAL_GetTick())
