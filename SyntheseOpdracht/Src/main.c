@@ -30,9 +30,6 @@
 #include <sys/unistd.h>
 //#include "stm32746g_discovery_qspi.h"
 
-
-#include "bigpoop.h"
-#include "smallpoop.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,9 +58,6 @@
 DMA2D_HandleTypeDef hdma2d;
 
 LTDC_HandleTypeDef hltdc;
-
-
-TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart1;
 
@@ -155,93 +149,78 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
+  MX_QUADSPI_Init();
+
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  //QSPI INIT
+  BSP_QSPI_Init();
+  BSP_QSPI_MemoryMappedMode();
+  WRITE_REG(QUADSPI->LPTR, 0xFFF);
+
 
 // EXAMPLE CODE
 #if TESTCODE == 1
   initLCD();
   if(initFileSystemAPI() == 1)
-  {/*
-	// Get list of all the valid images from the fs.
-    char* imageList[getImageAmount()];
-    char* gifList[10];
-    char* frameList[50];
-    char name[getLargestNameLength()];
-	getImageList(imageList, png, a_z);
-	printf("Images present in the fs: %u\n\r", getImageAmount());
-	for(uint8_t i = 0; i < getImageAmount(); i++)
-	{
-	  // Extract the name out of the selected image path.
-	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
-	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
-	}
-	printf("\n\r");
-	struct imageMetaData buf1 = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
-	getRawImageMetaData(imageList[2], strlen(imageList[2]), &buf1);
+  {
+	  // Get list of all the valid images/gifs from the fs.
+      char* imageList[getImageAmount()];
+      char* gifList[getGifAmount()];
+      char* frameList[MAX_GIF_FRAMES];
+      char name[getLargestNameLength()];
+      struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
 
+      getImageList(imageList, png, a_z);
+      printf("Images present in the fs: %u\n\r", getImageAmount());
+      for(uint8_t i = 0; i < getImageAmount(); i++)
+      {
+    	  // Extract the name out of the selected image path.
+    	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
+    	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
+      }
+      printf("\n\r");
 
+      printf("Gifs present in the fs: %u\n\r", getGifAmount());
+      getImageList(gifList, gif, a_z);
+	  for(uint8_t i = 0; i < getGifAmount(); i++)
+	  {
+		  // Extract the name out of the selected image path.
+		  extractNameOutOfPath(gifList[i], strlen(gifList[i]), name, no_ext, lower);
+		  printf("Gif %u, name: %s, path: %s\n\r", i, name, gifList[i]);
+	  }
+	  printf("\n\r");
 
-	//test de foto
-	//zet op 1==1 om te proberen
-	//zet op 1==0 om te skippen
-	if(1==0)
-	{
-	pictureToLCD(buf1);
-	}
-*/
-
-
-/*
-	//test de 1e homergif
-	if(1==0)
-	{
-	getImageList(gifList, gif, a_z);
-	//buf1 = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
-	getRawImageMetaData(gifList[0], strlen(gifList[0]), &buf1);
-	uint8_t amount = getGifFrames(buf1.name, strlen(buf1.name), frameList);
-	struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
-	getRawImageMetaData(frameList[0], strlen(frameList[0]), &buf);
-	pictureToLCD(buf);
-	}
-*/
-
-	  if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 0)
-	  	{
-	  		printf("text is not displayed correct\r\n");
-	  	}
-	  	else
-	  	{
-	  		printf("text is displayed correct\r\n");
-	  	}
-
-
-	//test grote poop
-	if(1==1)
-	{
-		struct imageMetaData bigbuf = {.data = BIGPOOP_DATA, .name = NULL, .num = 0, .frameTime = 0, .height = BIGPOOP_DATA_Y_PIXEL, .width = BIGPOOP_DATA_X_PIXEL};
-		pictureToLCD(bigbuf);
-	}
-
-	//test kleine poop
-	if(1==0)
-	{
-		struct imageMetaData smallbuf = {.data = SMALLPOOP_DATA, .name = NULL, .num = 0, .frameTime = 0, .height = SMALLPOOP_DATA_Y_PIXEL, .width = SMALLPOOP_DATA_X_PIXEL};
-		pictureToLCD(smallbuf);
-	}
-
-	//nieuwe text
-	HAL_Delay(2000);
-	if(textToLCD("test", strlen("test"), LCD_COLOR_ORANGE) == 0)
-	{
-		printf("text is not displayed correct\r\n");
-	}
-	else
-	{
-		printf("text is displayed correct\r\n");
-	}
-
-  }
+      if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
+      {
+    	  printf("text is displayed correct\r\n");
+      }
+      else
+      {
+    	  printf("text is not displayed correct\r\n");
+      }
+      if(getImageAmount() >= 1)
+      {
+    	  getRawImageMetaData(imageList[0], strlen(imageList[0]), &buf);
+    	  pictureToLCD(buf.data);
+      }
+      // This code is temporary, because the lcd api can't process gifs at this moment.
+      // It will block everything, so only required when testing the fs API.
+      /*if(getGifAmount() >= 1)
+      {
+    	  HAL_Delay(2000);
+		  uint8_t amount = getGifFrames(gifList[0], strlen(gifList[0]), frameList);
+		  while(1)
+		  {
+			  for(uint8_t i = 0; i < amount; i++)
+			  {
+				  getRawImageMetaData(frameList[i], strlen(frameList[i]), &buf);
+				  while(!(hltdc.Instance->CDSR & 1<<2));
+				  pictureToLCD(buf.data);
+				  HAL_Delay(buf.frameTime);
+			  }
+		  }
+      }*/}
   else
   {
 	printf("initFileSystemAPI has failed\n\r");
@@ -250,7 +229,7 @@ int main(void)
 #endif  
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
-  /* USER CODE END 2 */
+/* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -510,7 +489,40 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 2 */
 
-}
+
+
+/**
+  * @brief QUADSPI Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_QUADSPI_Init(void)
+{
+
+  /* USER CODE BEGIN QUADSPI_Init 0 */
+
+  /* USER CODE END QUADSPI_Init 0 */
+
+  /* USER CODE BEGIN QUADSPI_Init 1 */
+
+  /* USER CODE END QUADSPI_Init 1 */
+  /* QUADSPI parameter configuration*/
+  hqspi.Instance = QUADSPI;
+  hqspi.Init.ClockPrescaler = 1;
+  hqspi.Init.FifoThreshold = 4;
+  hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
+  hqspi.Init.FlashSize = 16;
+  hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_6_CYCLE;
+  hqspi.Init.ClockMode = QSPI_CLOCK_MODE_0;
+  hqspi.Init.FlashID = QSPI_FLASH_ID_1;
+  hqspi.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
+  if (HAL_QSPI_Init(&hqspi) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN QUADSPI_Init 2 */
+
+  /* USER CODE END QUADSPI_Init 2 */}
 
 /**
   * @brief USART1 Initialization Function
