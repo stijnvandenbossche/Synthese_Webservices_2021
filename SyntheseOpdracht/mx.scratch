@@ -3,10 +3,10 @@
   <FileVersion>3.0</FileVersion>
   <Workspace>
     <WorkspaceType>Single-project</WorkspaceType>
-    <WorkspacePath>C:\Users\tijnd\Documents\GitHub\Synthese_Webservices_2021\SyntheseOpdracht\</WorkspacePath>
+    <WorkspacePath>C:\Users\Gebruiker\Documents\GitHub\Synthese_Webservices_2021\SyntheseOpdracht\</WorkspacePath>
     <underRoot>true</underRoot>
     <TrustZone>0</TrustZone>
-    <HAL_Driver>C:\Users\tijnd\STM32Cube\Repository\STM32Cube_FW_F7_V1.16.1</HAL_Driver>
+    <HAL_Driver>C:\Users\Gebruiker\STM32Cube\Repository\STM32Cube_FW_F7_V1.16.1</HAL_Driver>
     <CMSIS>Drivers/CMSIS</CMSIS>
     <Toolchain>STM32CubeIDE</Toolchain>
     <IocFile>SyntheseOpdracht.ioc</IocFile>
@@ -49,7 +49,7 @@
             <memory access="xrw" name="RAM" size="320" start="0x20000000" />
             <memory access="rx" name="FLASH" size="1024" start="0x8000000" />
           </memories>
-          <startup>C:\Users\tijnd\STM32Cube\Repository\STM32Cube_FW_F7_V1.16.1\Drivers\CMSIS\Device\ST\STM32F7xx\Source\Templates\gcc\startup_stm32f746xx.s</startup>
+          <startup>C:\Users\Gebruiker\STM32Cube\Repository\STM32Cube_FW_F7_V1.16.1\Drivers\CMSIS\Device\ST\STM32F7xx\Source\Templates\gcc\startup_stm32f746xx.s</startup>
           <LinkSettings>
             <LinkAdditionalLibs />
           </LinkSettings>

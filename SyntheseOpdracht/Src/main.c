@@ -44,8 +44,7 @@
 #define TESTCODE 1
 
 
-// time in ms it take for the screen to go dark after no more touches were detected
-#define SCREENSAVER_DELAY 10000
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -60,6 +59,8 @@ DMA2D_HandleTypeDef hdma2d;
 LTDC_HandleTypeDef hltdc;
 
 QSPI_HandleTypeDef hqspi;
+
+TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart1;
 
@@ -81,6 +82,7 @@ static void MX_USART1_UART_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
 static void MX_QUADSPI_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 
@@ -151,6 +153,7 @@ int main(void)
   MX_FMC_Init();
   MX_LWIP_Init();
   MX_QUADSPI_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   //QSPI INIT
   BSP_QSPI_Init();
@@ -176,9 +179,20 @@ int main(void)
     	  // Extract the name out of the selected image path.
     	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
     	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
+
+
       }
       printf("\n\r");
-
+      //test large picture
+	  //put on 1==1 to test
+	  //pu on 1==0 to test
+	  if(1==1)
+	  {
+		  getRawImageMetaData("/images/maishakselaar", strlen("/images/maishakselaar"), &buf);
+		  pictureToLCD(buf);
+		  //just regular delay for testing purposes
+		  HAL_Delay(5000);
+	  }
       printf("Gifs present in the fs: %u\n\r", getGifAmount());
       getImageList(gifList, gif, a_z);
 	  for(uint8_t i = 0; i < getGifAmount(); i++)
@@ -186,39 +200,32 @@ int main(void)
 		  // Extract the name out of the selected image path.
 		  extractNameOutOfPath(gifList[i], strlen(gifList[i]), name, no_ext, lower);
 		  printf("Gif %u, name: %s, path: %s\n\r", i, name, gifList[i]);
+
+		  //test gif
+		  //put on 1==1 to test
+		  //pu on 1==0 to test
+		  if(1==1)
+		  {
+
+			  if(textToLCD(name, strlen(name), LCD_COLOR_WHITE) == 1)
+			  {
+				   printf("text is displayed correct\r\n");
+			  }
+			  else
+			  {
+				  printf("text is not displayed correct\r\n");
+			  }
+
+			  getRawImageMetaData(gifList[i], strlen(gifList[i]), &buf);
+			  pictureToLCD(buf);
+			  //just regular delay for testing purposes
+			  HAL_Delay(5000);
+		  }
 	  }
 	  printf("\n\r");
 
-      if(textToLCD(blablaMessage, strlen(blablaMessage), LCD_COLOR_WHITE) == 1)
-      {
-    	  printf("text is displayed correct\r\n");
-      }
-      else
-      {
-    	  printf("text is not displayed correct\r\n");
-      }
-      if(getImageAmount() >= 1)
-      {
-    	  getRawImageMetaData(imageList[0], strlen(imageList[0]), &buf);
-    	  pictureToLCD(buf.data);
-      }
-      // This code is temporary, because the lcd api can't process gifs at this moment.
-      // It will block everything, so only required when testing the fs API.
-      /*if(getGifAmount() >= 1)
-      {
-    	  HAL_Delay(2000);
-		  uint8_t amount = getGifFrames(gifList[0], strlen(gifList[0]), frameList);
-		  while(1)
-		  {
-			  for(uint8_t i = 0; i < amount; i++)
-			  {
-				  getRawImageMetaData(frameList[i], strlen(frameList[i]), &buf);
-				  while(!(hltdc.Instance->CDSR & 1<<2));
-				  pictureToLCD(buf.data);
-				  HAL_Delay(buf.frameTime);
-			  }
-		  }
-      }*/
+
+
 
   }
   else
@@ -244,11 +251,10 @@ int main(void)
 	// read the button to turn the lcd back on
 	if(readButton() == 1)
 	{
-		// turn on screen
+		//light up screen
+		ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
 		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
-		// update timer
-		ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
 	}
 	// if enough time passed => turn screen off
 	if(ScreensaverStart < HAL_GetTick())
@@ -256,8 +262,6 @@ int main(void)
 		// turn off screen
 		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_RESET);
-
-
 	}
   }
   /* USER CODE END 3 */
@@ -479,6 +483,51 @@ static void MX_QUADSPI_Init(void)
   /* USER CODE BEGIN QUADSPI_Init 2 */
 
   /* USER CODE END QUADSPI_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 50000-1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 1000-1;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
 
 }
 
