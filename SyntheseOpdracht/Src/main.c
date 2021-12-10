@@ -24,12 +24,14 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "fileSystemAPI.h"
 #include <errno.h>
 #include <LCD_functions.h>
 #include <sys/unistd.h>
 #include "httpd.h"
 #include "lwip/init.h"
 #include "CGI_SSI.h"
+#include "stm32746g_discovery_qspi.h"
 
 /* USER CODE END Includes */
 
@@ -40,6 +42,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+// set to 1 to test code
+// set to 0 to disable test code
+#define TESTCODE 1
 
 #define TESTCODE_LCD 1
 /* USER CODE END PD */
@@ -55,14 +60,20 @@ DMA2D_HandleTypeDef hdma2d;
 
 LTDC_HandleTypeDef hltdc;
 
+QSPI_HandleTypeDef hqspi;
+
+TIM_HandleTypeDef htim2;
+
 UART_HandleTypeDef huart1;
 
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
-#if TESTCODE_LCD == 1
-	char blablaMessage[TEXT_BUFFER_LENGTH] = "Tijn gaf mij het woord Pneumonoultramicroscopicsilicovolcanoconi, hij zei dat ik dit op de lcd moest plaatsen";
+#if TESTCODE == 1
+	char blablaMessage[TEXT_BUFFER_LENGTH] = "text will be displayed right here";
 #endif
+// store time when screen should go black
+uint32_t ScreensaverStart = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -72,6 +83,8 @@ static void MX_LTDC_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_FMC_Init(void);
+static void MX_QUADSPI_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 // printf
@@ -81,23 +94,20 @@ int _write( int xFile, char *pxPtr, int xLen );
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-//useless functions
 
-// printf
-int _write( int xFile, char *pcPtr, int xLen )
-{
+int _write(int file, char *ptr, int len) {
     HAL_StatusTypeDef xStatus;
-    switch ( xFile ) {
+    switch (file) {
     case STDOUT_FILENO: /*stdout*/
-		xStatus = HAL_UART_Transmit( &huart1, (uint8_t*)pcPtr, xLen, HAL_MAX_DELAY );
-		if ( xStatus != HAL_OK ) {
+		xStatus = HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+		if (xStatus != HAL_OK) {
 			errno = EIO;
 			return -1;
 		}
         break;
     case STDERR_FILENO: /* stderr */
-		xStatus = HAL_UART_Transmit( &huart1, (uint8_t*)pcPtr, xLen, HAL_MAX_DELAY );
-		if ( xStatus != HAL_OK ) {
+		xStatus = HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+		if (xStatus != HAL_OK) {
 			errno = EIO;
 			return -1;
 		}
@@ -106,7 +116,7 @@ int _write( int xFile, char *pcPtr, int xLen )
         errno = EBADF;
         return -1;
     }
-    return xLen;
+    return len;
 }
 
 
@@ -145,7 +155,8 @@ int main(void)
   MX_DMA2D_Init();
   MX_FMC_Init();
   MX_LWIP_Init();
-
+  MX_QUADSPI_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   httpd_init();
 
@@ -153,22 +164,92 @@ int main(void)
                            "photo"
                        };
 
-  http_set_ssi_handler(mySsiHandler, ssi_tag_name, 1);
 
-	#if TESTCODE_LCD == 1
-	  // LCD Initialization
-	  initLCD();
-	  // EXAMPLE: print small text message on the lcd
-	  if(textToLCD(blablaMessage, strlen(blablaMessage)) == 1)
-	  {
-		  printf("text is displayed correct\r\n");
-	  }
-	  else
-	  {
-		  printf("text is not displayed correct\r\n");
-	  }
-	#endif
 
+
+
+  //QSPI INIT
+  BSP_QSPI_Init();
+  BSP_QSPI_MemoryMappedMode();
+  WRITE_REG(QUADSPI->LPTR, 0xFFF);
+
+// EXAMPLE CODE
+#if TESTCODE == 1
+  initLCD();
+  if(initFileSystemAPI() == 1)
+  {
+	  // Get list of all the valid images/gifs from the fs.
+      char* imageList[getImageAmount()];
+      char* gifList[getGifAmount()];
+      char* frameList[MAX_GIF_FRAMES];
+      char name[getLargestNameLength()];
+      struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
+
+      getImageList(imageList, png, a_z);
+      printf("Images present in the fs: %u\n\r", getImageAmount());
+      for(uint8_t i = 0; i < getImageAmount(); i++)
+      {
+    	  // Extract the name out of the selected image path.
+    	  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name, no_ext, lower);
+    	  printf("Image %u, name: %s, path: %s\n\r", i, name, imageList[i]);
+
+
+      }
+      printf("\n\r");
+      //test large picture
+	  //put on 1==1 to test
+	  //pu on 1==0 to test
+	  if(1==1)
+	  {
+		  getRawImageMetaData("/images/maishakselaar", strlen("/images/maishakselaar"), &buf);
+		  pictureToLCD(buf);
+		  //just regular delay for testing purposes
+		  HAL_Delay(5000);
+	  }
+      printf("Gifs present in the fs: %u\n\r", getGifAmount());
+      getImageList(gifList, gif, a_z);
+	  for(uint8_t i = 0; i < getGifAmount(); i++)
+	  {
+		  // Extract the name out of the selected image path.
+		  extractNameOutOfPath(gifList[i], strlen(gifList[i]), name, no_ext, lower);
+		  printf("Gif %u, name: %s, path: %s\n\r", i, name, gifList[i]);
+
+		  //test gif
+		  //put on 1==1 to test
+		  //pu on 1==0 to test
+		  if(1==1)
+		  {
+
+			  if(textToLCD(name, strlen(name), LCD_COLOR_WHITE) == 1)
+			  {
+				   printf("text is displayed correct\r\n");
+			  }
+			  else
+			  {
+				  printf("text is not displayed correct\r\n");
+			  }
+
+			  getRawImageMetaData(gifList[i], strlen(gifList[i]), &buf);
+			  pictureToLCD(buf);
+			  //just regular delay for testing purposes
+			  HAL_Delay(5000);
+		  }
+	  }
+	  printf("\n\r");
+
+
+
+
+  }
+  else
+  {
+	  printf("initFileSystemAPI has failed\n\r");
+  }
+  printf("\n\r");
+
+#endif  
+  // start timer for screensaver
+  ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -178,7 +259,23 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  MX_LWIP_Process();
+	MX_LWIP_Process();
+
+	// read the button to turn the lcd back on
+	if(readButton() == 1)
+	{
+		//light up screen
+		ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
+	}
+	// if enough time passed => turn screen off
+	if(ScreensaverStart < HAL_GetTick())
+	{
+		// turn off screen
+		HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_RESET);
+	}
   }
   /* USER CODE END 3 */
 }
@@ -364,6 +461,86 @@ static void MX_LTDC_Init(void)
   /* USER CODE BEGIN LTDC_Init 2 */
 
   /* USER CODE END LTDC_Init 2 */
+
+}
+
+/**
+  * @brief QUADSPI Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_QUADSPI_Init(void)
+{
+
+  /* USER CODE BEGIN QUADSPI_Init 0 */
+
+  /* USER CODE END QUADSPI_Init 0 */
+
+  /* USER CODE BEGIN QUADSPI_Init 1 */
+
+  /* USER CODE END QUADSPI_Init 1 */
+  /* QUADSPI parameter configuration*/
+  hqspi.Instance = QUADSPI;
+  hqspi.Init.ClockPrescaler = 1;
+  hqspi.Init.FifoThreshold = 4;
+  hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
+  hqspi.Init.FlashSize = 16;
+  hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_6_CYCLE;
+  hqspi.Init.ClockMode = QSPI_CLOCK_MODE_0;
+  hqspi.Init.FlashID = QSPI_FLASH_ID_1;
+  hqspi.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
+  if (HAL_QSPI_Init(&hqspi) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN QUADSPI_Init 2 */
+
+  /* USER CODE END QUADSPI_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 50000-1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 1000-1;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
 
 }
 
