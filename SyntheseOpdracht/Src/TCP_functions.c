@@ -1,5 +1,6 @@
 /*!
  * \file TCP_functions.c
+ * \details Contains all functions necessary for correct TCP functionality. The only function users need and should use, is init_TCP; this sets up all callback functions, and starts listening on port 64000 by default (set up in TCP_functions.h)
  *
  *  \remarkCreated on: 18 Nov 2021
  *  \author Stijn Vdb
@@ -42,11 +43,15 @@ int init_TCP(void){
 	return returnvalue;
 }
 
-void check_TCP_timeouts(void){
-	sys_check_timeouts();
-}
-
-
+/*!
+ * \brief this function is the callback function that is called when there is an incoming connection on the port the TCP server is listening on. It sends a welcome message with some basic instructions as to what commands are supported and how to use them, as well as setting up callback functions on what to do after a successful send (of a message), and what to do with an incoming message.
+ *
+ * \param arg -> any extra arguments to identify the connection, not used in our use case
+ * \param tpcb -> the tcp_pcb (tcp protocol block) which is created when accepting the new connection, and which is used to send and receive data on
+ * \param err -> error message
+ *
+ * \return returns the error code
+ */
 err_t handle_incoming_connection(void* arg, struct tcp_pcb *tpcb, err_t err){
 	//send welcome message
 	tcp_write(tpcb,welcome_message_tcp,MAX_LENGTH_WELCOME_MESSAGE, 0);
@@ -58,11 +63,32 @@ err_t handle_incoming_connection(void* arg, struct tcp_pcb *tpcb, err_t err){
 	return ERR_OK;
 }
 
+/*!
+ * \brief callback function that is called after a successful send, prints a message over serial port for debugging.
+ *
+ * \param arg -> any extra arguments to identify the connection, not used in our use case
+ * \param tpcb -> the tcp_pcb (tcp protocol block) on which data is sent.
+ * \param len -> length of sent data
+ *
+ * \return returns error code
+ */
 err_t succesful_send(void *arg, struct tcp_pcb *tpcb, u16_t len){
 	//succesfully sent data, nothing needs to be done at the moment
 	printf("sent\r\n");
 	return ERR_OK;
 }
+
+/*!
+ *
+ * \brief Callback function which is called when receiving a message. This reads the pbuf and stores it in a string, so the pbuf can be freed as quick as possible. Afterwards, the data is processes with the function handle_command
+ *
+ * \param arg -> any extra arguments to identify the connection, not used in our use case
+ * \param tcp_pcb -> tcp_pcb (tcp protocol block) on which a message is received.
+ * \param pbuf -> a structure on which the incoming message is stored, and which needs to be read out. It is a linked list with multiple payloads if the message is too long.
+ * \param err -> error code
+ *
+ * \return returns error code.
+ */
 
 err_t handle_incoming_message(void *arg, struct tcp_pcb *tpcb,struct pbuf *pbuf, err_t err){
 	//write data to pbuf and depending from what is received to different action
@@ -90,6 +116,20 @@ err_t handle_incoming_message(void *arg, struct tcp_pcb *tpcb,struct pbuf *pbuf,
 	}
 	return ERR_OK;
 }
+
+/*!
+ *
+ * \brief Handles the actions which need to be performed depending of the incoming message via tcp. Currently implemented are following commands: 'l', 't', and any number of max 2 digits
+ *
+ * \param command -> the message received over tcp, of which the contents are checked
+ * \param command_length -> the length of the message, used because it command is not null-byte terminated per se
+ * \param tpcb -> the tcp pcb (tcp protocol block) over which the message has been received, and which is used to send data back to for some commands.
+ *
+ * \return returns the error code
+ *
+ * \retval 0 if everything went fine
+ * \retval 1 if something went wrong
+ */
 
 int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	printf("Handle command: %c\r\n",command[0]);
