@@ -17,6 +17,7 @@
 char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\nSend 'l' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nOr send 't' followed by a space, then your text to display that text.\r\n";
 
 
+
 /*!
  * \brief This function initializes TCP functionality & listens at port 64000 by default. Has to be called to correctly handle TCP commands
  *
@@ -95,31 +96,47 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	printf("Handle command: %c\r\n",command[0]);
 	int image_number;
 	char image_number_string[5];
+	int longest_name = getLargestNameLength();
+	//variables are static, needs to persist between different commands, to remember the list given by 'l' command, to be able to choose an image to display by the number command
+	static int amount_images=0;
+	static char** image_list;
+
+	/* Checking if it's the first creation of the image list. If it does exist, resize the existing array with realloc
+	 * 	(extra measurements in case the image list changes in size in runtime, probably not necessary but it is safer
+	 *
+	 * 	If it's the first time, create it with malloc
+	 */
+
+	if(image_list==NULL){
+		image_list = (char**)malloc(getImageAmount() * longest_name);
+	}else{
+		image_list = (char**)realloc(image_list,getImageAmount() * longest_name);
+	}
+
+
 	int err_code = 0;
+	int i;
 
 	if(command[0]=='l' ||command[0] =='L'){
 
-		//char text_l[30] = "Received command 'l'";
-		//textToLCD(text_l,strlen(text_l),LCD_COLOR_BLUE);
 		char imagelisttext[1000];
-		int longest_name = getLargestNameLength();
+
 		char temp_text[longest_name+10];
 		int tot_len=0;
 
-		//list of all images -> use command to display this
-		char * image_list[getImageAmount()];
+		//list of all images
 		char image_name[longest_name];
-		int amount_images = getImageList(image_list,raw,a_z);
-		for(int i=0; i< amount_images; i++){
+		amount_images = getImageList(image_list,raw,a_z);
+		for(i=0; i< amount_images; i++){
 			extractNameOutOfPath(image_list[i],strlen(image_list[i]),image_name,no_ext,lower);
 			snprintf(temp_text,100,"#%d: %s\r\n",i,image_name);
 			strncpy(&imagelisttext[i*(longest_name+10)],temp_text,longest_name+10);
 			tot_len+=longest_name+10;
 		}
-
-		printf("%s\r\n\r\n",imagelisttext);
-		textToLCD(imagelisttext,tot_len,LCD_COLOR_BLUE);
 		tcp_write(tpcb,imagelisttext,tot_len,0);
+		imagelisttext[(i+1)*(longest_name+10)]='\0';
+		printf("%s\r\n\r\n",imagelisttext);
+		//textToLCD(imagelisttext,tot_len,LCD_COLOR_BLUE);
 		tcp_output(tpcb);
 
 
@@ -133,9 +150,22 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 
 		printf("image #%d\r\n",image_number);
 
-		//display image with number image_number -> use command for this
+		if(image_number > 0 && image_number <= amount_images){
+			pictureToLCD(getRawImageData(image_list[image_number],strlen(image_list[image_number])));
+		}else{
+			//no image with that number exists
+			printf("No image with that number exists\r\n");
+			char errortext1[40]="No image with that number exists\r\n";
+			tcp_write(tpcb,errortext1,strlen(errortext1),0);
+			tcp_output(tpcb);
+		}
+
 	}else{
 		err_code=1; //unknown command
+		printf("Unknown command\r\n");
+			char errortext2[20]="Unknown command\r\n";
+			tcp_write(tpcb,errortext2,strlen(errortext2),0);
+			tcp_output(tpcb);
 	}
 	return err_code;
 }
