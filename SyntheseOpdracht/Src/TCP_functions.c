@@ -16,7 +16,8 @@
 #endif
 
 char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\nSend 'l' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nOr send 't' followed by a space, then your text to display that text.\r\n";
-
+char** image_list;
+//char* image_list[getImageAmount()];
 
 
 /*!
@@ -113,6 +114,12 @@ err_t handle_incoming_message(void *arg, struct tcp_pcb *tpcb,struct pbuf *pbuf,
 		//}
 	}
 	else{
+		for(int i=0;i<getImageAmount();i++){
+			free(image_list[i]);
+		}
+		free(image_list);
+		tcp_close(tpcb);
+
 		//pbuf empty -> means connection was closed, to do: close connection
 	}
 	return ERR_OK;
@@ -138,8 +145,8 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	char image_number_string[5];
 	int longest_name = getLargestNameLength();
 	//variables are static, needs to persist between different commands, to remember the list given by 'l' command, to be able to choose an image to display by the number command
-	static int amount_images=0;
-	static char** image_list;
+	int amount_images=getImageAmount();
+	//static char* image_list[getImageAmount()];
 
 	/* Checking if it's the first creation of the image list. If it does exist, resize the existing array with realloc
 	 * 	(extra measurements in case the image list changes in size in runtime, probably not necessary but it is safer
@@ -148,10 +155,14 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	 */
 
 	if(image_list==NULL){
-		image_list = (char**)malloc(getImageAmount() * longest_name);
-	}else{
-		image_list = (char**)realloc(image_list,getImageAmount() * longest_name);
+		image_list = (char**)malloc(amount_images*sizeof(char*));
+		for(int i=0;i<amount_images;i++){
+			image_list[i]=(char*)malloc(longest_name*sizeof(char));
+		}
 	}
+	/*}else{
+		image_list = (char**)realloc(image_list,getImageAmount() * longest_name);
+	}*/
 
 
 	int err_code = 0;
@@ -166,9 +177,9 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 
 		//list of all images
 		char image_name[longest_name];
-		amount_images = getImageList(image_list,raw,a_z);
+		int amount_images = getImageList(image_list,raw,a_z);
 		for(i=0; i< amount_images; i++){
-			extractNameOutOfPath(image_list[i],strlen(image_list[i]),image_name,no_ext,lower);
+			extractNameOutOfPath(image_list[i],longest_name,image_name,no_ext,lower);
 			snprintf(temp_text,100,"#%d: %s\r\n",i,image_name);
 			strncpy(&imagelisttext[i*(longest_name+10)],temp_text,longest_name+10);
 			tot_len+=longest_name+10;
@@ -176,7 +187,7 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 		tcp_write(tpcb,imagelisttext,tot_len,0);
 		imagelisttext[(i+1)*(longest_name+10)]='\0';
 		printf("%s\r\n\r\n",imagelisttext);
-		//textToLCD(imagelisttext,tot_len,LCD_COLOR_BLUE);
+		//textToLCD("list ding",10,LCD_COLOR_BLUE);
 		tcp_output(tpcb);
 
 
@@ -190,8 +201,8 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 
 		printf("image #%d\r\n",image_number);
 
-		if(image_number > 0 && image_number <= amount_images){
-			pictureToLCD(getRawImageData(image_list[image_number],strlen(image_list[image_number])));
+		if(image_number < amount_images){
+			pictureToLCD(getRawImageData((image_list[image_number]),longest_name));
 		}else{
 			//no image with that number exists
 			printf("No image with that number exists\r\n");
@@ -203,10 +214,9 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	}else{
 		err_code=1; //unknown command
 		printf("Unknown command\r\n");
-			char errortext2[20]="Unknown command\r\n";
+			/*char errortext2[20]="Unknown command\r\n";
 			tcp_write(tpcb,errortext2,strlen(errortext2),0);
-			tcp_output(tpcb);
+			tcp_output(tpcb);*/
 	}
 	return err_code;
 }
-
