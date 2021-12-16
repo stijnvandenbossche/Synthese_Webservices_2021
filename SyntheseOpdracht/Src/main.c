@@ -168,7 +168,6 @@ int main(void)
 	  // Get list of all the valid images/gifs from the fs.
       char* imageList[getImageAmount()];
       char* gifList[getGifAmount()];
-      char* frameList[MAX_GIF_FRAMES];
       char name[getLargestNameLength()];
       struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
 
@@ -188,7 +187,7 @@ int main(void)
 	  //pu on 1==0 to test
 	  if(1==1)
 	  {
-		  getRawImageMetaData("/images/maishakselaar", strlen("/images/maishakselaar"), &buf);
+		  getRawImageMetaData("/images/christmasTree", strlen("/images/christmasTree"), &buf);
 		  pictureToLCD(buf);
 		  //just regular delay for testing purposes
 		  HAL_Delay(5000);
