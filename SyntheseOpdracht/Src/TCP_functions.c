@@ -6,6 +6,7 @@
  *  \author Stijn Vdb
  */
 
+
 #include <TCP_functions.h>
 #ifndef BSP_FUNCTIONS_H_
 #include <LCD_functions.h>
@@ -15,10 +16,10 @@
 #include <fileSystemAPI.h>
 #endif
 
+#include <regex.h>
+
 char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\nSend 'l' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nOr send 't' followed by a space, then your text to display that text.\r\n";
 char** image_list;
-//char* image_list[getImageAmount()];
-
 
 /*!
  * \brief This function initializes TCP functionality & listens at port 64000 by default. Has to be called to correctly handle TCP commands
