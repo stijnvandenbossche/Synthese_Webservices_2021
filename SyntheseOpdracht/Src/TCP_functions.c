@@ -114,10 +114,8 @@ err_t handle_incoming_message(void *arg, struct tcp_pcb *tpcb,struct pbuf *pbuf,
 		//}
 	}
 	else{
-		for(int i=0;i<getImageAmount();i++){
-			free(image_list[i]);
-		}
 		free(image_list);
+		image_list=NULL;
 		tcp_close(tpcb);
 
 		//pbuf empty -> means connection was closed, to do: close connection
@@ -156,14 +154,7 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 
 	if(image_list==NULL){
 		image_list = (char**)malloc(amount_images*sizeof(char*));
-		for(int i=0;i<amount_images;i++){
-			image_list[i]=(char*)malloc(longest_name*sizeof(char));
-		}
 	}
-	/*}else{
-		image_list = (char**)realloc(image_list,getImageAmount() * longest_name);
-	}*/
-
 
 	int err_code = 0;
 	int i;
@@ -202,7 +193,7 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 		printf("image #%d\r\n",image_number);
 
 		if(image_number < amount_images){
-			pictureToLCD(getRawImageData((image_list[image_number]),longest_name));
+			pictureToLCD(getRawImageData((image_list[image_number]),strlen(image_list[image_number])));
 		}else{
 			//no image with that number exists
 			printf("No image with that number exists\r\n");
@@ -214,9 +205,6 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	}else{
 		err_code=1; //unknown command
 		printf("Unknown command\r\n");
-			/*char errortext2[20]="Unknown command\r\n";
-			tcp_write(tpcb,errortext2,strlen(errortext2),0);
-			tcp_output(tpcb);*/
 	}
 	return err_code;
 }
