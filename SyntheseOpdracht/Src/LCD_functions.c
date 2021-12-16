@@ -2,22 +2,23 @@
  *	\file BSP_functions.c
  *
  *  \Created 8 nov. 2021
- *  \author Jonas Aertgeerts
+ *  \Author Jonas Aertgeerts
  */
 #include <LCD_functions.h>
+// include picture that will be shown when something is wrong with the images
 #include "errorPicture.h"
 
-/*
- *  declaration of used variables
- */
+//declaration of used variables
 
 // error message that will be displayed on the LCD when there is something wrong with the text
 static char errorMessageText[TEXT_BUFFER_LENGTH] = "something went wrong while printing the string (see Serial terminal for more info)";
 
-// timerhandler
+// timerhandler for hardware timer
 extern TIM_HandleTypeDef htim2;
 
+// lcd handler
 extern LTDC_HandleTypeDef hltdc;
+
 // to light up screen when new image is displayed
 extern uint32_t ScreensaverStart;
 
@@ -66,12 +67,11 @@ void initLCD(void)
 	  BSP_LCD_DisplayOn();
 
 	  // background layer is now white
-	  // pictures will be displayed on this layer
 	  BSP_LCD_SelectLayer(0);
 	  BSP_LCD_Clear(LCD_COLOR_WHITE);
 
 
-	  // text will be displayed on foreground layer
+	  // text and pictures will be displayed on foreground layer
 	  BSP_LCD_SelectLayer( 1 );
 	  // layer is made transparent so background is visible
 	  BSP_LCD_Clear(LCD_COLOR_TRANSPARENT);
@@ -116,7 +116,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 	}
 	// make sure there is a '\0' at the end
 	textArray[len] = '\0';
-	// check if there are any weird charakters in the string
+	// check if there are any weird characters in the string
 	for(int i = 0 ; i < len; i++)
 	{
 		if(textArray[i] < ' ')
@@ -133,7 +133,6 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 	//clear text
 	clearText();
 	BSP_LCD_SetTextColor(color);
-	// make sure we are on the foreground layer
 	// small string to save the line that is going to be printed.
 	// one char longer than max length for '\0'
 	char BufString[charsOnLine+1];
@@ -205,6 +204,7 @@ int textToLCD(char textArray[TEXT_BUFFER_LENGTH], int len, uint32_t color)
 		BSP_LCD_DisplayStringAt( 5, LineCnt, ( uint8_t * ) BufString, LEFT_MODE );
 
 	}
+	// return len to indicate all went well
 	return len;
 }
 
@@ -224,34 +224,43 @@ uint8_t pictureToLCD(struct imageMetaData picture)
 	HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
 
+	// save wich picture is printed
 	currentPicture = picture;
+	// check image size
 	if(currentPicture.width > MAX_IMAGE_WIDTH || currentPicture.height > MAX_IMAGE_HEIGHT)
 	{
 		stopTimer();
 		//remove previous picture
 		clearPicture();
 		// print the error picture
-		frameToLCD(ERROR_PICTURE_DATA, ERROR_PICTURE_DATA_X_PIXEL, ERROR_PICTURE_DATA_Y_PIXEL);
+		frameToLCD((void*)ERROR_PICTURE_DATA, ERROR_PICTURE_DATA_X_PIXEL, ERROR_PICTURE_DATA_Y_PIXEL);
 		printf("something went wrong while printing the picture, it is to big\r\n");
 		return 0;
 	}
 	else
 	{
-
+		// indicates it's a regular picture
 		if(picture.frameTime == 0)
 		{
+			// no interrupts needed
 			stopTimer();
 			//remove previous picture
 			clearPicture();
-			// drawpicture based on given pointer
+			// draw picture based on given pointer
 			frameToLCD(currentPicture.data, currentPicture.width, currentPicture.height);
 		}
+		// it's a gif
 		else
 		{
+			//remove previous picture
 			clearPicture();
+			// store the amount of frames
 			frameAmount = getGifFrames(currentPicture.name, strlen(currentPicture.name), frameList);
+			// start with first frame
 			frameCounter = 0;
+			// set interrupt interval
 			setTimer_ms(picture.frameTime);
+			// start the timer
 			startTimer();
 		}
 		return 1;
@@ -270,7 +279,9 @@ uint8_t pictureToLCD(struct imageMetaData picture)
  */
 static void frameToLCD(void* data, uint16_t width, uint16_t height)
 {
-	while(!(hltdc.Instance->CDSR & 1<<2)); // wait on vsync
+	// wait for vsync
+	while(!(hltdc.Instance->CDSR & 1<<2));
+	// draw frame/image
 	WDA_LCD_DrawBitmap((uint16_t*)data, (LCD_WIDTH/2) +  ( ( (LCD_WIDTH/2) - width ) / 2 ) , ( LCD_HEIGHT - height ) / 2, width, height, LTDC_PIXEL_FORMAT_ARGB1555);
 }
 /*!
@@ -283,9 +294,9 @@ static void frameToLCD(void* data, uint16_t width, uint16_t height)
  */
 static void clearText(void)
 {
-	// switch to transparent to make overwrite text with 'invisible' plane
+	// switch to transparent to overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
-	// fill upper screen with plane
+	// fill left screen half with plane
 	BSP_LCD_FillRect( 0, 0 , LCD_WIDTH/2-1, LCD_HEIGHT );
 }
 
@@ -299,9 +310,9 @@ static void clearText(void)
  */
 static void clearPicture(void)
 {
-	// switch to transparent to make overwrite text with 'invisible' plane
+	// switch to transparent to overwrite previous picture with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
-	// fill lower screen with plane
+	// fill right screen half with plane
 	BSP_LCD_FillRect( (LCD_WIDTH/2), 0 , LCD_WIDTH/2, LCD_HEIGHT );
 }
 
@@ -316,6 +327,7 @@ static void clearPicture(void)
  */
 uint8_t readButton(void)
 {
+	// read input register
 	if(GPIOI->IDR & GPIO_PIN_11)
 	{
 		return 1;
@@ -336,6 +348,7 @@ uint8_t readButton(void)
  */
 static void setTimer_ms(uint16_t time_ms)
 {
+	// set reload register
 	htim2.Instance->ARR = (time_ms * 2) - 1;
 }
 
@@ -350,11 +363,16 @@ static void setTimer_ms(uint16_t time_ms)
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
+	// check if interrupt came from right timer
 	if(htim == &htim2)
 	{
+		// get image data and place it in local struct
 		getRawImageMetaData(frameList[frameCounter], strlen(frameList[frameCounter]), &currentPicture);
+		// print current frame
 		frameToLCD(currentPicture.data, currentPicture.width, currentPicture.height);
+		// increase framecounter
 		frameCounter++;
+		// resetcounter if it was last frame
 		if(frameCounter == frameAmount)
 		{
 			frameCounter = 0;
@@ -372,6 +390,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
  */
 static void startTimer(void)
 {
+	// start timer
 	HAL_TIM_Base_Start_IT(&htim2);
 }
 
@@ -385,5 +404,6 @@ static void startTimer(void)
  */
 static void stopTimer(void)
 {
+	// stop timer
 	HAL_TIM_Base_Stop_IT(&htim2);
 }

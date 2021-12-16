@@ -11,6 +11,7 @@
 //added "${workspace_loc:/${ProjName}/Drivers/BSP/inc}" to project properties
 #include "stm32746g_discovery_lcd.h"
 
+// include filesystemAPI to use it's variables
 #include "fileSystemAPI.h"
 
 // define lcd dimensions
