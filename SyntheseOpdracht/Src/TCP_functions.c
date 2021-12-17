@@ -18,7 +18,9 @@
 
 #include <regex.h>
 
-char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\nSend 'l' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nOr send 't' followed by a space, then your text to display that text.\r\n";
+//variables are static, needs to persist between different commands, to remember the list given by 'l' command, to be able to choose an image to display by the number command
+char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\n";
+char welcome_message_tcp_commands[MAX_LENGTH_WELCOME_MESSAGE]="Send 'l' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nSend 't' followed by a space, then your text to display that text.\r\nSend 'h' to display a list of commands\r\n";
 char** image_list;
 
 /*!
@@ -58,11 +60,11 @@ int init_TCP(void){
 err_t handle_incoming_connection(void* arg, struct tcp_pcb *tpcb, err_t err){
 	//send welcome message
 	tcp_write(tpcb,welcome_message_tcp,MAX_LENGTH_WELCOME_MESSAGE, 0);
-	printf("Welcome\r\n");
+	tcp_output(tpcb);
+	tcp_write(tpcb,welcome_message_tcp_commands,MAX_LENGTH_WELCOME_MESSAGE, 0);
 	tcp_output(tpcb);
 	tcp_sent(tpcb, succesful_send);
 	tcp_recv(tpcb, handle_incoming_message);
-	printf("callback functions done\r\n");
 	return ERR_OK;
 }
 
@@ -77,7 +79,6 @@ err_t handle_incoming_connection(void* arg, struct tcp_pcb *tpcb, err_t err){
  */
 err_t succesful_send(void *arg, struct tcp_pcb *tpcb, u16_t len){
 	//succesfully sent data, nothing needs to be done at the moment
-	printf("sent\r\n");
 	return ERR_OK;
 }
 
@@ -95,7 +96,6 @@ err_t succesful_send(void *arg, struct tcp_pcb *tpcb, u16_t len){
 
 err_t handle_incoming_message(void *arg, struct tcp_pcb *tpcb,struct pbuf *pbuf, err_t err){
 	//write data to pbuf and depending from what is received to different action
-	printf("incoming message\r\n");
 	char data[TEXT_BUFFER_LENGTH];
 	int pbuf_len = pbuf->tot_len;
 	if(pbuf!=NULL){
@@ -139,18 +139,14 @@ err_t handle_incoming_message(void *arg, struct tcp_pcb *tpcb,struct pbuf *pbuf,
  */
 
 int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
-	printf("Handle command: %c\r\n",command[0]);
 	int image_number;
 	char image_number_string[5];
 	int longest_name = getLargestNameLength();
-	//variables are static, needs to persist between different commands, to remember the list given by 'l' command, to be able to choose an image to display by the number command
 	int amount_images=getImageAmount();
-	//static char* image_list[getImageAmount()];
 
-	/* Checking if it's the first creation of the image list. If it does exist, resize the existing array with realloc
-	 * 	(extra measurements in case the image list changes in size in runtime, probably not necessary but it is safer
+	/* Checking if it's the first creation of the image list.
+	 * If it doesn't exist yet, create it with malloc
 	 *
-	 * 	If it's the first time, create it with malloc
 	 */
 
 	if(image_list==NULL){
@@ -171,15 +167,14 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 		char image_name[longest_name];
 		int amount_images = getImageList(image_list,raw,a_z);
 		for(i=0; i< amount_images; i++){
-			extractNameOutOfPath(image_list[i],longest_name,image_name,no_ext,lower);
-			snprintf(temp_text,100,"#%d: %s\r\n",i,image_name);
-			strncpy(&imagelisttext[i*(longest_name+10)],temp_text,longest_name+10);
-			tot_len+=longest_name+10;
+			extractNameOutOfPath(image_list[i],strlen(image_list[i]),image_name,no_ext,lower);
+			snprintf(temp_text,strlen(image_list[i])+6,"#%d: %s\r\n",i,image_name);
+			strncpy(&imagelisttext[tot_len],temp_text,strlen(image_list[i])+6);
+			tot_len+=strlen(image_list[i])+6;
 		}
 		tcp_write(tpcb,imagelisttext,tot_len,0);
-		imagelisttext[(i+1)*(longest_name+10)]='\0';
+		imagelisttext[tot_len+2]='\0';
 		printf("%s\r\n\r\n",imagelisttext);
-		//textToLCD("list ding",10,LCD_COLOR_BLUE);
 		tcp_output(tpcb);
 
 
@@ -187,25 +182,40 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 		char text_t[TEXT_BUFFER_LENGTH];
 		strncpy(text_t,&command[2],command_length);
 		textToLCD(text_t,command_length-2,LCD_COLOR_RED);
+	}else if(command[0]=='h'|| command[0]=='H'){
+		tcp_write(tpcb,welcome_message_tcp_commands,MAX_LENGTH_WELCOME_MESSAGE, 0);
+		tcp_output(tpcb);
 	}else if(isdigit(command[0])){
-		strncpy(image_number_string,command,2);	//Support up to two-digit numbers, should be plenty. If necessary, can be easily expanded by changing the '2'
-		image_number = atoi(image_number_string);
+		if(image_list != NULL){
+			strncpy(image_number_string,command,2);	//Support up to two-digit numbers, should be plenty. If necessary, can be easily expanded by changing the '2'
+			image_number = atoi(image_number_string);
 
-		printf("image #%d\r\n",image_number);
+			printf("image #%d\r\n",image_number);
 
-		if(image_number < amount_images){
-			pictureToLCD(getRawImageData((image_list[image_number]),strlen(image_list[image_number])));
+			if(image_number < amount_images){
+				pictureToLCD(getRawImageData((image_list[image_number]),strlen(image_list[image_number])));
+			}else{
+				//no image with that number exists
+				printf("No image with that number exists\r\n");
+				char errortext1[40]="No image with that number exists\r\n";
+				tcp_write(tpcb,errortext1,strlen(errortext1),0);
+				tcp_output(tpcb);
+			}
 		}else{
-			//no image with that number exists
-			printf("No image with that number exists\r\n");
-			char errortext1[40]="No image with that number exists\r\n";
-			tcp_write(tpcb,errortext1,strlen(errortext1),0);
+			//list not populated yet
+			char errortext2[85]= "The list of images isn't generated yet, enter 'l' to display the list first\r\n";
+			tcp_write(tpcb,errortext2,strlen(errortext2),0);
 			tcp_output(tpcb);
 		}
 
 	}else{
-		err_code=1; //unknown command
-		printf("Unknown command\r\n");
+		if(command[0] != '\r'){
+			err_code=1; //unknown command
+			char errortext3[70]="Unknown command, for a list of possible commands, type 'h'\r\n";
+			tcp_write(tpcb,errortext3,strlen(errortext3),0);
+			tcp_output(tpcb);
+			printf("Unknown command\r\n");
+		}
 	}
 	return err_code;
 }
