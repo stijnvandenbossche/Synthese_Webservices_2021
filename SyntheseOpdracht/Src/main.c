@@ -160,11 +160,15 @@ int main(void)
   BSP_QSPI_MemoryMappedMode();
   WRITE_REG(QUADSPI->LPTR, 0xFFF);
 
-// EXAMPLE CODE
-#if TESTCODE == 1
+
   initLCD();
-  if(initFileSystemAPI() == 1)
+  if(initFileSystemAPI() == 0)
   {
+	  printf("initFileSystemAPI has failed\n\r\n\r");
+  }
+  else
+  {
+	#if TESTCODE == 1
 	  // Get list of all the valid images/gifs from the fs.
       char* imageList[getImageAmount()];
       char* gifList[getGifAmount()];
@@ -184,7 +188,7 @@ int main(void)
       printf("\n\r");
       //test large picture
 	  //put on 1==1 to test
-	  //pu on 1==0 to test
+	  //put on 1==0 to test
 	  if(1==1)
 	  {
 		  getRawImageMetaData("/images/christmasTree", strlen("/images/christmasTree"), &buf);
@@ -222,18 +226,9 @@ int main(void)
 		  }
 	  }
 	  printf("\n\r");
-
-
-
-
+	#endif
   }
-  else
-  {
-	  printf("initFileSystemAPI has failed\n\r");
-  }
-  printf("\n\r");
 
-#endif  
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
   /* USER CODE END 2 */
