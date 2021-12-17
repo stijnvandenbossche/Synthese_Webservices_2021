@@ -1,8 +1,8 @@
 /*!
  *	\file BSP_functions.h
  *
- *  \Created 8 nov. 2021
- *  \Author Jonas Aertgeerts
+ *  \date 8 nov. 2021
+ *  \author Jonas Aertgeerts
  */
 #ifndef BSP_FUNCTIONS_H_
 #define BSP_FUNCTIONS_H_
@@ -11,7 +11,7 @@
 //added "${workspace_loc:/${ProjName}/Drivers/BSP/inc}" to project properties
 #include "stm32746g_discovery_lcd.h"
 
-// include filesystemAPI to use it's variables
+// include filesystemAPI to use its variables
 #include "fileSystemAPI.h"
 
 // define lcd dimensions

@@ -1,10 +1,10 @@
 /*!
  *	\file BSP_functions.c
  *
- *  \Created 8 nov. 2021
- *  \Author Jonas Aertgeerts
+ *  \date 8 nov. 2021
+ *  \author Jonas Aertgeerts
  */
-#include <LCD_functions.h>
+#include "LCD_functions.h"
 // include picture that will be shown when something is wrong with the images
 #include "errorPicture.h"
 
@@ -224,7 +224,7 @@ uint8_t pictureToLCD(struct imageMetaData picture)
 	HAL_GPIO_WritePin(LCD_DISP_GPIO_PORT, LCD_DISP_PIN, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);
 
-	// save wich picture is printed
+	// save which picture is printed
 	currentPicture = picture;
 	// check image size
 	if(currentPicture.width > MAX_IMAGE_WIDTH || currentPicture.height > MAX_IMAGE_HEIGHT)
