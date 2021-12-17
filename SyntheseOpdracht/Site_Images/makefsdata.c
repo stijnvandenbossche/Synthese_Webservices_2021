@@ -999,6 +999,7 @@ int process_file(FILE *data_file, FILE *struct_file, const char *filename)
   fprintf(data_file, "static const " PAYLOAD_ALIGN_TYPE " dummy_align_%s = %d;" NEWLINE, varname, payload_alingment_dummy_counter++);
   fprintf(data_file, "#endif" NEWLINE);
 #endif /* ALIGN_PAYLOAD */
+  fprintf(data_file, "__attribute__((section(\".ExtQSPIFlashSection\")))" NEWLINE);
   fprintf(data_file, "static const unsigned char FSDATA_ALIGN_PRE data_%s[] FSDATA_ALIGN_POST = {" NEWLINE, varname);
   /* encode source file name (used by file system, not returned to browser) */
   fprintf(data_file, "/* %s (%"SZT_F" chars) */" NEWLINE, qualifiedName, strlen(qualifiedName) + 1);

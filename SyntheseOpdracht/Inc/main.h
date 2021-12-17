@@ -58,6 +58,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define QSPI_D2_Pin GPIO_PIN_2
+#define QSPI_D2_GPIO_Port GPIOE
+#define QSPI_NCS_Pin GPIO_PIN_6
+#define QSPI_NCS_GPIO_Port GPIOB
 #define LCD_BL_CTRL_Pin GPIO_PIN_3
 #define LCD_BL_CTRL_GPIO_Port GPIOK
 #define LED_Pin GPIO_PIN_1
@@ -66,6 +70,14 @@ void Error_Handler(void);
 #define LCD_DISP_GPIO_Port GPIOI
 #define BUTTON_Pin GPIO_PIN_11
 #define BUTTON_GPIO_Port GPIOI
+#define QSPI_CLK_Pin GPIO_PIN_2
+#define QSPI_CLK_GPIO_Port GPIOB
+#define QSPI_D1_Pin GPIO_PIN_12
+#define QSPI_D1_GPIO_Port GPIOD
+#define QSPI_D3_Pin GPIO_PIN_13
+#define QSPI_D3_GPIO_Port GPIOD
+#define QSPI_D0_Pin GPIO_PIN_11
+#define QSPI_D0_GPIO_Port GPIOD
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
