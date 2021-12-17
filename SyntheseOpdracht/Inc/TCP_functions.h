@@ -36,7 +36,7 @@
  *  \def MAX_LENGTH_WELCOME_MESSAGE
  *  MAX_LENGTH_WELCOME_MESSAGE sets the maximum length of the welcome message, to make it easier to initialize the string
  */
-#define MAX_LENGTH_WELCOME_MESSAGE 300
+#define MAX_LENGTH_WELCOME_MESSAGE 500
 
 
 int init_TCP(void);

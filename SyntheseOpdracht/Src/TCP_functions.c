@@ -20,7 +20,8 @@
 
 //variables are static, needs to persist between different commands, to remember the list given by 'l' command, to be able to choose an image to display by the number command
 char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\n";
-char welcome_message_tcp_commands[MAX_LENGTH_WELCOME_MESSAGE]="Send 'l' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nSend 't' followed by a space, then your text to display that text.\r\nSend 'h' to display a list of commands\r\n";
+char welcome_message_tcp_commands[MAX_LENGTH_WELCOME_MESSAGE]="Send '\x1b[32;40ml\x1b[39;49m' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nSend '\x1b[35;40mt\x1b[39;49m' followed by a space, then your text to display that text.\r\nSend '\x1b[33;40mc\x1b[39;49m' to clear the screen.\r\nSend '\x1b[34;40mh\x1b[39;49m' to display a list of commands.\r\n";
+
 char** image_list;
 
 /*!
@@ -187,6 +188,9 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	}else if(command[0]=='h'|| command[0]=='H'){
 		tcp_write(tpcb,welcome_message_tcp_commands,MAX_LENGTH_WELCOME_MESSAGE, 0);
 		tcp_output(tpcb);
+	}else if(command[0]=='c' || command[0]=='C'){
+		//clearPicture();
+		//clearText();
 	}else if(isdigit(command[0])){
 		if(image_list != NULL){
 			strncpy(image_number_string,command,2);	//Support up to two-digit numbers, should be plenty. If necessary, can be easily expanded by changing the '2'
@@ -214,7 +218,7 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	}else{
 		if(command[0] != '\r'){
 			err_code=1; //unknown command
-			char errortext3[70]="Unknown command, for a list of possible commands, type 'h'\r\n";
+			char errortext3[85]="\x1b[31;40mUnknown command, for a list of possible commands, type 'h'\x1b[39;49m\r\n";
 			tcp_write(tpcb,errortext3,strlen(errortext3),0);
 			tcp_output(tpcb);
 			printf("Unknown command\r\n");
