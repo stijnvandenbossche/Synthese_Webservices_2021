@@ -22,7 +22,7 @@
 #define TEXT_BUFFER_LENGTH 300
 
 // time in ms it take for the screen to go dark after no more touches were detected
-#define SCREENSAVER_DELAY 10000
+#define SCREENSAVER_DELAY 20000
 
 /* LCD Initialization for normal operation */
 void initLCD(void);
