@@ -30,6 +30,10 @@ void initLCD(void);
 int textToLCD(char *textArray, int len, uint32_t color);
 /* prints picture to the LCD */
 uint8_t pictureToLCD(struct imageMetaData picture);
+/* clears previous text of the LCD */
+void clearText(void);
+/* clears previous picture of the LCD */
+void clearPicture(void);
 
 /* reads status of onboard blue button */
 uint8_t readButton(void);

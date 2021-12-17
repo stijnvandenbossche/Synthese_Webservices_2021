@@ -36,10 +36,7 @@ uint8_t frameAmount;
 // to itterate over all gif frames
 uint8_t frameCounter;
 
-/* clears previous text of the LCD */
-static void clearText(void);
-/* clears previous picture of the LCD */
-static void clearPicture(void);
+
 /* print one frame/picture to the LCD */
 static void frameToLCD(void* data, uint16_t width, uint16_t height);
 /* sets the time for the timer interrupt routine */
@@ -292,7 +289,7 @@ static void frameToLCD(void* data, uint16_t width, uint16_t height)
  * \retval void
  *
  */
-static void clearText(void)
+void clearText(void)
 {
 	// switch to transparent to overwrite text with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
@@ -308,7 +305,7 @@ static void clearText(void)
  * \retval void
  *
  */
-static void clearPicture(void)
+void clearPicture(void)
 {
 	// switch to transparent to overwrite previous picture with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
