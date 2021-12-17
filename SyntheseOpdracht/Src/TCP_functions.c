@@ -142,7 +142,8 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	int image_number;
 	char image_number_string[5];
 	int longest_name = getLargestNameLength();
-	int amount_images=getImageAmount();
+	int amount_total=getImageAmount()+getGifAmount();
+	struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
 
 	/* Checking if it's the first creation of the image list.
 	 * If it doesn't exist yet, create it with malloc
@@ -150,7 +151,7 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	 */
 
 	if(image_list==NULL){
-		image_list = (char**)malloc(amount_images*sizeof(char*));
+		image_list = (char**)malloc(amount_total*sizeof(char*));
 	}
 
 	int err_code = 0;
@@ -165,9 +166,10 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 
 		//list of all images
 		char image_name[longest_name];
-		int amount_images = getImageList(image_list,raw,a_z);
-		for(i=0; i< amount_images; i++){
-			extractNameOutOfPath(image_list[i],strlen(image_list[i]),image_name,no_ext,lower);
+		int amount_images = getImageList(image_list,png,a_z);
+		int amount_gifs = getImageList(image_list+amount_images,gif,a_z);
+		for(i=0; i< amount_total; i++){
+			extractNameOutOfPath(image_list[i],strlen(image_list[i]),image_name,ext,lower);
 			snprintf(temp_text,strlen(image_list[i])+6,"#%d: %s\r\n",i,image_name);
 			strncpy(&imagelisttext[tot_len],temp_text,strlen(image_list[i])+6);
 			tot_len+=strlen(image_list[i])+6;
@@ -192,8 +194,9 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 
 			printf("image #%d\r\n",image_number);
 
-			if(image_number < amount_images){
-				pictureToLCD(getRawImageData((image_list[image_number]),strlen(image_list[image_number])));
+			if(image_number < amount_total){
+				getRawImageMetaData((image_list[image_number]),strlen(image_list[image_number]),&buf);
+				pictureToLCD(buf);
 			}else{
 				//no image with that number exists
 				printf("No image with that number exists\r\n");
