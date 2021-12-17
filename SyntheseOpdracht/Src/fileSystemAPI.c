@@ -167,21 +167,23 @@ void extractNameOutOfPath(char* pPath, uint16_t pathLength, char* pName, extensi
  */
 uint8_t getImageList(char* imageList[], fileExtension extType, sortType sortState)
 {
-	// TODO: check extType
 	uint8_t imageCnt = 0;
 	char pathBuffer[MAX_PATH_LENGTH];
 
-	for(struct fsdata_file* f = (struct fsdata_file*)pFirstFile; f != NULL; f = (struct fsdata_file*)f->next)
+	if(extType == png || extType == gif)
 	{
-		// validateImage is called to check if the file f is valid.
-		if(validateImage((char*)f->name, strlen((const char*)f->name)) != 0x00)
+		for(struct fsdata_file* f = (struct fsdata_file*)pFirstFile; f != NULL; f = (struct fsdata_file*)f->next)
 		{
-			// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .GIF or .gif .
-			convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
-			if((extType == png && strstr(pathBuffer, ".png") != NULL) || (extType == gif && strstr(pathBuffer, ".gif") != NULL))
+			// validateImage is called to check if the file f is valid.
+			if(validateImage((char*)f->name, strlen((const char*)f->name)) != 0x00)
 			{
-				insertImagePath(imageList, imageCnt, (char*)f->name, sortState);
-				imageCnt++;
+				// convExtToLowerCase is called to convert the extension of the file f to lowercase. This way it doesn't matter whether the extension is e.g a .GIF or .gif .
+				convExtToLowerCase((char*)f->name, strlen((const char*)f->name), pathBuffer, sizeof(pathBuffer));
+				if((extType == png && strstr(pathBuffer, ".png") != NULL) || (extType == gif && strstr(pathBuffer, ".gif") != NULL))
+				{
+					insertImagePath(imageList, imageCnt, (char*)f->name, sortState);
+					imageCnt++;
+				}
 			}
 		}
 	}
@@ -409,23 +411,23 @@ static uint8_t extractArgsOutOfPath(char* pPath, uint16_t pathLength, struct ima
 	uint16_t lengthBeforeExt = getPathLength(pPath, pathLength, stop_at_ext);
 	uint8_t retVal = 0;
 	convExtToLowerCase(pPath, pathLength, pathBuffer, sizeof(pathBuffer));
-	// TODO: check if every argument is present.
 	if(strstr(pathBuffer, ".raw") != NULL && (lengthBeforeExt - lengthBeforeArgs) >= strlen("#-#-x-@-"))
 	{
+		// The value of pStartArg is continuously checked to see if every argument is present.
 		pStartArg = strchr(pathBuffer, '#');
-		pStartArg = strtok(pStartArg, "#x@");
-		argNumBuf = strtol(pStartArg, NULL, 10);
+		pStartArg = (pStartArg != NULL)? strtok(pStartArg, "#x@") : NULL;
+		argNumBuf = (pStartArg != NULL)? strtol(pStartArg, NULL, 10) : 0;
 
-		pStartArg = strtok(NULL, "#x@");
-		argWidthBuf = strtol(pStartArg, NULL, 10);
+		pStartArg = (pStartArg != NULL)? strtok(NULL, "#x@") : NULL;
+		argWidthBuf = (pStartArg != NULL)? strtol(pStartArg, NULL, 10) : 0;
 
-		pStartArg = strtok(NULL, "#x@");
-		argHeightBuf = strtol(pStartArg, NULL, 10);
+		pStartArg = (pStartArg != NULL)? strtok(NULL, "#x@") : NULL;
+		argHeightBuf = (pStartArg != NULL)? strtol(pStartArg, NULL, 10) : 0;
 
-		pStartArg = strtok(NULL, "#x@");
-		argTimeBuf = strtol(pStartArg, NULL, 10);
+		pStartArg = (pStartArg != NULL)? strtok(NULL, "#x@") : NULL;
+		argTimeBuf = (pStartArg != NULL)? strtol(pStartArg, NULL, 10) : 0;
 
-		if(argNumBuf > 0 && argWidthBuf >= MIN_IMAGE_WIDTH && argWidthBuf <= MAX_IMAGE_WIDTH && argHeightBuf >= MIN_IMAGE_HEIGHT && argHeightBuf <= MAX_IMAGE_HEIGHT)
+		if(pStartArg != NULL && argNumBuf > 0 && argWidthBuf >= MIN_IMAGE_WIDTH && argWidthBuf <= MAX_IMAGE_WIDTH && argHeightBuf >= MIN_IMAGE_HEIGHT && argHeightBuf <= MAX_IMAGE_HEIGHT)
 		{
 			pMetaData->num = argNumBuf;
 			pMetaData->width = argWidthBuf;
