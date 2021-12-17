@@ -14,11 +14,9 @@
     <p>This is the webside for the systhese project for Webservices & Applications 2021.</p>
     <p>Members: Jonas, Liam, Rik, Stijn, Tijn, Tim and lecturer Wim Dams.</p>
 </div>
-<div>
-    <form class = "message">
-        <input type = "text" name = "msg" id = "msg">
-        <button name = "send" class = "button" onclick = "sendmsg()">Submit</button>
-    </form>
+<div class = "message">
+    <input type = "text" name = "msg" id = "msg">
+    <button name = "send" class = "button" onclick = "sendmsg()">Submit</button>
 </div>
 <div id = "photo">
     <!--List of photo's-->
@@ -30,9 +28,9 @@
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText);
+            console.log(xmlHttp.responseText);
     }
-    xmlHttp.open("GET", "/sendedmsg.cgi?msg=" + getElementById("msg").innerHTML, true); // true for asynchronous 
+    xmlHttp.open("GET", "/sendedmsg.cgi?msg=" + document.getElementById("msg").value, true); // true for asynchronous 
     xmlHttp.send(null);
     }
 
@@ -40,7 +38,7 @@
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText);
+            console.log(xmlHttp.responseText);
     }
     xmlHttp.open("GET", "/sendedphoto.cgi?photo=" + path, true); // true for asynchronous 
     xmlHttp.send(null);

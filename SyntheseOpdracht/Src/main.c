@@ -164,7 +164,7 @@ int main(void)
                            "photo"
                        };
 
-
+  http_set_ssi_handler(mySsiHandler, ssi_tag_name, 1);
 
 
 
@@ -199,7 +199,7 @@ int main(void)
       //test large picture
 	  //put on 1==1 to test
 	  //pu on 1==0 to test
-	  if(1==1)
+	  /*if(1==1)
 	  {
 		  getRawImageMetaData("/images/maishakselaar", strlen("/images/maishakselaar"), &buf);
 		  pictureToLCD(buf);
@@ -236,7 +236,7 @@ int main(void)
 		  }
 	  }
 	  printf("\n\r");
-
+	   */
 
 
 

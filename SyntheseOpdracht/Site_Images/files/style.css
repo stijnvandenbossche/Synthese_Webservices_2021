@@ -26,6 +26,9 @@ h1{
 .photo {
     text-align: center;
     margin: 10px;
+    height: 100px;
+    display: inline-block;
+    object-fit: contain;
 }
 
 .count {
@@ -35,4 +38,12 @@ h1{
 
 .pbut {
     background-color: rgba(0, 0, 0, 0.0);
+}
+
+.gif {
+    text-align: center;
+    margin: 10px;
+    height: 100px;
+    display: inline-block;
+    object-fit: contain;
 }
