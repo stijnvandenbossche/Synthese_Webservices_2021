@@ -20,7 +20,7 @@
 #include <tcp.h>
 #endif
 
-#include <regex.h>
+#include <re.h>
 #include <LCD_functions.h>
 
 /*!

@@ -21,25 +21,22 @@
 char** image_list;
 
 char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\n";
-char welcome_message_tcp_commands[MAX_LENGTH_WELCOME_MESSAGE]="Send '\x1b[32;40ml\x1b[39;49m' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nSend '\x1b[35;40mt\x1b[39;49m' followed by a space, then your text to display that text.\r\nSend '\x1b[33;40mc\x1b[39;49m' to clear the screen.\r\nSend '\x1b[34;40mh\x1b[39;49m' to display a list of commands.\r\n";
+char welcome_message_tcp_commands[MAX_LENGTH_WELCOME_MESSAGE]="Send '\x1b[32;40ml\x1b[39;49m' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nSend '\x1b[35;40mt\x1b[39;49m' followed by a space, then your text to display that text.\r\nSend '\x1b[33;40mc\x1b[39;49m' to clear the screen.\r\nSend '\x1b[36;40mh\x1b[39;49m' to display a list of commands.\r\n";
 
 //Variables used for regex
-char* regexImage ="(?:(\d+)(?:[,\s])+)";
-char* regexHelp="^[hH]\s*$|^[hH]elp\s*$";
-char* regexList="^[lL]\s*$|^[lL]ist\s*$";
-char* regexText="(^[tT][,\s+]|^[tT]ext[,\s+])(.*)$";
-char* regexClear="^[cC]\s*$|^[Cc]lear\s*$";
+char* regexImage ="^\\d+[,\\s]*$";
+char* regexHelp="^[hH]\\s*$";
+char* regexList="^[lL]\\s*$";
+char* regexText="^[tT][,\\s+].*$";
+char* regexClear="^[cC]\\s*$";
 
 size_t maxMatches;
 
-regex_t regexCompiledImage;
-regex_t regexCompiledHelp;
-regex_t regexCompiledList;
-regex_t regexCompiledText;
-regex_t regexCompiledClear;
-
-//initialised as a pointer, needs to be allocated as an array (to be done in init)
-regmatch_t* regexMatches;
+re_t regexCompiledImage;
+re_t regexCompiledHelp;
+re_t regexCompiledList;
+re_t regexCompiledText;
+re_t regexCompiledClear;
 
 /*!
  * \brief This function initializes TCP functionality & listens at port 64000 by default. Has to be called to correctly handle TCP commands
@@ -60,27 +57,13 @@ int init_TCP(void){
 		returnvalue= 1;
 	}
 
-	//regex compilations & initialisations
-	maxMatches = getImageAmount()+getGifAmount();
-	regexMatches = (regmatch_t*)malloc(maxMatches*sizeof(regmatch_t));
 
-	//compiling regex
-	if(regcomp(&regexCompiledHelp,regexHelp,REG_EXTENDED)){
-		printf("Can't compile regex Help\r\n");
-	}
-	if(regcomp(&regexCompiledList,regexList,REG_EXTENDED)){
-		printf("Can't compile regex List\r\n");
-	}
-	if(regcomp(&regexCompiledText,regexText,REG_EXTENDED)){
-		printf("Can't compile regex Text\r\n");
-	}
-	if(regcomp(&regexCompiledClear,regexClear,REG_EXTENDED)){
-		printf("Can't compile regex Clear\r\n");
-	}
-	if(regcomp(&regexCompiledImage,regexImage,REG_EXTENDED)){
-		printf("Can't compile regex Image\r\n");
-	}
-
+	//compiling regex -> by testing, this is broken
+	regexCompiledHelp = re_compile(regexHelp);
+	regexCompiledClear = re_compile(regexClear);
+	regexCompiledList = re_compile(regexList);
+	regexCompiledText = re_compile(regexText);
+	regexCompiledImage = re_compile(regexImage);
 
 
 
@@ -187,6 +170,10 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	int longest_name = getLargestNameLength();
 	int amount_total=getImageAmount()+getGifAmount();
 	struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
+	int match_length;
+
+	//making sure command is a null-terminated string
+	command[command_length]='\0';
 
 	/* Checking if it's the first creation of the image list.
 	 * If it doesn't exist yet, create it with malloc
@@ -200,7 +187,7 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	int err_code = 0;
 	int i;
 
-	if(regexec(&regexCompiledList,command,1,regexMatches,0)==0){
+	if(re_match(regexList,command, &match_length) != -1){
 
 		char imagelisttext[1000];
 
@@ -219,26 +206,24 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 		}
 		tcp_write(tpcb,imagelisttext,tot_len,0);
 		imagelisttext[tot_len+2]='\0';
-		printf("%s\r\n\r\n",imagelisttext);
 		tcp_output(tpcb);
 
 
-	}else if(command[0]=='t' || command[0] == 'T'){
+	}else if(re_match(regexText,command, &match_length) != -1){
 		char text_t[TEXT_BUFFER_LENGTH];
-		strncpy(text_t,&command[2],command_length);
-		textToLCD(text_t,command_length-2,LCD_COLOR_RED);
-	}else if(command[0]=='h'|| command[0]=='H'){
+		int index_start = re_match(regexText,command, &match_length);
+		textToLCD(command+2,strlen(command)-2,LCD_COLOR_RED);
+	}else if(re_match(regexHelp,command, &match_length) != -1){
 		tcp_write(tpcb,welcome_message_tcp_commands,MAX_LENGTH_WELCOME_MESSAGE, 0);
 		tcp_output(tpcb);
-	}else if(command[0]=='c' || command[0]=='C'){
+	}else if(re_match(regexClear,command, &match_length) != -1){
 		//clearPicture();
 		//clearText();
-	}else if(isdigit(command[0])){
+		printf("Clear\r\n");
+	}else if(re_match(regexImage,command, &match_length) != -1){
 		if(image_list != NULL){
-			strncpy(image_number_string,command,2);	//Support up to two-digit numbers, should be plenty. If necessary, can be easily expanded by changing the '2'
-			image_number = atoi(image_number_string);
-
-			printf("image #%d\r\n",image_number);
+			image_number = atoi(command);
+			printf("image #%d\r\n", image_number);
 
 			if(image_number < amount_total){
 				getRawImageMetaData((image_list[image_number]),strlen(image_list[image_number]),&buf);
