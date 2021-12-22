@@ -16,13 +16,30 @@
 #include <fileSystemAPI.h>
 #endif
 
-#include <regex.h>
 
 //variables are static, needs to persist between different commands, to remember the list given by 'l' command, to be able to choose an image to display by the number command
+char** image_list;
+
 char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\n";
 char welcome_message_tcp_commands[MAX_LENGTH_WELCOME_MESSAGE]="Send '\x1b[32;40ml\x1b[39;49m' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nSend '\x1b[35;40mt\x1b[39;49m' followed by a space, then your text to display that text.\r\nSend '\x1b[33;40mc\x1b[39;49m' to clear the screen.\r\nSend '\x1b[34;40mh\x1b[39;49m' to display a list of commands.\r\n";
 
-char** image_list;
+//Variables used for regex
+char* regexImage ="(?:(\d+)(?:[,\s])+)";
+char* regexHelp="^[hH]\s*$|^[hH]elp\s*$";
+char* regexList="^[lL]\s*$|^[lL]ist\s*$";
+char* regexText="(^[tT][,\s+]|^[tT]ext[,\s+])(.*)$";
+char* regexClear="^[cC]\s*$|^[Cc]lear\s*$";
+
+size_t maxMatches;
+
+regex_t regexCompiledImage;
+regex_t regexCompiledHelp;
+regex_t regexCompiledList;
+regex_t regexCompiledText;
+regex_t regexCompiledClear;
+
+//initialised as a pointer, needs to be allocated as an array (to be done in init)
+regmatch_t* regexMatches;
 
 /*!
  * \brief This function initializes TCP functionality & listens at port 64000 by default. Has to be called to correctly handle TCP commands
@@ -42,6 +59,30 @@ int init_TCP(void){
 		//failed to bind port
 		returnvalue= 1;
 	}
+
+	//regex compilations & initialisations
+	maxMatches = getImageAmount()+getGifAmount();
+	regexMatches = (regmatch_t*)malloc(maxMatches*sizeof(regmatch_t));
+
+	//compiling regex
+	if(regcomp(&regexCompiledHelp,regexHelp,REG_EXTENDED)){
+		printf("Can't compile regex Help\r\n");
+	}
+	if(regcomp(&regexCompiledList,regexList,REG_EXTENDED)){
+		printf("Can't compile regex List\r\n");
+	}
+	if(regcomp(&regexCompiledText,regexText,REG_EXTENDED)){
+		printf("Can't compile regex Text\r\n");
+	}
+	if(regcomp(&regexCompiledClear,regexClear,REG_EXTENDED)){
+		printf("Can't compile regex Clear\r\n");
+	}
+	if(regcomp(&regexCompiledImage,regexImage,REG_EXTENDED)){
+		printf("Can't compile regex Image\r\n");
+	}
+
+
+
 
 	struct tcp_pcb* connection = tcp_listen_with_backlog(pcb, AMOUNT_CONNECTIONS);
 	tcp_accept(connection, handle_incoming_connection);
@@ -120,6 +161,7 @@ err_t handle_incoming_message(void *arg, struct tcp_pcb *tpcb,struct pbuf *pbuf,
 		image_list=NULL;
 		tcp_close(tpcb);
 
+
 		//pbuf empty -> means connection was closed, to do: close connection
 	}
 	return ERR_OK;
@@ -158,7 +200,7 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	int err_code = 0;
 	int i;
 
-	if(command[0]=='l' ||command[0] =='L'){
+	if(regexec(&regexCompiledList,command,1,regexMatches,0)==0){
 
 		char imagelisttext[1000];
 
