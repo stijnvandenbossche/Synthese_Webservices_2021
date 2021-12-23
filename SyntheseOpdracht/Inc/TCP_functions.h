@@ -1,7 +1,7 @@
 /*!
  *  \file TCP_functions.h
  *  \details Contains function protoypes for TCP functionality
- *  \remarkCreated on: 18 Nov 2021
+ *  \remark Created on: 18 Nov 2021
  *  \author Stijn Vdb
  */
 
