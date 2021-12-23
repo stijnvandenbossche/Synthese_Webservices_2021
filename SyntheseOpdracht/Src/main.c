@@ -177,6 +177,7 @@ int main(void)
 // EXAMPLE CODE
 
 
+  init_TCP();
   initLCD();
   if(initFileSystemAPI() == 0)
   {
@@ -244,7 +245,6 @@ int main(void)
 	  printf("\n\r");
 	#endif
   }
-
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
 
