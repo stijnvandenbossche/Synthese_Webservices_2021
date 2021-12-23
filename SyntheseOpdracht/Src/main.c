@@ -34,6 +34,7 @@
 #include "lwip/init.h"
 #include "CGI_SSI.h"
 #include "stm32746g_discovery_qspi.h"
+#include "TCP_functions.h"
 
 /* USER CODE END Includes */
 
@@ -46,7 +47,7 @@
 /* USER CODE BEGIN PD */
 // set to 1 to test code
 // set to 0 to disable test code
-#define TESTCODE 1
+#define TESTCODE 0
 
 
 

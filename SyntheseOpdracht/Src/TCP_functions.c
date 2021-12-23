@@ -194,7 +194,7 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 	}else if(re_match(regexText,command, &match_length) != -1){
 		textToLCD(command+2,strlen(command)-2,LCD_COLOR_RED);
 	}else if(re_match(regexHelp,command, &match_length) != -1){
-		tcp_write(tpcb,welcome_message_tcp_commands,MAX_LENGTH_WELCOME_MESSAGE, 0);
+		tcp_write(tpcb,welcome_message_tcp_commands,strlen(welcome_message_tcp_commands), 0);
 		tcp_output(tpcb);
 	}else if(re_match(regexClear,command, &match_length) != -1){
 		clearPicture();
