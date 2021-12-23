@@ -160,7 +160,7 @@ int main(void)
   BSP_QSPI_MemoryMappedMode();
   WRITE_REG(QUADSPI->LPTR, 0xFFF);
 
-
+  init_TCP();
   initLCD();
   if(initFileSystemAPI() == 0)
   {
