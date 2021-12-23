@@ -8,18 +8,9 @@
 #ifndef INC_TCP_FUNCTIONS_H_
 #define INC_TCP_FUNCTIONS_H_
 
-#ifndef _STRING_H_
 #include <string.h>
-#endif
-
-#ifndef __mx_lwip_H
 #include <lwip.h>
-#endif
-
-#ifndef LWIP_HDR_TCP_H
 #include <tcp.h>
-#endif
-
 #include <re.h>
 #include <LCD_functions.h>
 

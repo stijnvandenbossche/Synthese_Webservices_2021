@@ -2,26 +2,19 @@
  * \file TCP_functions.c
  * \details Contains all functions necessary for correct TCP functionality. The only function users need and should use, is init_TCP; this sets up all callback functions, and starts listening on port 64000 by default (set up in TCP_functions.h)
  *
- *  \remarkCreated on: 18 Nov 2021
+ *  \remark Created on: 18 Nov 2021
  *  \author Stijn Vdb
  */
 
 
 #include <TCP_functions.h>
-#ifndef BSP_FUNCTIONS_H_
-#include <LCD_functions.h>
-#endif
-#include <string.h>
-#ifndef FILESYSTEMAPI_H_
-#include <fileSystemAPI.h>
-#endif
 
 
 /*variables are globals, need to persist between different commands to remember the list given by 'l' command, to be able to choose an image to display by the number command*/
 char** image_list;
 
-char welcome_message_tcp[MAX_LENGTH_WELCOME_MESSAGE]="Welcome to the image picker program for our group project.\r\n";
-char welcome_message_tcp_commands[MAX_LENGTH_WELCOME_MESSAGE]="Send '\x1b[32;40ml\x1b[39;49m' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nSend '\x1b[35;40mt\x1b[39;49m' followed by a space or comma, then your text to display that text.\r\nSend '\x1b[33;40mc\x1b[39;49m' to clear the screen.\r\nSend '\x1b[36;40mh\x1b[39;49m' to display a list of commands.\r\n";
+char welcome_message_tcp[]="Welcome to the image picker program for our group project.\r\n";
+char welcome_message_tcp_commands[]="Send '\x1b[32;40ml\x1b[39;49m' to list all possible images.\r\nThen send a number to display the corresponding image.\r\nSend '\x1b[35;40mt\x1b[39;49m' followed by a space or comma, then your text to display that text.\r\nSend '\x1b[33;40mc\x1b[39;49m' to clear the screen.\r\nSend '\x1b[36;40mh\x1b[39;49m' to display a list of commands.\r\n";
 
 /*Regex patterns*/
 char* regexImage ="^\\d+[,\\s]*$";
@@ -41,7 +34,8 @@ char* regexClear="^[cC]\\s*$";
  */
 int init_TCP(void){
 	int returnvalue = 0;
-	lwip_init();
+	//lwip init is done already
+	//lwip_init();
 	struct tcp_pcb* pcb = tcp_new();
 	err_t error = tcp_bind(pcb, IP_ADDR_ANY, TCP_PORT);
 	if(error==ERR_USE){
