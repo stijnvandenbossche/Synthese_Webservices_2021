@@ -165,9 +165,6 @@ int main(void)
                        };
 
   http_set_ssi_handler(mySsiHandler, ssi_tag_name, 1);
-
-
-
   //QSPI INIT
   BSP_QSPI_Init();
   BSP_QSPI_MemoryMappedMode();
@@ -175,7 +172,9 @@ int main(void)
 // EXAMPLE CODE
 
 
-if(initFileSystemAPI() == 0)
+  init_TCP();
+  initLCD();
+  if(initFileSystemAPI() == 0)
   {
 	  printf("initFileSystemAPI has failed\n\r\n\r");
   }
@@ -241,6 +240,7 @@ if(initFileSystemAPI() == 0)
 	  printf("\n\r");
 	#endif
   }
+
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
   /* USER CODE END 2 */
