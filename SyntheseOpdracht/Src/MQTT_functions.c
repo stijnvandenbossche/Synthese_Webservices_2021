@@ -1,11 +1,8 @@
-#include "lwip.h"
-#include "mqtt.h"
 #include "MQTT_functions.h"
-#include "LCD_functions.h"
-#include "fileSystemAPI.h"
+
 
 static int inpub_id;
-static enum data_types {Text, Img, Gif};
+static enum data_types {Text, Img, Gif, Empty};
 
 void mqtt_do_connect(mqtt_client_t *client)
 {
@@ -56,8 +53,10 @@ void mqtt_incoming_publish_cb(void *arg, const char *topic, u32_t tot_len)
   {
 	  inpub_id = Gif;
   }
-
-
+  else
+  {
+	  inpub_id = Empty;
+  }
 }
 
 void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t flags)
@@ -70,7 +69,6 @@ void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t flags)
   char* gifList[getGifAmount()];
   getImageList(gifList, gif, a_z);
   struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
-
 
   if(flags & MQTT_DATA_FLAG_LAST)
   {
@@ -92,7 +90,7 @@ void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t flags)
 		  uint8_t i = 0;
 		  while(i < getImageAmount())
 		  {
-			  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name[i], ext, lower);
+			  extractNameOutOfPath(imageList[i], strlen(imageList[i]), name[i], no_ext, lower);
 			  if(strncmp(data, name[i], strlen(name[i])) == 0)
 			  {
 				  getRawImageMetaData(imageList[i], strlen(imageList[i]), &buf);
@@ -112,7 +110,7 @@ void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t flags)
 		 uint8_t j = 0;
 		 while(j < getGifAmount())
 		 {
-			  extractNameOutOfPath(gifList[j], strlen(gifList[j]), name[j], ext, lower);
+			  extractNameOutOfPath(gifList[j], strlen(gifList[j]), name[j], no_ext, lower);
 			  if(strncmp(data, name[j], strlen(name[j])) == 0)
 			  {
 				  getRawImageMetaData(gifList[j], strlen(gifList[j]), &buf);
