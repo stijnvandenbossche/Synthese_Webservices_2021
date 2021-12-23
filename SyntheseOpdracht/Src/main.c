@@ -20,13 +20,15 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "lwip.h"
+#include "mqtt.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
 #include "fileSystemAPI.h"
 #include <errno.h>
-#include "LCD_functions.h"
+#include <LCD_functions.h>
+#include "MQTT_functions.h"
 #include <sys/unistd.h>
 #include "httpd.h"
 #include "lwip/init.h"
@@ -165,6 +167,9 @@ int main(void)
                        };
 
   http_set_ssi_handler(mySsiHandler, ssi_tag_name, 1);
+
+
+
   //QSPI INIT
   BSP_QSPI_Init();
   BSP_QSPI_MemoryMappedMode();
@@ -240,9 +245,16 @@ int main(void)
 	  printf("\n\r");
 	#endif
   }
-
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
+
+  mqtt_client_t *client = mqtt_client_new();	/* Dynamic storage allocation */
+  if(client != NULL) {
+	  mqtt_do_connect(client);
+  }
+
+  mqtt_do_publish(client, NULL);
+  //HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_Port, LCD_BL_CTRL_Pin,1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
