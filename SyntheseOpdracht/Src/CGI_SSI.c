@@ -1,6 +1,8 @@
 #include "CGI_SSI.h"
 struct imageMetaData buf = {.data = NULL, .name = NULL, .num = 0, .frameTime = 0, .height = 0, .width = 0};
 
+
+//needed because enabled in cubeIDE
 int fs_open_custom(struct fs_file *file, const char *name) {
 
 	return 0;
@@ -13,6 +15,7 @@ void fs_close_custom(struct fs_file *file){
 }
 
 
+//cgi handler for receiving and printing incomming message and photo
 extern void httpd_cgi_handler(struct fs_file *file, const char* uri, int iNumParams,
                               char **pcParam, char **pcValue){
 	for(int i = 0; i < iNumParams; i++){
@@ -34,22 +37,24 @@ extern void httpd_cgi_handler(struct fs_file *file, const char* uri, int iNumPar
 }
 
 
+//making httpd_cgi_handler the sgi handler
 u16_t mySsiHandler(const char* ssi_tag_name, char *pcInsert, int iInsertLen){
 
 
-
+	//insering photo's in webside
 	if(strcmp(ssi_tag_name, "photo") == 0){
-		//vraag lijst op funtie
-
+		
+		//getting photo list
 		char* photolist[getImageAmount()];
 		getImageList(photolist, png, a_z);
 
 
-		//end lijst op funtie
 		char teststr[2560];
 
+		//adding string that shows how many photo's where detected
 		sprintf(pcInsert, "<h2 class = 'count'>%d Photo's were detected.</h2>", getImageAmount());
 
+		//printing photo's
 		strcat(pcInsert, "<div><p style = 'text-align: center;'>");
 		for(int i = 0; i < getImageAmount(); i++){
 
@@ -58,16 +63,15 @@ u16_t mySsiHandler(const char* ssi_tag_name, char *pcInsert, int iInsertLen){
 		}
 		strcat(pcInsert, "</div></p>");
 
-		//gifs
+		//getting gif list
 		char* giflist[getGifAmount()];
 		getImageList(giflist, gif, a_z);
 
-
-		//end lijst op funtie
-
+		//adding string that shows how many gifs where detected
 		sprintf(teststr, "</br></br><h2 class = 'count'>%d Gifs were detected.</h2>", getGifAmount());
 		strcat(pcInsert, teststr);
 
+		//printing gifs
 		strcat(pcInsert, "<div><p style = 'text-align: center;'>");
 		for(int i = 0; i < getGifAmount(); i++){
 
