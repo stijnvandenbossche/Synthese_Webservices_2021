@@ -203,11 +203,8 @@ int handle_command(char* command,int command_length,struct tcp_pcb *tpcb){
 		tcp_write(tpcb,welcome_message_tcp_commands,MAX_LENGTH_WELCOME_MESSAGE, 0);
 		tcp_output(tpcb);
 	}else if(re_match(regexClear,command, &match_length) != -1){
-		/*TO DO: Uncomment to use Jonas' functions which are currently not accesible*/
-
-		//clearPicture();
-		//clearText();
-		printf("Clear\r\n");
+		clearPicture();
+		clearText();
 	}else if(re_match(regexImage,command, &match_length) != -1){
 		if(image_list != NULL){
 			image_number = atoi(command);
