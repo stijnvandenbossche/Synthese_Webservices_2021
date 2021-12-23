@@ -1,0 +1,49 @@
+* {
+    margin: 0px;
+    padding: 0px
+}
+
+body {
+    font-size: 120%;
+    background: #f05b5b;
+}
+
+h1{
+    margin: 1%;
+    font-size: larger;
+    font-weight: bold;
+}
+
+.intro{
+    text-align: center;
+}
+
+.message{
+    text-align: center;
+    margin: 10px;
+}
+
+.photo {
+    text-align: center;
+    margin: 10px;
+    height: 100px;
+    display: inline-block;
+    object-fit: contain;
+}
+
+.count {
+    text-align: center;
+    margin: 10px;
+}
+
+.pbut {
+    background-color: rgba(0, 0, 0, 0.0);
+}
+
+.gif {
+    text-align: center;
+    margin: 10px;
+    height: 100px;
+    display: inline-block;
+    object-fit: contain;
+}
