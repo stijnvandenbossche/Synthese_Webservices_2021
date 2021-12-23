@@ -60,9 +60,9 @@ int init_TCP(void){
  */
 err_t handle_incoming_connection(void* arg, struct tcp_pcb *tpcb, err_t err){
 	/*send welcome message*/
-	tcp_write(tpcb,welcome_message_tcp,MAX_LENGTH_WELCOME_MESSAGE, 0);
+	tcp_write(tpcb,welcome_message_tcp,strlen(welcome_message_tcp), 0);
 	tcp_output(tpcb);
-	tcp_write(tpcb,welcome_message_tcp_commands,MAX_LENGTH_WELCOME_MESSAGE, 0);
+	tcp_write(tpcb,welcome_message_tcp_commands,strlen(welcome_message_tcp_commands), 0);
 	tcp_output(tpcb);
 
 	/*setting callback functions*/
