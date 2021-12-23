@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Synthese_Webservices_2021</title>
+    <link href="reset.css" type="text/css" rel ="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8"/>
+</head>
+
+<body>
+<div class="intro">
+    <!--This is an introducktion-->
+    <h1>Synthese_Webservices_2021</h1>
+    <p>This is the webside for systhese project for Webservices & Applications 2021.</p>
+    <p>Members: Jonas, Liam, Rik, Stijn, Tijn, Tim and lecturer Wim Dams.</p>
+</div>
+<div class = "message">
+    <input type = "text" name = "msg" id = "msg">
+    <button name = "send" class = "button" onclick = "sendmsg()">Submit</button>
+</div>
+<div id = "photo">
+    <!--List of photo's-->
+    <!--#photo-->
+</div>
+
+<script>
+    function sendmsg(){
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            console.log(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", "/sendedmsg.cgi?msg=" + document.getElementById("msg").value, true); // true for asynchronous 
+    xmlHttp.send(null);
+    }
+
+    function sendphoto(path){
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            console.log(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", "/sendedphoto.cgi?photo=" + path, true); // true for asynchronous 
+    xmlHttp.send(null);
+    }
+
+</script>
+</body>
+</html>

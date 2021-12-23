@@ -28,6 +28,9 @@
 #include <errno.h>
 #include "LCD_functions.h"
 #include <sys/unistd.h>
+#include "httpd.h"
+#include "lwip/init.h"
+#include "CGI_SSI.h"
 #include "stm32746g_discovery_qspi.h"
 
 /* USER CODE END Includes */
@@ -155,14 +158,24 @@ int main(void)
   MX_QUADSPI_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  httpd_init();
+
+  char ssi_tag_name[1][10] = {
+                           "photo"
+                       };
+
+  http_set_ssi_handler(mySsiHandler, ssi_tag_name, 1);
+
+
+
   //QSPI INIT
   BSP_QSPI_Init();
   BSP_QSPI_MemoryMappedMode();
   WRITE_REG(QUADSPI->LPTR, 0xFFF);
+// EXAMPLE CODE
 
 
-  initLCD();
-  if(initFileSystemAPI() == 0)
+if(initFileSystemAPI() == 0)
   {
 	  printf("initFileSystemAPI has failed\n\r\n\r");
   }
@@ -228,7 +241,6 @@ int main(void)
 	  printf("\n\r");
 	#endif
   }
-
   // start timer for screensaver
   ScreensaverStart = HAL_GetTick() + SCREENSAVER_DELAY;
   /* USER CODE END 2 */
