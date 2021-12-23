@@ -61,6 +61,8 @@
  * Use this CGI type e.g. to execute specific actions and return a page that
  * does not depend on the CGI parameters.
  */
+#define LWIP_DEBUG 1
+
 #if !defined LWIP_HTTPD_CGI || defined __DOXYGEN__
 #define LWIP_HTTPD_CGI            0
 #endif
@@ -150,7 +152,7 @@
  * If this buffer is not long enough, use LWIP_HTTPD_SSI_MULTIPART.
  */
 #if !defined LWIP_HTTPD_MAX_TAG_INSERT_LEN || defined __DOXYGEN__
-#define LWIP_HTTPD_MAX_TAG_INSERT_LEN 192
+#define LWIP_HTTPD_MAX_TAG_INSERT_LEN 19200
 #endif
 
 #if !defined LWIP_HTTPD_POST_MANUAL_WND || defined __DOXYGEN__
@@ -172,7 +174,7 @@
 #endif
 
 #if !defined HTTPD_DEBUG || defined __DOXYGEN__
-#define HTTPD_DEBUG         LWIP_DBG_OFF
+#define HTTPD_DEBUG         LWIP_DBG_ON
 #endif
 
 /** Set this to 1 to use a memp pool for allocating 
