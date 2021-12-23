@@ -26,7 +26,7 @@
 
 #include "fileSystemAPI.h"
 #include <errno.h>
-#include <LCD_functions.h>
+#include "LCD_functions.h"
 #include <sys/unistd.h>
 #include "httpd.h"
 #include "lwip/init.h"
