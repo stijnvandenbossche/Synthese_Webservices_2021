@@ -307,6 +307,8 @@ void clearText(void)
  */
 void clearPicture(void)
 {
+	// no interrupts needed
+	stopTimer();
 	// switch to transparent to overwrite previous picture with 'invisible' plane
 	BSP_LCD_SetTextColor( LCD_COLOR_TRANSPARENT );
 	// fill right screen half with plane
